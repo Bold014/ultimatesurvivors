@@ -53,7 +53,7 @@ public sealed class XPGem : Component
 				WorldPosition += toPlayer.Normal * MoveSpeed * Time.Delta;
 			WorldPosition = WorldPosition.WithZ( 0f );
 
-			if ( dist < 12f )
+			if ( dist < 3f )
 				Collect();
 		}
 	}

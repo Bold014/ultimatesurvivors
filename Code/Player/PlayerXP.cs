@@ -7,8 +7,11 @@ public sealed class PlayerXP : Component
 	static SoundEvent LevelUpSound = new( "sounds/level_up.mp3" );
 
 	public int CurrentXP     { get; private set; } = 0;
-	public int XPToNextLevel { get; private set; } = 100;
+	public int XPToNextLevel { get; private set; } = 40;  // Level 1→2: fast. Later levels scale exponentially.
 	public int Level         { get; private set; } = 1;
+
+	/// <summary>XP required to reach next level. Early levels are fast; later levels scale exponentially.</summary>
+	private static int GetXPForLevel( int level ) => (int)(40 * System.Math.Pow( level, 1.5 ));
 
 	public float XPPercent => XPToNextLevel > 0 ? (float)CurrentXP / XPToNextLevel : 0f;
 
@@ -48,7 +51,7 @@ public sealed class PlayerXP : Component
 		EnsureInitialized();
 		try { Sound.Play( LevelUpSound ); } catch { }
 		Level++;
-		XPToNextLevel = (int)(XPToNextLevel * 1.2f) + 50;
+		XPToNextLevel = GetXPForLevel( Level );
 
 		Log.Info( $"[PlayerXP] LevelUp! New level={Level}, next XP threshold={XPToNextLevel}" );
 

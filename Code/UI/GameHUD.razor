@@ -142,19 +142,24 @@
 			</div>
 		</div>
 
+		@{
+			var bothNearby = nearChest != null && nearChest.IsPlayerNearby && nearBeacon != null && nearBeacon.IsPlayerNearby;
+			var chestBottom = bothNearby ? 130 : 80;
+			var beaconBottom = bothNearby ? 80 : 80;
+		}
 		<!-- ── Chest interaction prompt ─────────────────────────────────────── -->
 		@if ( nearChest != null && nearChest.IsPlayerNearby )
 		{
 			var canAfford = (coins?.Coins ?? 0) >= nearChest.Cost;
 			var isFree = player?.IsNextChestFree ?? false;
 			var canOpen = canAfford || isFree;
-			<div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1a1008cc; border: 2px solid @(canOpen ? "#c8a800" : "#883322"); border-radius: 10px; padding: 10px 24px; text-align: center;">
-				<div style="font-size: 18px; font-family: monospace; color: @(canOpen ? "#f5c518" : "#cc6666"); font-weight: bold;">
+			<div style="position: absolute; bottom: @(chestBottom)px; left: 50%; transform: translateX(-50%); background: #1a1008cc; border: 2px solid @(canOpen ? "#c8a800" : "#883322"); border-radius: 10px; padding: 8px 20px; text-align: center;">
+				<div style="font-size: 16px; font-family: monospace; color: @(canOpen ? "#f5c518" : "#cc6666"); font-weight: bold;">
 					[E] Open Chest — @(isFree ? "FREE" : $"{nearChest.Cost} coins")
 				</div>
 				@if ( !canOpen )
 				{
-					<div style="font-size: 12px; font-family: monospace; color: #cc6666; margin-top: 4px;">Not enough coins</div>
+					<div style="font-size: 11px; font-family: monospace; color: #cc6666; margin-top: 2px;">Not enough coins</div>
 				}
 			</div>
 		}
@@ -163,16 +168,13 @@
 		@if ( nearBeacon != null && nearBeacon.IsPlayerNearby )
 		{
 			int pct = (int)(nearBeacon.ChargePercent * 100f);
-			<div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: #080f1acc; border: 2px solid #3a6fff; border-radius: 10px; padding: 10px 24px; min-width: 280px; display: flex; align-items: center; gap: 16px;">
-				<div style="display: flex; flex-direction: column; line-height: 1.1;">
-					<div style="font-size: 14px; font-family: monospace; color: #88aaff; font-weight: bold; letter-spacing: 2px;">CHARGING</div>
-					<div style="font-size: 12px; font-family: monospace; color: #88aaff; font-weight: bold; letter-spacing: 2px;">BEACON</div>
-				</div>
-				<div style="flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0;">
-					<div style="flex: 1; background: #0a1030; border: 1px solid #3a6fff; border-radius: 4px; height: 10px; overflow: hidden;">
+			<div style="position: absolute; bottom: @(beaconBottom)px; left: 50%; transform: translateX(-50%); background: #080f1acc; border: 2px solid #3a6fff; border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; gap: 10px;">
+				<span style="font-size: 11px; font-family: monospace; color: #88aaff; font-weight: bold; letter-spacing: 1px; white-space: nowrap;">CHARGING BEACON</span>
+				<div style="display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1;">
+					<div style="flex: 1; min-width: 60px; background: #0a1030; border: 1px solid #3a6fff; border-radius: 3px; height: 8px; overflow: hidden;">
 						<div style="background: #3a6fff; height: 100%; width: @pct%; transition: width 0.1s;"></div>
 					</div>
-					<div style="font-size: 12px; font-family: monospace; color: #88aaff; font-weight: bold; white-space: nowrap;">@pct %</div>
+					<span style="font-size: 11px; font-family: monospace; color: #88aaff; font-weight: bold; white-space: nowrap;">@pct%</span>
 				</div>
 			</div>
 		}

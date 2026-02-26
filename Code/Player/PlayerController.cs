@@ -399,7 +399,7 @@ public sealed class PlayerController : Component
 		_hpBarGo.WorldScale    = new Vector3( 1f, 1f, 1f );
 
 		var wp = _hpBarGo.Components.Create<Sandbox.WorldPanel>();
-		wp.PanelSize = new Vector2( 216f, 22f );
+		wp.PanelSize = new Vector2( 216f, 36f );
 
 		// The Razor PanelComponent renders automatically into the WorldPanel on the same GameObject
 		_hpBar = _hpBarGo.Components.Create<PlayerHealthBar>();
@@ -412,6 +412,10 @@ public sealed class PlayerController : Component
 		// Follow player every frame — 20 units below in screen space (-X = screen-down)
 		_hpBarGo.WorldPosition = WorldPosition + new Vector3( -14f, 0f, 1f );
 		_hpBar.HPPercent = Math.Clamp( _state.HPPercent, 0f, 1f );
+		_hpBar.HasShield = _state.MaxShield > 0f;
+		_hpBar.ShieldPercent = _hpBar.HasShield
+			? Math.Clamp( _state.Shield / _state.MaxShield, 0f, 1f )
+			: 0f;
 	}
 
 	/// <summary>Broadcasts a chat message to all clients in the lobby.</summary>

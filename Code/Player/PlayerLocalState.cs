@@ -10,7 +10,7 @@ public sealed class PlayerLocalState : Component
 	public float Damage { get; set; } = 10f;
 	public float Area { get; set; } = 1f;
 	public float CooldownMultiplier { get; set; } = 1f;
-	public float MagnetRadius { get; set; } = 80f;
+	public float MagnetRadius { get; set; } = 20f;
 	public float Luck { get; set; } = 0f;
 	public float Armor { get; set; } = 0f;
 	public bool HasRevival { get; set; } = false;

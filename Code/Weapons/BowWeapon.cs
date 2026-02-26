@@ -44,7 +44,7 @@ public sealed class BowWeapon : WeaponBase
 		proj.Lifetime = 2.0f;
 		proj.Piercing = WeaponLevel >= 4;
 		proj.SpritePath = "sprites/arrow.sprite";
-		proj.SpriteSize = 0.5f;
+		proj.SpriteSize = 1f;
 		proj.SourceWeaponId = WeaponId;
 	}
 

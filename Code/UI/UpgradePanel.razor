@@ -1,4 +1,5 @@
 @using Sandbox;
+@using System.Linq;
 @inherits PanelComponent;
 
 <root>
@@ -124,11 +125,27 @@
 
 @code
 {
+	static SoundEvent UiClick = new( "sounds/ui_click.mp3" );
+
+	void PlayClickSound()
+	{
+		try { Sound.Play( UiClick ); } catch { }
+	}
+
 	UpgradeSystem UpgSys  => Scene?.GetAllComponents<UpgradeSystem>().FirstOrDefault();
 	bool IsVisible        => UpgSys?.IsShowingUpgrades ?? false;
 
-	void SelectUpgrade( int index ) => UpgSys?.SelectUpgrade( index );
-	void IgnoreOffers()             => UpgSys?.SelectIgnore();
+	void SelectUpgrade( int index )
+	{
+		PlayClickSound();
+		UpgSys?.SelectUpgrade( index );
+	}
+
+	void IgnoreOffers()
+	{
+		PlayClickSound();
+		UpgSys?.SelectIgnore();
+	}
 
 	// ── Title helpers per source ──────────────────────────────────────────────
 

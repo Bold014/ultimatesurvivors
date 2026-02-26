@@ -22,6 +22,12 @@ public sealed class WorldObjectSpawner : Component
 
 		Chest.ResetRunState();
 
+		// Destroy any scene-placed chests/beacons so WorldObjectSpawner is the sole source (avoids duplicates at same spot)
+		foreach ( var chest in Scene.GetAllComponents<Chest>().ToList() )
+			chest.GameObject.Destroy();
+		foreach ( var beacon in Scene.GetAllComponents<LevelUpBeacon>().ToList() )
+			beacon.GameObject.Destroy();
+
 		// Initial world objects at run start
 		for ( int i = 0; i < 2; i++ )
 			SpawnChest();
@@ -90,7 +96,12 @@ public sealed class WorldObjectSpawner : Component
 				return pos;
 		}
 
-		// Fallback: return origin area (shouldn't happen often)
-		return Vector3.Zero;
+		// Fallback: use a random position anyway to avoid clustering at origin
+		float a = (float)(_rand.NextDouble() * 360.0);
+		float d = SpawnMinDist + (float)(_rand.NextDouble() * (SpawnMaxDist - SpawnMinDist));
+		return new Vector3(
+			MathF.Cos( a * MathF.PI / 180f ) * d,
+			MathF.Sin( a * MathF.PI / 180f ) * d,
+			0f );
 	}
 }

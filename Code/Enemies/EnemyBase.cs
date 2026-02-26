@@ -26,6 +26,8 @@ public sealed class EnemyBase : Component
 
 	/// <summary>World-space half-extent on the XY plane. Dev box is 100 units; WorldScale = 0.35 × SizeScale.</summary>
 	public float HalfExtent => 17.5f * SizeScale;
+	/// <summary>Radius for projectile hit detection. Tighter so projectile visually reaches sprite before destroying.</summary>
+	public float ProjectileHitRadius => HalfExtent + 12f;
 
 	private float _damageCooldown = 0f;
 	private ModelRenderer _renderer;
@@ -214,13 +216,13 @@ public sealed class EnemyBase : Component
 		go.WorldRotation = Rotation.From( new Angles( 90f, 0f, 0f ) );
 		go.WorldScale = new Vector3( 2.5f, 2.5f, 2.5f );
 
-		// Create indicator and set values BEFORE WorldPanel so first render has correct damage/crit
+		// WorldPanel must exist first so PanelComponent can attach to it (matches PlayerController pattern)
+		var wp = go.Components.Create<Sandbox.WorldPanel>();
+		wp.PanelSize = new Vector2( 100f, 36f );
+
 		var indicator = go.Components.Create<DamageIndicator>();
 		indicator.Damage = amount;
 		indicator.IsCritical = isCritical;
-
-		var wp = go.Components.Create<Sandbox.WorldPanel>();
-		wp.PanelSize = new Vector2( 100f, 36f );
 	}
 
 	private void Die( string weaponId = null )
