@@ -2,6 +2,10 @@ PlayerHealthBar
 {
 	width: 100%;
 	height: 100%;
+	padding: 2px;
+	background-color: rgba( 0, 0, 0, 0.6 );
+	border-radius: 4px;
+	border: 1px solid rgba( 100, 40, 40, 0.8 );
 
 	.bars
 	{
@@ -9,39 +13,42 @@ PlayerHealthBar
 		height: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 3px;
+		gap: 4px;
 	}
 
 	.hp-bg
 	{
 		width: 100%;
 		flex: 1;
-		min-height: 10px;
+		min-height: 12px;
 		background-color: rgba( 38, 10, 10, 1 );
-		border-radius: 2px;
+		border-radius: 3px;
 		overflow: hidden;
+		border: 1px solid rgba( 100, 30, 30, 0.6 );
 	}
 
 	.hp-fill
 	{
 		height: 100%;
 		background-color: rgba( 217, 31, 31, 1 );
-		transition-duration: 0.08s;
+		transition-duration: 0.1s;
+		box-shadow: 0 0 6px rgba( 217, 31, 31, 0.4 );
 	}
 
 	.shield-bg
 	{
 		width: 100%;
-		height: 10px;
+		height: 12px;
 		background-color: rgba( 10, 16, 48, 1 );
-		border-radius: 2px;
+		border-radius: 3px;
 		overflow: hidden;
+		border: 1px solid rgba( 50, 80, 150, 0.5 );
 	}
 
 	.shield-fill
 	{
 		height: 100%;
 		background-color: rgba( 58, 111, 255, 1 );
-		transition-duration: 0.08s;
+		transition-duration: 0.1s;
 	}
 }

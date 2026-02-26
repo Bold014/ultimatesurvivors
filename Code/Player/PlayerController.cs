@@ -399,7 +399,7 @@ public sealed class PlayerController : Component
 		_hpBarGo.WorldScale    = new Vector3( 1f, 1f, 1f );
 
 		var wp = _hpBarGo.Components.Create<Sandbox.WorldPanel>();
-		wp.PanelSize = new Vector2( 216f, 36f );
+		wp.PanelSize = new Vector2( 240f, 44f );
 
 		// The Razor PanelComponent renders automatically into the WorldPanel on the same GameObject
 		_hpBar = _hpBarGo.Components.Create<PlayerHealthBar>();
