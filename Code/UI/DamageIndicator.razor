@@ -10,11 +10,14 @@
 {
 	public float Damage { get; set; }
 	public bool IsCritical { get; set; } = false;
+	/// <summary>When true, position and lifetime are managed by DamageIndicatorWorld.</summary>
+	public bool ManagedExternally { get; set; }
 
-	private const float Lifetime = 0.85f;
-	private float _elapsed = 0f;
+	private const float Lifetime = 1.25f;
+	public float Elapsed { get; set; }
 
-	private float Opacity => Math.Clamp( 1f - (_elapsed / Lifetime), 0f, 1f );
+	// Full opacity for 70% of lifetime, then fade out over the last 30%
+	private float Opacity => Elapsed < Lifetime * 0.7f ? 1f : Math.Clamp( 1f - (Elapsed - Lifetime * 0.7f) / (Lifetime * 0.3f), 0f, 1f );
 	private string DisplayText => IsCritical
 		? $"CRIT {(int)MathF.Ceiling( Damage )}!"
 		: ((int)MathF.Ceiling( Damage )).ToString();
@@ -25,14 +28,13 @@
 
 	protected override void OnUpdate()
 	{
-		_elapsed += Time.Delta;
+		if ( ManagedExternally ) return;
 
-		// Float upward in world space — +X is screen-up in top-down orthographic view
+		Elapsed += Time.Delta;
 		GameObject.WorldPosition += new Vector3( 35f * Time.Delta, 0f, 0f );
-
-		if ( _elapsed >= Lifetime )
+		if ( Elapsed >= Lifetime )
 			GameObject.Destroy();
 	}
 
-	protected override int BuildHash() => System.HashCode.Combine( (int)(_elapsed * 15), IsCritical, (int)Damage );
+	protected override int BuildHash() => System.HashCode.Combine( (int)(Elapsed * 15), IsCritical, (int)Damage );
 }

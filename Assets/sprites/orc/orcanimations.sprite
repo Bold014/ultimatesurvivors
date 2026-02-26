@@ -1,0 +1,222 @@
+{
+  "Animations": [
+    {
+      "Name": "walkright",
+      "FrameRate": 7.9998903,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/orc/orc_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_2.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_3.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkleft",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/orc/orc_4.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_5.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_6.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_7.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/orc/orc_8.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_9.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_10.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_11.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/orc/orc_12.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_13.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_14.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_15.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "attack right",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/orc/orc_16.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_17.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_18.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_19.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "attack left",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/orc/orc_20.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_21.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_22.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_23.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "attack down",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/orc/orc_24.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_25.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_26.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_27.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "attack up",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/orc/orc_28.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_29.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_30.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_31.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "die",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/orc/orc_32.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_33.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_34.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/orc/orc_35.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

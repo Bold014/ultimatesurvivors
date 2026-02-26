@@ -8,6 +8,5 @@ public static class DevTools
 	public static void ToggleDevUnlocks()
 	{
 		PlayerProgress.DevUnlockAll = !PlayerProgress.DevUnlockAll;
-		Log.Info( $"[Dev] DevUnlockAll = {PlayerProgress.DevUnlockAll}" );
 	}
 }

@@ -20,6 +20,10 @@ public sealed class EnemyBase : Component
 	[Property] public string DieAnimation { get; set; }
 	/// <summary>How long (in seconds) the die animation plays before the GameObject is destroyed.</summary>
 	[Property] public float DieAnimDuration { get; set; } = 0.5f;
+	/// <summary>Prefix for attack animations (e.g. "attack" → "attack right", "attack left", etc.). Empty = no attack anim.</summary>
+	[Property] public string AttackAnimationPrefix { get; set; }
+	/// <summary>Duration to play the attack animation when dealing contact damage.</summary>
+	[Property] public float AttackAnimDuration { get; set; } = 0.5f;
 
 	public float HP { get; private set; }
 	public GameObject Target { get; set; }
@@ -34,6 +38,8 @@ public sealed class EnemyBase : Component
 	private SpriteRenderer _spriteRenderer;
 	private float _flashTimer = 0f;
 	private float _dieTimer = -1f;
+	private float _attackTimer = 0f;
+	private string _lastWalkAnim = "walkdown";
 
 	protected override void OnStart()
 	{
@@ -50,6 +56,7 @@ public sealed class EnemyBase : Component
 			_spriteRenderer = spriteGo.Components.Create<SpriteRenderer>();
 			_spriteRenderer.Sprite = sprite;
 			_spriteRenderer.TextureFilter = Sandbox.Rendering.FilterMode.Point;
+			_spriteRenderer.PlayAnimation( _lastWalkAnim );
 		}
 		else
 		{
@@ -78,8 +85,13 @@ public sealed class EnemyBase : Component
 		if ( _flashTimer > 0f )
 		{
 			_flashTimer -= Time.Delta;
-			if ( _flashTimer <= 0f && _renderer != null )
-				_renderer.Tint = EnemyColor;
+			if ( _flashTimer <= 0f )
+			{
+				if ( _renderer != null )
+					_renderer.Tint = EnemyColor;
+				if ( _spriteRenderer != null )
+					_spriteRenderer.OverlayColor = Color.White.WithAlpha( 0 );
+			}
 		}
 
 		if ( Target == null ) return;
@@ -88,10 +100,41 @@ public sealed class EnemyBase : Component
 		var upgradeSystem = Target.Components.Get<UpgradeSystem>();
 		if ( upgradeSystem?.IsShowingUpgrades == true ) return;
 
+		// Count down attack animation
+		if ( _attackTimer > 0f )
+			_attackTimer -= Time.Delta;
+
 		// Move toward player on XY plane, sliding around tree tiles
 		var dir = (Target.WorldPosition - WorldPosition).WithZ( 0f );
 		if ( dir.LengthSquared > 1f )
 		{
+			// Update walk direction for when we're not attacking
+			float ax = MathF.Abs( dir.x ), ay = MathF.Abs( dir.y );
+			_lastWalkAnim = ax > ay
+				? (dir.x > 0 ? "walkright" : "walkleft")
+				: (dir.y > 0 ? "walkup" : "walkdown");
+		}
+
+		// Play attack or walk animation based on state
+		if ( _spriteRenderer != null )
+		{
+			if ( _attackTimer > 0f && !string.IsNullOrEmpty( AttackAnimationPrefix ) )
+			{
+				float ax = MathF.Abs( dir.x ), ay = MathF.Abs( dir.y );
+				string attackDir = ax > ay
+					? (dir.x > 0 ? "right" : "left")
+					: (dir.y > 0 ? "up" : "down");
+				_spriteRenderer.PlayAnimation( $"{AttackAnimationPrefix} {attackDir}" );
+			}
+			else
+			{
+				_spriteRenderer.PlayAnimation( _lastWalkAnim );
+			}
+		}
+
+		if ( dir.LengthSquared > 1f )
+		{
+
 			var step = dir.Normal * Speed * Time.Delta;
 			var desired = WorldPosition + step;
 
@@ -114,6 +157,7 @@ public sealed class EnemyBase : Component
 		WorldPosition = WorldPosition.WithZ( 0f );
 
 		SeparateFromOtherEnemies();
+		SeparateFromPlayer();
 
 		// Contact damage with cooldown
 		_damageCooldown -= Time.Delta;
@@ -129,6 +173,7 @@ public sealed class EnemyBase : Component
 				{
 					bool died = playerState.TakeDamage( ContactDamage );
 					_damageCooldown = DamageCooldownDuration;
+					_attackTimer = AttackAnimDuration;
 					if ( died )
 						Target.Components.Get<PlayerStats>()?.Die();
 				}
@@ -163,6 +208,34 @@ public sealed class EnemyBase : Component
 		WorldPosition = pos;
 	}
 
+	/// <summary>
+	/// Pushes this enemy away from the player when overlapping. Uses mass ratio so the player
+	/// "wins" collisions — the enemy gets pushed more than the player.
+	/// </summary>
+	private void SeparateFromPlayer()
+	{
+		if ( Target == null || HP <= 0f ) return;
+
+		const float playerMass = 3f;
+		const float enemyMass = 1f;
+		const float playerHalfExtent = 1f;
+		float totalMass = playerMass + enemyMass;
+
+		var pos = WorldPosition.WithZ( 0f );
+		var playerPos = Target.WorldPosition.WithZ( 0f );
+		var diff = pos - playerPos;
+		float minDist = HalfExtent + playerHalfExtent;
+		float distSq = diff.LengthSquared;
+
+		if ( distSq >= minDist * minDist || distSq < 0.001f ) return;
+
+		float dist = MathF.Sqrt( distSq );
+		float overlap = minDist - dist;
+		float enemyPush = overlap * (playerMass / totalMass);
+		pos += diff / dist * enemyPush;
+		WorldPosition = pos;
+	}
+
 	public void TakeDamage( float amount, string weaponId = null )
 	{
 		if ( _dieTimer >= 0f ) return;
@@ -192,9 +265,18 @@ public sealed class EnemyBase : Component
 
 		HP -= amount;
 
+		// Lifesteal: heal player for a fraction of damage dealt
+		if ( playerState != null && playerState.Lifesteal > 0f )
+			playerState.Heal( amount * playerState.Lifesteal );
+
 		if ( _renderer != null )
 		{
 			_renderer.Tint = Color.White;
+			_flashTimer = 0.1f;
+		}
+		else if ( _spriteRenderer != null )
+		{
+			_spriteRenderer.OverlayColor = Color.White;
 			_flashTimer = 0.1f;
 		}
 
@@ -208,14 +290,16 @@ public sealed class EnemyBase : Component
 
 	private void SpawnDamageIndicator( float amount, bool isCritical = false )
 	{
-		var pos = WorldPosition + new Vector3( 20f, (System.Random.Shared.NextSingle() - 0.5f) * 18f, 1f );
-		DamageIndicatorManager.Instance?.RequestIndicator( pos, amount, isCritical );
+		var offset = new Vector3( 20f, (System.Random.Shared.NextSingle() - 0.5f) * 18f, 1f );
+		DamageIndicatorWorld.Spawn( GameObject, offset, amount, isCritical );
 	}
 
 	private void Die( string weaponId = null )
 	{
 		Target?.Components.Get<PlayerStats>()?.AddKill( weaponId, XPValue );
-		Target?.Components.Get<PlayerCoins>()?.AddCoins( 1 );
+		var state = Target?.Components.Get<PlayerLocalState>();
+		int coins = state != null ? Math.Max( 1, (int)Math.Ceiling( 1 * state.GoldMultiplier ) ) : 1;
+		Target?.Components.Get<PlayerCoins>()?.AddCoins( coins );
 		SpawnXPGem();
 
 		if ( _spriteRenderer != null && !string.IsNullOrEmpty( DieAnimation ) )

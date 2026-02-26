@@ -4,7 +4,7 @@
 /// </summary>
 public abstract class WeaponBase : Component
 {
-	public const int MaxWeaponLevel = 5;
+	public const int MaxWeaponLevel = 10;
 
 	[Property] public int WeaponLevel { get; set; } = 1;
 	[Property] public float BaseCooldown { get; set; } = 1.5f;

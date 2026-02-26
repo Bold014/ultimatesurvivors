@@ -21,14 +21,12 @@ public sealed class MusicManager : Component
 	protected override void OnStart()
 	{
 		Instance = this;
-		Log.Info( "[MusicManager] OnStart — playing SongLoop" );
 
 		try
 		{
 			_handle = Sound.Play( SongLoop );
 			_playing = true;
 			ApplyMute();
-			Log.Info( $"[MusicManager] Music started (muted={PlayerProgress.Data.MusicMuted})" );
 		}
 		catch ( System.Exception e )
 		{

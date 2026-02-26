@@ -7,6 +7,7 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 {
 	private readonly List<GameObject> _shards = new();
 	private int _lastSpawnedLevel = 0;
+	private int _lastProjectileCount = -1;
 
 	protected override void OnStart()
 	{
@@ -16,18 +17,21 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 		BaseCooldown = 9999f;
 		SpawnShards();
 		_lastSpawnedLevel = WeaponLevel;
+		_lastProjectileCount = _state != null ? _state.ProjectileCount : 0;
 	}
 
 	protected override void OnUpdate()
 	{
 		base.OnUpdate();
 
-		// Rebuild shards whenever WeaponLevel changes
-		if ( WeaponLevel != _lastSpawnedLevel )
+		// Rebuild shards whenever WeaponLevel or ProjectileCount changes
+		int projCount = _state != null ? _state.ProjectileCount : 0;
+		if ( WeaponLevel != _lastSpawnedLevel || projCount != _lastProjectileCount )
 		{
 			ClearShards();
 			SpawnShards();
 			_lastSpawnedLevel = WeaponLevel;
+			_lastProjectileCount = projCount;
 		}
 
 		// Sync damage to current player state
@@ -73,12 +77,16 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 		_shards.Clear();
 	}
 
-	private int ShardCount() => WeaponLevel switch
+	private int ShardCount()
 	{
-		>= 5 => 4,
-		>= 3 => 3,
-		_    => 2
-	};
+		int baseCount = WeaponLevel switch
+		{
+			>= 5 => 4,
+			>= 3 => 3,
+			_    => 2
+		};
+		return baseCount + (_state != null ? _state.ProjectileCount : 0);
+	}
 
 	protected override void OnDestroy()
 	{

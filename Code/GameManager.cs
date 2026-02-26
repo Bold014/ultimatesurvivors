@@ -17,15 +17,7 @@ public sealed class GameManager : Component
 	{
 		Instance = this;
 		PlayerProgress.Load();
-
-		Log.Info( "[GameManager] OnStart — spawning player" );
 		SpawnPlayer();
-		Log.Info( "[GameManager] SpawnPlayer() returned" );
-
-		// Add DamageIndicatorManager to HUD for screen-space damage numbers (avoids WorldPanel culling)
-		var hud = Scene.Children.FirstOrDefault( c => c.Name == "HUD" );
-		if ( hud != null && hud.Components.Get<DamageIndicatorManager>() == null )
-			hud.Components.Create<DamageIndicatorManager>();
 	}
 
 	protected override void OnUpdate()
@@ -40,7 +32,7 @@ public sealed class GameManager : Component
 				int tier = MenuManager.SelectedTier;
 				int waves = tier * 10;
 				ChatComponent.Instance?.AddMessage( "System", "Welcome to Ultimate Survivors!", Color.Yellow );
-				ChatComponent.Instance?.AddMessage( "System", $"Survive {waves} waves. Beat the boss to enter endless mode!", new Color( 1f, 0.8f, 0.2f ) );
+				ChatComponent.Instance?.AddMessage( "System", "Survive 10 minutes! Beat 3 mini-bosses, then the final boss!", new Color( 1f, 0.8f, 0.2f ) );
 			}
 		}
 
@@ -61,13 +53,12 @@ public sealed class GameManager : Component
 		CheckRunEnd();
 	}
 
-	// ── Tier completion: award gold and update unlocks when player clears final wave ─
+	// ── Tier completion: award gold when player defeats final boss ─────────────
 	private void CheckTierComplete()
 	{
 		var spawner = Scene.GetAllComponents<EnemySpawner>().FirstOrDefault();
 		if ( spawner == null || !spawner.TierJustCompleted ) return;
 
-		// Player must still be alive (we're transitioning to endless)
 		var allStats = Scene.GetAllComponents<PlayerStats>();
 		if ( !allStats.Any() || !allStats.All( s => s.IsAlive ) ) return;
 
@@ -77,13 +68,11 @@ public sealed class GameManager : Component
 		int tier   = MenuManager.SelectedTier;
 		string map = MenuManager.SelectedMap ?? "dark_forest";
 
-		// Base gold: 50 + (tier * 20) + (SurviveMinutes * 2) + (Kills / 20)
 		int surviveMinutes = (int)(stats.TimeAlive / 60f);
 		int baseGold       = 50 + (tier * 20) + (surviveMinutes * 2) + (stats.Kills / 20);
 		float mult         = tier switch { 1 => 1f, 2 => 1.1f, 3 => 1.2f, _ => 1f };
 		int gold           = (int)(baseGold * mult);
 
-		// Apply PlayerLocalState gold multiplier (tomes, etc.)
 		var state = stats.GameObject.Components.Get<PlayerLocalState>();
 		if ( state != null )
 			gold = (int)(gold * state.GoldMultiplier);
@@ -97,7 +86,12 @@ public sealed class GameManager : Component
 		_tierCompleteGoldAwarded = true;
 		spawner.ClearTierJustCompleted();
 
-		ChatComponent.Instance?.AddMessage( "System", $"+{gold} gold for completing Tier {tier}!", new Color( 1f, 0.85f, 0.2f ) );
+		ChatComponent.Instance?.AddMessage( "System", $"+{gold} gold for defeating the final boss!", new Color( 1f, 0.85f, 0.2f ) );
+
+		// Victory — return to menu
+		_runEnded          = true;
+		_returnToMenuDelay = 8f;
+		ChatComponent.Instance?.AddMessage( "System", "Victory! Returning to menu...", new Color( 0.4f, 1f, 0.4f ) );
 	}
 
 	// ── End-of-run check ──────────────────────────────────────────────────────
@@ -158,25 +152,18 @@ public sealed class GameManager : Component
 	{
 		// Destroy any player already placed in the scene (editor remnant) to avoid duplicates
 		var existingControllers = Scene.GetAllComponents<PlayerController>().ToList();
-		Log.Info( $"[GameManager] SpawnPlayer — found {existingControllers.Count} existing PlayerController(s)" );
 		foreach ( var existing in existingControllers )
-		{
-			Log.Info( $"[GameManager] Destroying existing player GO: '{existing.GameObject.Name}' id={existing.GameObject.Id}" );
 			existing.GameObject.Destroy();
-		}
 
 		// Also nuke any orphaned HPBar GOs that survived
 		var orphanBars = Scene.Children.Where( c => c.Name == "HPBar" ).ToList();
-		Log.Info( $"[GameManager] Found {orphanBars.Count} orphaned HPBar GO(s) — destroying" );
 		foreach ( var bar in orphanBars )
 			bar.Destroy();
 
 		var go = new GameObject( true, "Player" );
-		Log.Info( $"[GameManager] Created new Player GO id={go.Id}" );
 		go.WorldPosition = Vector3.Zero;
 
 		go.Components.Create<PlayerStats>();
-		Log.Info( "[GameManager] Created PlayerStats" );
 		go.Components.Create<PlayerLocalState>();
 		go.Components.Create<PlayerCoins>();
 		go.Components.Create<PlayerWeapons>();
@@ -187,12 +174,6 @@ public sealed class GameManager : Component
 		go.Components.Create<EnemySpawner>();
 		go.Components.Create<WorldObjectSpawner>();
 		go.Components.Create<PlayerController>();
-		Log.Info( "[GameManager] All components created on player GO" );
-
-		// Verify components are actually findable via scene query
-		var statsFound = Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
-		var xpFound    = Scene.GetAllComponents<PlayerXP>().FirstOrDefault();
-		Log.Info( $"[GameManager] Scene query — PlayerStats found: {statsFound != null}, PlayerXP found: {xpFound != null}" );
 	}
 
 	private static string CharacterNameToId( string name ) => name?.ToLower() switch

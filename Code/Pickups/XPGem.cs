@@ -61,7 +61,6 @@ public sealed class XPGem : Component
 	private void Collect()
 	{
 		var xp = PlayerObject?.Components.Get<PlayerXP>();
-		Log.Info( $"[XPGem] Collect — PlayerObject={PlayerObject?.Name ?? "NULL"}, PlayerXP found={xp != null}, XPValue={XPValue}" );
 		try { Sound.Play( XpPickupSound ); } catch { }
 		xp?.AddXP( XPValue );
 		GameObject.Destroy();

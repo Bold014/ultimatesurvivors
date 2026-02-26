@@ -16,7 +16,7 @@ public sealed class AxeWeapon : WeaponBase
 		var target = FindNearestEnemy();
 		if ( target == null ) return;
 
-		int axeCount = GetAxeCount();
+		int axeCount = GetAxeCount() + _state.ProjectileCount;
 		var baseDir = (target.WorldPosition - WorldPosition).WithZ( 0f ).Normal;
 
 		for ( int i = 0; i < axeCount; i++ )

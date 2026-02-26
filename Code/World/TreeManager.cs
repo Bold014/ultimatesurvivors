@@ -99,7 +99,6 @@ public class TreeManager : Component
 		TreeTiles.Clear();
 
 		_ready = true;
-		Log.Info( $"[TreeMgr] Ready — streaming {ChunkSize}² chunks at {TreePercent}% density." );
 	}
 
 	protected override void OnUpdate()

@@ -128,8 +128,6 @@ public sealed class Chest : Component
 		// Collision so enemies and players can bump into the chest.
 		var collider = Components.Create<BoxCollider>();
 		collider.Scale = new Vector3( SpriteScale * 16f, SpriteScale * 16f, SpriteScale * 16f );
-
-		Log.Info( $"[Chest] Sprite loaded ({SpritePath}): {sprite != null}" );
 	}
 
 	/// <summary>

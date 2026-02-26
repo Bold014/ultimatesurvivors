@@ -78,7 +78,6 @@ public class RandomTileVariants : Component
 		_layer.Height = -1f;
 
 		var posToGuid = tilesetRes.Tiles.ToDictionary( t => t.Position, t => t.Id );
-		Log.Info( $"[MapGen] Loaded '{tilesetRes.ResourcePath}' — {posToGuid.Count} tiles." );
 
 		var groundPos = new Vector2Int( GroundColumn, GroundRow );
 		if ( !posToGuid.TryGetValue( groundPos, out _groundGuid ) )
@@ -105,38 +104,21 @@ public class RandomTileVariants : Component
 		}
 
 		_ready = true;
-		Log.Info( $"[MapGen] Ready — {_variants.Count} variant types, streaming in {ChunkSize}² chunks." );
 	}
-
-	int _debugFrames = 0;
 
 	Vector3 GetTrackingPosition()
 	{
 		// Track the player directly by component — Scene.Camera is often fixed at (0,0,z)
 		var player = Scene.GetAllComponents<PlayerController>().FirstOrDefault();
 		if ( player is not null )
-		{
-			if ( _debugFrames % 60 == 0 )
-				Log.Info( $"[MapGen] Tracking PlayerController @ {player.WorldPosition}" );
 			return player.WorldPosition;
-		}
-
-		// Log if no player found
-		if ( _debugFrames % 60 == 0 )
-			Log.Warning( "[MapGen] No PlayerController found — falling back to camera!" );
 		return Scene.Camera?.WorldPosition ?? Vector3.Zero;
 	}
 
 	protected override void OnUpdate()
 	{
-		_debugFrames++;
-
 		if ( !_ready || _layer == null )
-		{
-			if ( _debugFrames % 60 == 0 )
-				Log.Warning( $"[MapGen] OnUpdate skipped — ready={_ready}, layer={_layer != null}" );
 			return;
-		}
 
 		var tileSizeF = _layer.TilesetResource?.GetTileSize() ?? new Vector2( 16, 16 );
 		var tileSize = new Vector2Int( (int)tileSizeF.x, (int)tileSizeF.y );
@@ -150,16 +132,6 @@ public class RandomTileVariants : Component
 		var trackPos = GetTrackingPosition();
 		int centerChunkX = (int)MathF.Floor( trackPos.x / ( tileSize.x * ChunkSize ) );
 		int centerChunkY = (int)MathF.Floor( trackPos.y / ( tileSize.y * ChunkSize ) );
-
-		if ( _debugFrames % 60 == 0 )
-		{
-			// Also log the best camera position so we can verify TilesetComponent culling is correct
-			var bestCam = Scene.GetAllComponents<CameraComponent>()
-				.Where( c => c.IsMainCamera && c.IsValid() )
-				.OrderByDescending( c => c.Priority )
-				.FirstOrDefault();
-			Log.Info( $"[MapGen] trackPos={trackPos} chunk=({centerChunkX},{centerChunkY}) generated={_generatedChunks.Count} bestCamPos={bestCam?.WorldPosition} bestCamPriority={bestCam?.Priority}" );
-		}
 
 		// Find the closest ungenerated chunk to the tracking position
 		Vector2Int? closest = null;
@@ -183,8 +155,6 @@ public class RandomTileVariants : Component
 
 		if ( closest.HasValue )
 		{
-			if ( _generatedChunks.Count < 10 )
-				Log.Info( $"[MapGen] Generating chunk {closest.Value} (dist²={closestDistSq}), total={_generatedChunks.Count}" );
 			GenerateChunk( closest.Value, tileSize );
 			_generatedChunks.Add( closest.Value );
 		}

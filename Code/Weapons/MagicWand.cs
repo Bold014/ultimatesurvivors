@@ -17,7 +17,7 @@ public sealed class MagicWand : WeaponBase
 		if ( target == null ) return;
 
 		var baseDir = (target.WorldPosition - WorldPosition).WithZ( 0f ).Normal;
-		int count = WeaponLevel >= 3 ? 2 : 1;
+		int count = (WeaponLevel >= 3 ? 2 : 1) + _state.ProjectileCount;
 		float spread = 12f;
 
 		for ( int i = 0; i < count; i++ )

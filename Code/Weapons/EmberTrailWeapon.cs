@@ -29,7 +29,7 @@ public sealed class EmberTrailWeapon : WeaponBase
 	{
 		if ( _state == null ) return;
 
-		int zoneCount = WeaponLevel >= 4 ? 2 : 1;
+		int zoneCount = (WeaponLevel >= 4 ? 2 : 1) + _state.ProjectileCount;
 		for ( int i = 0; i < zoneCount; i++ )
 		{
 			var offset = i == 0 ? Vector3.Zero : new Vector3( (i % 2 == 0 ? 1f : -1f) * 20f, 0f, 0f );
@@ -39,7 +39,8 @@ public sealed class EmberTrailWeapon : WeaponBase
 			var zone = go.Components.Create<BurnZone>();
 			zone.Damage = _state.Damage * (0.4f + WeaponLevel * 0.1f);
 			zone.Radius = 13.5f + WeaponLevel * 10f; // base reduced 70% (was 45)
-			zone.Lifetime = 2f + WeaponLevel * 0.4f;
+			float baseLifetime = 2f + WeaponLevel * 0.4f;
+			zone.Lifetime = baseLifetime * _state.DurationMultiplier;
 			zone.PulseInterval = 0.5f;
 			zone.SourceWeaponId = WeaponId;
 		}

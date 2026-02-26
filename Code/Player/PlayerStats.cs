@@ -21,11 +21,9 @@ public sealed class PlayerStats : Component
 
 	private float _localTime    = 0f;
 	private bool  _timerRunning = true;
-	private float _debugLogTimer = 0f;
 
 	protected override void OnStart()
 	{
-		Log.Info( $"[PlayerStats] OnStart — IsAlive={IsAlive}, _timerRunning={_timerRunning}, GameObject={GameObject?.Name}" );
 	}
 
 	protected override void OnUpdate()
@@ -33,15 +31,8 @@ public sealed class PlayerStats : Component
 		if ( !_timerRunning ) return;
 		if ( UpgradeSystem.LocalInstance?.IsShowingUpgrades == true ) return;
 
-		_localTime     += Time.Delta;
-		TimeAlive       = _localTime;
-
-		_debugLogTimer += Time.Delta;
-		if ( _debugLogTimer >= 5f )
-		{
-			_debugLogTimer = 0f;
-			Log.Info( $"[PlayerStats] OnUpdate running — TimeAlive={TimeAlive:F1}s, Kills={Kills}, Level={Level}" );
-		}
+		_localTime += Time.Delta;
+		TimeAlive   = _localTime;
 	}
 
 	/// <param name="weaponId">Display name of the weapon (matches QuestDefinition.WeaponName), or null if unknown.</param>
@@ -59,7 +50,6 @@ public sealed class PlayerStats : Component
 
 	public void Die()
 	{
-		Log.Info( "[PlayerStats] Die() called — stopping timer" );
 		IsAlive       = false;
 		_timerRunning = false;
 

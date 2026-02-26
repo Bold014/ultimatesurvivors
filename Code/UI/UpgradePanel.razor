@@ -11,9 +11,9 @@
 		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0d0905ee; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;">
 
 			<!-- ── Title block ────────────────────────────────────────────── -->
-			<div style="background: @TitleBg(source); border: 3px solid @TitleBorder(source); border-radius: 10px; padding: 12px 48px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-				<div style="font-size: 36px; font-weight: bold; color: @TitleColor(source); font-family: monospace; letter-spacing: 5px;">@TitleText(source)</div>
-				<div style="font-size: 12px; color: #a08050; font-family: monospace; letter-spacing: 3px;">@SubtitleText(source)</div>
+			<div style="background: @TitleBg(source); border: 2px solid @TitleBorder(source); border-radius: 4px; padding: 12px 48px; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);">
+				<div style="font-size: 36px; font-weight: bold; color: @TitleColor(source); font-family: monospace; letter-spacing: 5px; text-shadow: 2px 2px 0 #000;">@TitleText(source)</div>
+				<div style="font-size: 12px; color: #a08050; font-family: monospace; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">@SubtitleText(source)</div>
 			</div>
 
 			<!-- ── Cards row ──────────────────────────────────────────────── -->
@@ -31,50 +31,50 @@
 					           ? RarityBg( upgrade.Rarity )
 					           : (isWeapon ? "#1a1400" : "#1a1008");
 
-				<div style="width: 200px; background: @cardBg; border: 2px solid @cardBorder; border-radius: 10px; padding: 16px 14px 20px 14px; display: flex; flex-direction: column; gap: 10px; pointer-events: all; cursor: pointer;"
+				<div style="width: 200px; background: @cardBg; border: 2px solid @cardBorder; border-radius: 4px; padding: 16px 14px 20px 14px; display: flex; flex-direction: column; gap: 10px; pointer-events: all; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);"
 					 onclick=@(() => SelectUpgrade( idx ))>
 
 					@* ── Rarity / type badge ── *@
 					@if ( source == UpgradeSystem.RewardSource.Shrine )
 					{
-						<div style="background: @RarityBadgeBg(upgrade.Rarity); border: 1px solid @RarityBorderColor(upgrade.Rarity); border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: @RarityTextColor(upgrade.Rarity); font-weight: bold; letter-spacing: 1px;">
+						<div style="background: @RarityBadgeBg(upgrade.Rarity); border: 1px solid @RarityBorderColor(upgrade.Rarity); border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: @RarityTextColor(upgrade.Rarity); font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							@upgrade.Rarity.ToString().ToUpper()
 						</div>
 					}
 					else if ( isWeapon && upgrade.IsNewWeapon )
 					{
-						<div style="background: #1a3010; border: 1px solid #44aa44; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #88ee88; font-weight: bold; letter-spacing: 1px;">
+						<div style="background: #1a2008; border: 1px solid #5a8a2a; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #88ee88; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							NEW WEAPON
 						</div>
 					}
 					else if ( isWeapon )
 					{
-						<div style="background: #1a1400; border: 1px solid #c8a800; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #f5c518; font-weight: bold; letter-spacing: 1px;">
+						<div style="background: #1a1400; border: 1px solid #c8a800; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #f5c518; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							WEAPON
 						</div>
 					}
 					else if ( source == UpgradeSystem.RewardSource.Chest )
 					{
-						<div style="background: #0d0d20; border: 1px solid #7755cc; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #aa88ff; font-weight: bold; letter-spacing: 1px;">
+						<div style="background: #0d0d20; border: 1px solid #7755cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #aa88ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							ITEM
 						</div>
 					}
 					else if ( upgrade.MaxLevel > 0 )
 					{
 						var prevLevel = upgrade.NextLevel - 1;
-						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #cc99ff; font-weight: bold; letter-spacing: 1px;">
+						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							TOME  LVL @prevLevel → @upgrade.NextLevel / @upgrade.MaxLevel
 						</div>
 					}
 					else
 					{
-						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #cc99ff; font-weight: bold; letter-spacing: 1px;">
+						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							TOME
 						</div>
 					}
 
 					@* ── Upgrade name ── *@
-					<div style="font-size: 17px; color: #f0e0b0; font-family: monospace; font-weight: bold; padding-bottom: 2px;">
+					<div style="font-size: 17px; color: #f0e0b0; font-family: monospace; font-weight: bold; padding-bottom: 2px; text-shadow: 1px 1px 0 #000;">
 						@upgrade.Name
 					</div>
 
@@ -82,7 +82,7 @@
 					<div style="height: 1px; background: #3a2510;"></div>
 
 					@* ── Description ── *@
-					<div style="font-size: 12px; color: #c8b090; font-family: monospace; padding-top: 2px;">
+					<div style="font-size: 12px; color: #c8b090; font-family: monospace; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
 						@upgrade.Description
 					</div>
 
@@ -92,9 +92,9 @@
 						var parts = upgrade.StatPreview.Split( '→' );
 						@if ( parts.Length == 2 )
 						{
-							<div style="font-size: 13px; font-family: monospace; display: flex; align-items: center; gap: 4px; padding-top: 2px;">
+							<div style="font-size: 13px; font-family: monospace; display: flex; align-items: center; gap: 4px; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
 								<span style="color: #888870;">@parts[0].Trim()</span>
-								<span style="color: #88aaff;">→</span>
+								<span style="color: #e8c060;">→</span>
 								<span style="color: #88ee88; font-weight: bold;">@parts[1].Trim()</span>
 							</div>
 						}
@@ -107,14 +107,14 @@
 			<!-- ── Ignore Offers button (shrine only) ─────────────────────── -->
 			@if ( sys?.CanIgnore == true )
 			{
-				<div style="background: #2a0808; border: 2px solid #883322; border-radius: 8px; padding: 10px 32px; pointer-events: all; cursor: pointer; font-size: 15px; font-family: monospace; color: #cc6655; font-weight: bold; letter-spacing: 2px;"
+				<div style="background: #1a1008; border: 2px solid #6a4a1a; border-radius: 4px; padding: 10px 32px; pointer-events: all; cursor: pointer; font-size: 15px; font-family: monospace; color: #a08050; font-weight: bold; letter-spacing: 2px; text-shadow: 1px 1px 0 #000;"
 					 onclick=@(() => IgnoreOffers())>
 					IGNORE OFFERS
 				</div>
 			}
 			else
 			{
-				<div style="font-size: 11px; color: #5a3a10; font-family: monospace; letter-spacing: 3px;">
+				<div style="font-size: 11px; color: #5a3a10; font-family: monospace; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">
 					CLICK A CARD TO SELECT
 				</div>
 			}
@@ -168,7 +168,7 @@
 	string TitleBg( UpgradeSystem.RewardSource s ) => s switch
 	{
 		UpgradeSystem.RewardSource.LevelUp => "#1a1008",
-		UpgradeSystem.RewardSource.Shrine  => "#080f1a",
+		UpgradeSystem.RewardSource.Shrine  => "#1a1408",
 		UpgradeSystem.RewardSource.Chest   => "#140a1a",
 		_                                  => "#1a1008"
 	};
@@ -176,7 +176,7 @@
 	string TitleBorder( UpgradeSystem.RewardSource s ) => s switch
 	{
 		UpgradeSystem.RewardSource.LevelUp => "#c8a800",
-		UpgradeSystem.RewardSource.Shrine  => "#3a6fff",
+		UpgradeSystem.RewardSource.Shrine  => "#8a5a20",
 		UpgradeSystem.RewardSource.Chest   => "#7755cc",
 		_                                  => "#c8a800"
 	};
@@ -184,7 +184,7 @@
 	string TitleColor( UpgradeSystem.RewardSource s ) => s switch
 	{
 		UpgradeSystem.RewardSource.LevelUp => "#f5c518",
-		UpgradeSystem.RewardSource.Shrine  => "#88aaff",
+		UpgradeSystem.RewardSource.Shrine  => "#f5c518",
 		UpgradeSystem.RewardSource.Chest   => "#cc99ff",
 		_                                  => "#f5c518"
 	};
@@ -193,33 +193,33 @@
 
 	string RarityBorderColor( UpgradeDefinition.UpgradeRarity r ) => r switch
 	{
-		UpgradeDefinition.UpgradeRarity.Common   => "#44aa44",
-		UpgradeDefinition.UpgradeRarity.Uncommon => "#4488ff",
-		UpgradeDefinition.UpgradeRarity.Rare     => "#cc44cc",
-		_                                        => "#888888"
+		UpgradeDefinition.UpgradeRarity.Common   => "#5a8a2a",
+		UpgradeDefinition.UpgradeRarity.Uncommon => "#8a6a20",
+		UpgradeDefinition.UpgradeRarity.Rare     => "#8a4a8a",
+		_                                        => "#6a5a4a"
 	};
 
 	string RarityBg( UpgradeDefinition.UpgradeRarity r ) => r switch
 	{
-		UpgradeDefinition.UpgradeRarity.Common   => "#0a1a0a",
-		UpgradeDefinition.UpgradeRarity.Uncommon => "#080f1a",
-		UpgradeDefinition.UpgradeRarity.Rare     => "#150a15",
-		_                                        => "#111111"
+		UpgradeDefinition.UpgradeRarity.Common   => "#0d1408",
+		UpgradeDefinition.UpgradeRarity.Uncommon => "#1a1408",
+		UpgradeDefinition.UpgradeRarity.Rare     => "#1a0818",
+		_                                        => "#111108"
 	};
 
 	string RarityBadgeBg( UpgradeDefinition.UpgradeRarity r ) => r switch
 	{
-		UpgradeDefinition.UpgradeRarity.Common   => "#0d1f0d",
-		UpgradeDefinition.UpgradeRarity.Uncommon => "#0a1030",
-		UpgradeDefinition.UpgradeRarity.Rare     => "#1a0a1a",
-		_                                        => "#111111"
+		UpgradeDefinition.UpgradeRarity.Common   => "#0d1a0a",
+		UpgradeDefinition.UpgradeRarity.Uncommon => "#1a1404",
+		UpgradeDefinition.UpgradeRarity.Rare     => "#1a0a18",
+		_                                        => "#111108"
 	};
 
 	string RarityTextColor( UpgradeDefinition.UpgradeRarity r ) => r switch
 	{
-		UpgradeDefinition.UpgradeRarity.Common   => "#66cc66",
-		UpgradeDefinition.UpgradeRarity.Uncommon => "#6699ff",
-		UpgradeDefinition.UpgradeRarity.Rare     => "#dd66dd",
+		UpgradeDefinition.UpgradeRarity.Common   => "#88cc66",
+		UpgradeDefinition.UpgradeRarity.Uncommon => "#e8c060",
+		UpgradeDefinition.UpgradeRarity.Rare     => "#dd88dd",
 		_                                        => "#aaaaaa"
 	};
 

@@ -6,23 +6,27 @@ DamageIndicator
 	align-items: center;
 	justify-content: center;
 	transform: scaleX( -1 );
+	background-color: transparent;
+	overflow: visible;
+	pointer-events: none;
 
 	.dmg-number
 	{
 		font-weight: bold;
 		text-align: center;
+		white-space: nowrap;
 		text-shadow: 1px 1px 0px rgba(0,0,0,0.85), -1px -1px 0px rgba(0,0,0,0.85),
 		             1px -1px 0px rgba(0,0,0,0.85), -1px 1px 0px rgba(0,0,0,0.85);
 		pointer-events: none;
 
 		&.normal
 		{
-			font-size: 20px;
+			font-size: 48px;
 		}
 
 		&.big
 		{
-			font-size: 28px;
+			font-size: 64px;
 		}
 	}
 }

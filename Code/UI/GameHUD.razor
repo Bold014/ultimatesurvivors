@@ -44,9 +44,9 @@
 
 			</div>
 
-			<!-- CENTER large timer -->
+			<!-- CENTER countdown timer (10 min until final boss) -->
 			<div style="flex: 0 0 auto; font-size: 26px; font-family: monospace; color: #f5c518; font-weight: bold; letter-spacing: 6px; text-shadow: 0 0 12px rgba(245,197,24,0.15);">
-				@FormatTime( stats?.TimeAlive ?? 0f )
+				@(spawner?.IsFinalBossPhase == true ? "FINAL BOSS!" : FormatTime( spawner?.TimeRemaining ?? 600f ))
 			</div>
 
 			<!-- RIGHT cluster -->
@@ -58,8 +58,8 @@
 				</div>
 
 				<div style="display: flex; align-items: center; gap: 8px; background: #120c04; border: 1px solid #4a3520; padding: 4px 12px; border-radius: 6px;">
-					<span style="font-size: 11px; color: #a08050; font-family: monospace; letter-spacing: 2px;">WAVE</span>
-					<span style="font-size: 16px; color: #f5c518; font-family: monospace; font-weight: bold;">@(spawner?.WaveNumber ?? 0)</span>
+					<span style="font-size: 11px; color: #a08050; font-family: monospace; letter-spacing: 2px;">@(spawner?.IsFinalBossPhase == true ? "FINAL" : "MINI")</span>
+					<span style="font-size: 16px; color: #f5c518; font-family: monospace; font-weight: bold;">@(spawner?.IsFinalBossPhase == true ? "!" : $"{spawner?.MiniBossesSpawned ?? 0}/3")</span>
 				</div>
 
 				<div style="background: linear-gradient(180deg, #2a2008 0%, #1a1404 100%); border: 2px solid #c8a800; padding: 4px 14px; border-radius: 8px; box-shadow: 0 0 10px rgba(200,168,0,0.2);">
@@ -215,27 +215,28 @@
 		var w  = LocalWeapons;
 		var c  = LocalCoins;
 		var bc = NearbyBeacon;
-		return System.HashCode.Combine(
-			System.HashCode.Combine(
-				System.HashCode.Combine(
-					(int)(s?.TimeAlive ?? 0f),
-					xp?.CurrentXP     ?? 0,
-					xp?.Level         ?? 1,
-					s?.Kills          ?? 0,
-					(int)((pl?.HPPercent ?? 1f) * 100),
-					(int)((pl?.MaxShield ?? 0f) > 0f ? (pl?.Shield ?? 0f) / (pl?.MaxShield ?? 1f) * 100 : -1),
-					sp?.WaveNumber    ?? 0,
-					w?.Weapons?.Count ?? 0
-				),
-				s?.IsAlive ?? true
-			),
-			System.HashCode.Combine(
-				c?.Coins          ?? 0,
-				NearbyChest       != null ? 1 : 0,
-				bc                != null ? 1 : 0,
-				(int)((bc?.ChargePercent ?? 0f) * 100)
-			)
+		int h1 = System.HashCode.Combine(
+			(int)(s?.TimeAlive ?? 0f),
+			xp?.CurrentXP     ?? 0,
+			xp?.Level         ?? 1,
+			s?.Kills          ?? 0,
+			(int)((pl?.HPPercent ?? 1f) * 100),
+			(int)((pl?.MaxShield ?? 0f) > 0f ? (pl?.Shield ?? 0f) / (pl?.MaxShield ?? 1f) * 100 : -1),
+			sp?.MiniBossesSpawned ?? 0
 		);
+		int h2 = System.HashCode.Combine(
+			(int)(sp?.TimeRemaining ?? 600f),
+			sp?.IsFinalBossPhase == true ? 1 : 0,
+			w?.Weapons?.Count ?? 0,
+			s?.IsAlive ?? true
+		);
+		int h3 = System.HashCode.Combine(
+			c?.Coins          ?? 0,
+			NearbyChest       != null ? 1 : 0,
+			bc                != null ? 1 : 0,
+			(int)((bc?.ChargePercent ?? 0f) * 100)
+		);
+		return System.HashCode.Combine( h1, h2, h3 );
 	}
 
 	string FormatTime( float seconds )

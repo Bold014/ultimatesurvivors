@@ -10,6 +10,9 @@ public sealed class PlayerPassives : Component
 
 	public IReadOnlyList<string> Passives => _passives.AsReadOnly();
 
+	/// <summary>True when all tome slots are filled (4/4). When full, level-up only offers upgrades to existing tomes.</summary>
+	public bool IsFull => _passives.Count >= MaxSlots;
+
 	public void AddPassive( string name )
 	{
 		if ( _passives.Count < MaxSlots )

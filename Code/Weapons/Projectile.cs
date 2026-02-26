@@ -123,6 +123,7 @@ public sealed class Projectile : Component
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
 			if ( enemy.HP <= 0f || _alreadyHit.Contains( enemy ) ) continue;
+			if ( !IsOnScreen( enemy.WorldPosition ) ) continue;
 
 			float hitRadius = enemy.ProjectileHitRadius;
 			var enemyPos = enemy.WorldPosition.WithZ( 0f );
@@ -146,6 +147,18 @@ public sealed class Projectile : Component
 		return false;
 	}
 
+	/// <summary>True if the world position is within the orthographic camera view (enemy must be on screen to be hit).</summary>
+	private bool IsOnScreen( Vector3 worldPos )
+	{
+		var player = Scene.GetAllComponents<PlayerController>().FirstOrDefault();
+		if ( player == null ) return true;
+		var center = player.WorldPosition.WithZ( 0f );
+		const float halfHeight = 100f;
+		const float halfWidth = 200f * (16f / 9f) * 0.5f;
+		var p = worldPos.WithZ( 0f );
+		return MathF.Abs( p.x - center.x ) <= halfWidth && MathF.Abs( p.y - center.y ) <= halfHeight;
+	}
+
 	/// <summary>True if the line segment from A to B intersects the circle at center C with radius r. closest is the impact point.</summary>
 	private static bool SegmentIntersectsCircle( Vector3 a, Vector3 b, Vector3 c, float r, out Vector3 closest )
 	{
@@ -161,6 +174,4 @@ public sealed class Projectile : Component
 		closest = (a + ab * t).WithZ( 0f );
 		return ((c - closest).WithZ( 0f )).LengthSquared < r * r;
 	}
-}
-
 }

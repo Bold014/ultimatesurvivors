@@ -42,11 +42,8 @@ public sealed class PlayerController : Component
 
 	protected override void OnStart()
 	{
-		Log.Info( $"[PlayerController] OnStart — IsProxy={IsProxy}, SelectedCharacter={SelectedCharacter}" );
-
 		if ( IsProxy )
 		{
-			Log.Info( "[PlayerController] IsProxy=true — skipping local init (other player)" );
 			foreach ( var r in Components.GetAll<ModelRenderer>() )
 				r.Enabled = false;
 			return;
@@ -57,10 +54,7 @@ public sealed class PlayerController : Component
 		_weapons = Components.Get<PlayerWeapons>();
 		_spawner = Components.Get<EnemySpawner>();
 
-		Log.Info( $"[PlayerController] Components found — state={_state != null}, stats={_stats != null}, weapons={_weapons != null}, spawner={_spawner != null}" );
-
 		var charDef = CharacterDefinition.GetByName( MenuManager.SelectedCharacter );
-		Log.Info( $"[PlayerController] CharDef={charDef?.Name ?? "NULL"}, HP={charDef?.BaseHP}" );
 		_state.Initialize( charDef );
 
 		if ( _stats != null )
@@ -90,7 +84,6 @@ public sealed class PlayerController : Component
 
 	protected override void OnDestroy()
 	{
-		Log.Info( $"[PlayerController] OnDestroy — GO='{GameObject.Name}' id={GameObject.Id}, destroying HPBar: {_hpBarGo != null}" );
 		_hpBarGo?.Destroy();
 	}
 
@@ -131,6 +124,8 @@ public sealed class PlayerController : Component
 	private const float PlayerHalfExtent = 8f;
 	/// <summary>Tighter hitbox for player-enemy collisions only. Reduces padding so contact feels closer to the sprite.</summary>
 	private const float PlayerEnemyHalfExtent = 1f;
+	/// <summary>Effective mass for collision push. Higher = player pushes enemies more, gets pushed less.</summary>
+	private const float PlayerMass = 3f;
 
 	private void HandleMovement()
 	{
@@ -198,7 +193,8 @@ public sealed class PlayerController : Component
 			pos = AabbPushOut( pos, shrine.WorldPosition.WithZ( 0f ), PlayerHalfExtent, 15f );
 		}
 
-		// Enemies — circular push-out so the player is blocked by the swarm
+		// Enemies — mutual push-out with mass ratio. Player has higher mass so they push enemies more than they get pushed.
+		const float enemyMass = 1f;
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
 			if ( enemy.HP <= 0f ) continue;
@@ -210,7 +206,13 @@ public sealed class PlayerController : Component
 			if ( distSq < minDist * minDist && distSq > 0.001f )
 			{
 				float dist = MathF.Sqrt( distSq );
-				pos += diff / dist * (minDist - dist);
+				float overlap = minDist - dist;
+				float totalMass = PlayerMass + enemyMass;
+				float playerPush = overlap * (enemyMass / totalMass);
+				float enemyPush = overlap * (PlayerMass / totalMass);
+
+				pos += diff / dist * playerPush;
+				enemy.GameObject.WorldPosition = enemy.WorldPosition.WithZ( 0f ) - (diff / dist) * enemyPush;
 			}
 		}
 
@@ -275,8 +277,6 @@ public sealed class PlayerController : Component
 		_spriteRenderer.Sprite = sprite;
 		_spriteRenderer.PlaybackSpeed = 1f;
 		_spriteRenderer.TextureFilter = Sandbox.Rendering.FilterMode.Point;
-
-		Log.Info( $"[PlayerController] Sprite loaded for {cfg.Path}: {sprite != null}" );
 	}
 
 	private void UpdateSpriteAnimation( Vector3 dir )
@@ -341,7 +341,9 @@ public sealed class PlayerController : Component
 
 			_isDashing = true;
 			_dashTime = 0.15f;
-			_dashCooldown = 1.5f;
+			float baseCooldown = _state?.DashCooldownBase ?? 1.5f;
+			float mult = _state?.DashCooldownMultiplier ?? 1f;
+			_dashCooldown = baseCooldown * mult;
 		}
 
 		if ( _isDashing )
@@ -394,7 +396,6 @@ public sealed class PlayerController : Component
 	{
 		_hpBarGo = new GameObject( true, "HPBar" );
 		_hpBarGo.SetParent( GameObject );
-		Log.Info( $"[PlayerController] CreateHealthBar — owner GO='{GameObject.Name}' id={GameObject.Id}, HPBar id={_hpBarGo.Id}, parent='{_hpBarGo.Parent?.Name}'" );
 		_hpBarGo.WorldRotation = Rotation.From( new Angles( 90f, 0f, 0f ) );
 		_hpBarGo.WorldScale    = new Vector3( 1f, 1f, 1f );
 

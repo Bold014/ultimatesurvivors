@@ -128,24 +128,30 @@ public sealed class UpgradeSystem : Component
 	private IReadOnlyList<UpgradeDefinition> BuildLevelUpChoices()
 	{
 		var pool = new List<UpgradeDefinition>();
+		float luck = _state?.Luck ?? 0f;
 
-		// Add tomes that are unlocked and not yet maxed, stamping the level and stat preview
+		// Add tomes: when inventory is full (4/4), only offer level-ups for tomes already in inventory
+		bool tomeSlotsFull = _passives?.IsFull ?? false;
 		foreach ( var tome in UpgradeDefinition.TomePool )
 		{
 			if ( tome.UnlockId != null && !PlayerProgress.IsUnlocked( tome.UnlockId ) ) continue;
 			int currentLevel = _tomes?.GetLevel( tome.Name ) ?? 0;
 			if ( currentLevel >= tome.MaxLevel ) continue;
+			// When slots full, only show tomes we already own (currentLevel > 0)
+			if ( tomeSlotsFull && currentLevel == 0 ) continue;
 
-			pool.Add( new UpgradeDefinition
+			var (rolledValue, description) = RollTomeValue( tome, luck );
+			var choice = new UpgradeDefinition
 			{
 				Name        = tome.Name,
-				Description = tome.Description,
+				Description = description,
 				Type        = tome.Type,
-				Value       = tome.Value,
+				Value       = rolledValue,
 				MaxLevel    = tome.MaxLevel,
 				NextLevel   = currentLevel + 1,
-				StatPreview = BuildTomeStatPreview( tome, _state ),
-			} );
+				StatPreview = BuildTomeStatPreview( tome.Type, rolledValue, _state ),
+			};
+			pool.Add( choice );
 		}
 
 		// Add weapon options: level-up if owned (and not maxed), unlock if new and slots remain
@@ -184,22 +190,38 @@ public sealed class UpgradeSystem : Component
 		return Pick( pool, 3 );
 	}
 
-	/// <summary>Shrine pool: one per rarity tier, drawn from ShrinePool.</summary>
+	/// <summary>Shrine pool: 3 choices. Higher Luck = better bonuses (more Uncommon/Rare offers).</summary>
 	private IReadOnlyList<UpgradeDefinition> BuildShrineChoices()
 	{
 		var commons   = UpgradeDefinition.ShrinePool.Where( x => x.Rarity == UpgradeDefinition.UpgradeRarity.Common ).ToList();
 		var uncommons = UpgradeDefinition.ShrinePool.Where( x => x.Rarity == UpgradeDefinition.UpgradeRarity.Uncommon ).ToList();
 		var rares     = UpgradeDefinition.ShrinePool.Where( x => x.Rarity == UpgradeDefinition.UpgradeRarity.Rare ).ToList();
 
-		// Pick one of each rarity for a balanced spread; fallback to full pool if a tier is exhausted
-		var choices = new List<UpgradeDefinition>
-		{
-			commons.Count   > 0 ? commons[_rand.Next( commons.Count )]     : null,
-			uncommons.Count > 0 ? uncommons[_rand.Next( uncommons.Count )] : null,
-			rares.Count     > 0 ? rares[_rand.Next( rares.Count )]         : null,
-		};
+		// Luck scales rarity: base 50% Common, 35% Uncommon, 15% Rare. +4% Rare per Luck (max 50% Rare).
+		float luck = _state?.Luck ?? 0f;
+		float rareChance   = Math.Min( 0.50f, 0.15f + luck * 0.04f );
+		float uncomChance  = 0.35f;
+		float commonChance = 1f - rareChance - uncomChance;
 
-		return choices.Where( c => c != null ).ToList().AsReadOnly();
+		var choices = new List<UpgradeDefinition>();
+		for ( int i = 0; i < 3; i++ )
+		{
+			float roll = (float)_rand.NextDouble();
+			UpgradeDefinition.UpgradeRarity tier;
+			if ( roll < commonChance )
+				tier = UpgradeDefinition.UpgradeRarity.Common;
+			else if ( roll < commonChance + uncomChance )
+				tier = UpgradeDefinition.UpgradeRarity.Uncommon;
+			else
+				tier = UpgradeDefinition.UpgradeRarity.Rare;
+
+			var pool = tier == UpgradeDefinition.UpgradeRarity.Common ? commons
+				: tier == UpgradeDefinition.UpgradeRarity.Uncommon ? uncommons : rares;
+			if ( pool.Count > 0 )
+				choices.Add( pool[_rand.Next( pool.Count )] );
+		}
+
+		return choices.AsReadOnly();
 	}
 
 	/// <summary>Chest pool: 3 random items, rerolled with Luck. Unlockable items only appear when owned.</summary>
@@ -220,45 +242,90 @@ public sealed class UpgradeSystem : Component
 		return Pick( pool, 3 );
 	}
 
+	/// <summary>Rolls a random tome value with variance; Luck biases toward higher values.</summary>
+	private (float value, string description) RollTomeValue( UpgradeDefinition tome, float luck )
+	{
+		float baseVal = tome.Value;
+		// ProjectileCount (Quantity Tome) is always +1 — no variance
+		if ( tome.Type == UpgradeDefinition.UpgradeType.ProjectileCountUp )
+			return (baseVal, $"+{(int)baseVal} projectile to all attacks");
+
+		// Variance: ±25% of base. Luck adds up to +20% toward max per 10 Luck (e.g. 10 Luck ≈ +10% avg).
+		float variance = 0.25f;
+		float minVal = baseVal * (1f - variance);
+		float maxVal = baseVal * (1f + variance);
+		float roll   = (float)_rand.NextDouble();
+		float luckBonus = Math.Min( 0.25f, luck * 0.02f ); // +2% toward max per Luck, cap +25%
+		float effectiveRoll = Math.Min( 1f, roll + luckBonus );
+		float value = minVal + (maxVal - minVal) * effectiveRoll;
+
+		string desc = BuildTomeDescription( tome.Type, value );
+		return (value, desc);
+	}
+
+	/// <summary>Builds a human-readable description for a rolled tome value.</summary>
+	private static string BuildTomeDescription( UpgradeDefinition.UpgradeType type, float value )
+	{
+		return type switch
+		{
+			UpgradeDefinition.UpgradeType.SpeedUp           => $"+{value * 100f:F0}% movement speed",
+			UpgradeDefinition.UpgradeType.AreaUp            => $"+{value * 100f:F0}% attack size",
+			UpgradeDefinition.UpgradeType.ShieldUp          => $"+{value:F0} shield capacity",
+			UpgradeDefinition.UpgradeType.RegenUp           => $"+{value:F0} HP regen per minute",
+			UpgradeDefinition.UpgradeType.LifestealUp        => $"+{value * 100f:F0}% lifesteal (heal % of damage dealt)",
+			UpgradeDefinition.UpgradeType.ProjectileSpeedUp => $"+{value * 100f:F0}% projectile speed",
+			UpgradeDefinition.UpgradeType.MaxHPUp           => $"+{value * 100f:F0}% max HP",
+			UpgradeDefinition.UpgradeType.GoldMultiplierUp  => $"+{value * 100f:F0}% gold from all sources",
+			UpgradeDefinition.UpgradeType.DamageUp          => $"+{value * 100f:F0}% damage",
+			UpgradeDefinition.UpgradeType.CooldownDown      => $"+{value * 100f:F0}% attack speed",
+			UpgradeDefinition.UpgradeType.CritChanceUp      => $"+{value * 100f:F0}% critical hit chance",
+			UpgradeDefinition.UpgradeType.KnockbackUp       => $"+{value * 100f:F0}% enemy knockback distance",
+			UpgradeDefinition.UpgradeType.XPMultiplierUp   => $"+{value * 100f:F0}% XP from all sources",
+			_ => $"+{value:F1}"
+		};
+	}
+
 	/// <summary>Builds a "current → new" stat preview string for a tome choice.</summary>
-	private static string BuildTomeStatPreview( UpgradeDefinition tome, PlayerLocalState s )
+	private static string BuildTomeStatPreview( UpgradeDefinition.UpgradeType type, float value, PlayerLocalState s )
 	{
 		if ( s == null ) return null;
 
-		switch ( tome.Type )
+		switch ( type )
 		{
 			case UpgradeDefinition.UpgradeType.SpeedUp:
-				return $"Speed: {s.Speed:F0} → {s.Speed * (1f + tome.Value):F0}";
+				return $"Speed: {s.Speed:F0} → {s.Speed * (1f + value):F0}";
 			case UpgradeDefinition.UpgradeType.DamageUp:
-				return $"Damage: {s.Damage:F1} → {s.Damage * (1f + tome.Value):F1}";
+				return $"Damage: {s.Damage:F1} → {s.Damage * (1f + value):F1}";
 			case UpgradeDefinition.UpgradeType.MaxHPUp:
-				return $"Max HP: {s.MaxHP:F0} → {s.MaxHP * (1f + tome.Value):F0}";
+				return $"Max HP: {s.MaxHP:F0} → {s.MaxHP * (1f + value):F0}";
 			case UpgradeDefinition.UpgradeType.AreaUp:
-				return $"Area: {s.Area:F2}× → {s.Area * (1f + tome.Value):F2}×";
+				return $"Area: {s.Area:F2}× → {s.Area * (1f + value):F2}×";
 			case UpgradeDefinition.UpgradeType.CooldownDown:
-				return $"Cooldown: {s.CooldownMultiplier:F2}× → {s.CooldownMultiplier * (1f - tome.Value):F2}×";
+				return $"Cooldown: {s.CooldownMultiplier:F2}× → {s.CooldownMultiplier * (1f - value):F2}×";
 			case UpgradeDefinition.UpgradeType.MagnetUp:
-				return $"Magnet: {s.MagnetRadius:F0} → {s.MagnetRadius * (1f + tome.Value):F0}";
+				return $"Magnet: {s.MagnetRadius:F0} → {s.MagnetRadius * (1f + value):F0}";
 			case UpgradeDefinition.UpgradeType.LuckUp:
-				return $"Luck: {(int)s.Luck} → {(int)(s.Luck + tome.Value)}";
+				return $"Luck: {(int)s.Luck} → {(int)(s.Luck + value)}";
 			case UpgradeDefinition.UpgradeType.ArmorUp:
-				return $"Armor: {s.Armor:F0} → {s.Armor + tome.Value:F0}";
+				return $"Armor: {s.Armor:F0} → {s.Armor + value:F0}";
 			case UpgradeDefinition.UpgradeType.ShieldUp:
-				return $"Max Shield: {s.MaxShield:F0} → {s.MaxShield + tome.Value:F0}";
+				return $"Max Shield: {s.MaxShield:F0} → {s.MaxShield + value:F0}";
 			case UpgradeDefinition.UpgradeType.RegenUp:
-				return $"HP Regen: {s.RegenPerMinute:F0}/min → {s.RegenPerMinute + tome.Value:F0}/min";
+				return $"HP Regen: {s.RegenPerMinute:F0}/min → {s.RegenPerMinute + value:F0}/min";
+			case UpgradeDefinition.UpgradeType.LifestealUp:
+				return $"Lifesteal: {s.Lifesteal * 100f:F0}% → {(s.Lifesteal + value) * 100f:F0}%";
 			case UpgradeDefinition.UpgradeType.ProjectileSpeedUp:
-				return $"Proj Speed: {s.ProjectileSpeedMultiplier:F2}× → {s.ProjectileSpeedMultiplier * (1f + tome.Value):F2}×";
+				return $"Proj Speed: {s.ProjectileSpeedMultiplier:F2}× → {s.ProjectileSpeedMultiplier * (1f + value):F2}×";
 			case UpgradeDefinition.UpgradeType.CritChanceUp:
-				return $"Crit: {s.CritChance * 100f:F0}% → {(s.CritChance + tome.Value) * 100f:F0}%";
+				return $"Crit: {s.CritChance * 100f:F0}% → {(s.CritChance + value) * 100f:F0}%";
 			case UpgradeDefinition.UpgradeType.KnockbackUp:
-				return $"Knockback: {s.Knockback:F2}× → {s.Knockback + tome.Value:F2}×";
+				return $"Knockback: {s.Knockback:F2}× → {s.Knockback + value:F2}×";
 			case UpgradeDefinition.UpgradeType.GoldMultiplierUp:
-				return $"Gold: {s.GoldMultiplier:F2}× → {s.GoldMultiplier * (1f + tome.Value):F2}×";
+				return $"Gold: {s.GoldMultiplier:F2}× → {s.GoldMultiplier * (1f + value):F2}×";
 			case UpgradeDefinition.UpgradeType.ProjectileCountUp:
-				return $"Projectiles: +{s.ProjectileCount} → +{s.ProjectileCount + (int)tome.Value}";
+				return $"Projectiles: +{s.ProjectileCount} → +{s.ProjectileCount + (int)value}";
 			case UpgradeDefinition.UpgradeType.XPMultiplierUp:
-				return $"XP: {s.XPMultiplier:F2}× → {s.XPMultiplier * (1f + tome.Value):F2}×";
+				return $"XP: {s.XPMultiplier:F2}× → {s.XPMultiplier * (1f + value):F2}×";
 			default:
 				return null;
 		}

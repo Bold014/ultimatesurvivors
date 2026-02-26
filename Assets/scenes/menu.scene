@@ -140,7 +140,7 @@
       "OwnerTransfer": 1,
       "Components": [
         {
-          "__type": "MenuManager",
+          "__type": "Sandbox.MenuManager",
           "__guid": "2bf2bf30-2b26-45ae-8580-a05a068cadb3",
           "__enabled": true,
           "Flags": 0,

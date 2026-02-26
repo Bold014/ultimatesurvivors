@@ -7,21 +7,21 @@ public sealed class PlayerXP : Component
 	static SoundEvent LevelUpSound = new( "sounds/level_up.mp3" );
 
 	public int CurrentXP     { get; private set; } = 0;
-	public int XPToNextLevel { get; private set; } = 40;  // Level 1→2: fast. Later levels scale exponentially.
+	public int XPToNextLevel { get; private set; } = 25;  // Level 1→2: fast. Gentler curve for 10-min runs.
 	public int Level         { get; private set; } = 1;
 
 	/// <summary>XP required to reach next level. Early levels are fast; later levels scale exponentially.</summary>
-	private static int GetXPForLevel( int level ) => (int)(40 * System.Math.Pow( level, 1.5 ));
+	private static int GetXPForLevel( int level ) => (int)(25 * System.Math.Pow( level, 1.25 ));
 
 	public float XPPercent => XPToNextLevel > 0 ? (float)CurrentXP / XPToNextLevel : 0f;
 
-	private UpgradeSystem _upgradeSystem;
-	private PlayerStats   _stats;
-	private bool          _initialized = false;
+	private UpgradeSystem   _upgradeSystem;
+	private PlayerStats     _stats;
+	private PlayerLocalState _state;
+	private bool            _initialized = false;
 
 	protected override void OnStart()
 	{
-		Log.Info( $"[PlayerXP] OnStart — GameObject={GameObject?.Name}" );
 	}
 
 	private void EnsureInitialized()
@@ -30,15 +30,16 @@ public sealed class PlayerXP : Component
 		_initialized   = true;
 		_upgradeSystem = Components.Get<UpgradeSystem>();
 		_stats         = Components.Get<PlayerStats>();
-		Log.Info( $"[PlayerXP] EnsureInitialized — upgradeSystem={_upgradeSystem != null}, stats={_stats != null}" );
+		_state         = Components.Get<PlayerLocalState>();
 	}
 
 	public void AddXP( int amount )
 	{
 		EnsureInitialized();
-		Log.Info( $"[PlayerXP] AddXP({amount}) — CurrentXP {CurrentXP} → {CurrentXP + amount} / {XPToNextLevel}" );
+		float mult = _state?.XPMultiplier ?? 1f;
+		int finalAmount = Math.Max( 1, (int)Math.Ceiling( amount * mult ) );
 
-		CurrentXP += amount;
+		CurrentXP += finalAmount;
 		while ( CurrentXP >= XPToNextLevel )
 		{
 			CurrentXP -= XPToNextLevel;
@@ -52,8 +53,6 @@ public sealed class PlayerXP : Component
 		try { Sound.Play( LevelUpSound ); } catch { }
 		Level++;
 		XPToNextLevel = GetXPForLevel( Level );
-
-		Log.Info( $"[PlayerXP] LevelUp! New level={Level}, next XP threshold={XPToNextLevel}" );
 
 		if ( _stats != null )
 			_stats.Level = Level;

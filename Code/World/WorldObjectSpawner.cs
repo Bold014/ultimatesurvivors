@@ -1,34 +1,30 @@
 /// <summary>
 /// Spawns Chests and LevelUpBeacons throughout the run.
 /// On start: spawns 2 chests + 1 beacon.
-/// Every 2 waves cleared: spawns 1 more chest.
-/// Every 3 waves cleared: spawns 1 more beacon.
+/// Every 2 minutes: spawns 1 more chest.
+/// Every 3 minutes: spawns 1 more beacon.
 /// </summary>
 public sealed class WorldObjectSpawner : Component
 {
 	private EnemySpawner _spawner;
 	private Random       _rand;
-	private int          _lastWaveSpawned = 0;
+	private int          _chestsSpawned  = 2;   // 2 spawned in OnStart
+	private int          _beaconsSpawned = 1;   // 1 spawned in OnStart
 
-	// Spawn radius range from the world origin (not player, so objects stay on-screen)
 	private const float SpawnMinDist = 200f;
 	private const float SpawnMaxDist = 400f;
 
 	protected override void OnStart()
 	{
 		_spawner = Components.Get<EnemySpawner>();
-
-		_rand = new Random();
-
+		_rand    = new Random();
 		Chest.ResetRunState();
 
-		// Destroy any scene-placed chests/beacons so WorldObjectSpawner is the sole source (avoids duplicates at same spot)
 		foreach ( var chest in Scene.GetAllComponents<Chest>().ToList() )
 			chest.GameObject.Destroy();
 		foreach ( var beacon in Scene.GetAllComponents<LevelUpBeacon>().ToList() )
 			beacon.GameObject.Destroy();
 
-		// Initial world objects at run start
 		for ( int i = 0; i < 2; i++ )
 			SpawnChest();
 		SpawnBeacon();
@@ -38,23 +34,21 @@ public sealed class WorldObjectSpawner : Component
 	{
 		if ( _spawner == null ) return;
 
-		int wave = _spawner.WaveNumber;
-		if ( wave <= _lastWaveSpawned ) return;
+		float runMinutes = _spawner.RunTime / 60f;
+		int targetChests  = 2 + (int)(runMinutes / 2f);   // 2 initial + 1 per 2 min
+		int targetBeacons = 1 + (int)(runMinutes / 3f);   // 1 initial + 1 per 3 min
 
-		// Check if the spawner just finished a wave (entered intermission)
-		// We detect this by watching wave transitions
-		for ( int w = _lastWaveSpawned + 1; w <= wave; w++ )
+		while ( _chestsSpawned < targetChests )
 		{
-			// Chest every 2 completed waves
-			if ( w % 2 == 0 )
-				SpawnChest();
-
-			// Beacon every 3 completed waves
-			if ( w % 3 == 0 )
-				SpawnBeacon();
+			SpawnChest();
+			_chestsSpawned++;
 		}
 
-		_lastWaveSpawned = wave;
+		while ( _beaconsSpawned < targetBeacons )
+		{
+			SpawnBeacon();
+			_beaconsSpawned++;
+		}
 	}
 
 	private void SpawnChest()
@@ -63,8 +57,7 @@ public sealed class WorldObjectSpawner : Component
 		var go    = new GameObject( true, "Chest" );
 		go.WorldPosition = pos;
 		var chest = go.Components.Create<Chest>();
-		chest.SpawnedOnWave = Math.Max( 1, _spawner?.WaveNumber ?? 1 );
-		Log.Info( $"[WorldObjectSpawner] Spawned chest at {pos} (wave={chest.SpawnedOnWave}, opens so far={Chest.ChestsOpened})" );
+		chest.SpawnedOnWave = Math.Max( 1, (int)(_spawner?.RunTime ?? 0) / 60 );
 	}
 
 	private void SpawnBeacon()
@@ -73,12 +66,10 @@ public sealed class WorldObjectSpawner : Component
 		var go  = new GameObject( true, "LevelUpBeacon" );
 		go.WorldPosition = pos;
 		go.Components.Create<LevelUpBeacon>();
-		Log.Info( $"[WorldObjectSpawner] Spawned beacon at {pos}" );
 	}
 
 	private Vector3 RandomSpawnPosition()
 	{
-		// Retry up to 10 times to avoid placing on a tree tile
 		for ( int attempt = 0; attempt < 10; attempt++ )
 		{
 			float angle = (float)(_rand.NextDouble() * 360.0);
@@ -88,7 +79,6 @@ public sealed class WorldObjectSpawner : Component
 				MathF.Sin( angle * MathF.PI / 180f ) * dist,
 				0f );
 
-			// Check a footprint matching one tree tile (16×32) so objects don't clip a tree
 			if ( !TreeManager.IsTreeAtWorldPos( pos.x, pos.y ) &&
 			     !TreeManager.IsTreeAtWorldPos( pos.x + TreeManager.TileWorldWidth - 1, pos.y ) &&
 			     !TreeManager.IsTreeAtWorldPos( pos.x, pos.y + TreeManager.TileWorldHeight - 1 ) &&
@@ -96,7 +86,6 @@ public sealed class WorldObjectSpawner : Component
 				return pos;
 		}
 
-		// Fallback: use a random position anyway to avoid clustering at origin
 		float a = (float)(_rand.NextDouble() * 360.0);
 		float d = SpawnMinDist + (float)(_rand.NextDouble() * (SpawnMaxDist - SpawnMinDist));
 		return new Vector3(

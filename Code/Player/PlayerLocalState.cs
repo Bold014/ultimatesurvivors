@@ -37,6 +37,20 @@ public sealed class PlayerLocalState : Component
 	/// <summary>Multiplier on all XP gained.</summary>
 	public float XPMultiplier { get; set; } = 1f;
 
+	// ── Megabonk-style shrine stats ───────────────────────────────────────────
+	/// <summary>Chance to evade incoming damage (0 = 0%, 1 = 100%).</summary>
+	public float Evasion { get; set; } = 0f;
+	/// <summary>Fraction of damage dealt that heals the player (0 = 0%, 0.1 = 10% lifesteal).</summary>
+	public float Lifesteal { get; set; } = 0f;
+	/// <summary>Multiplier on ability/effect duration (e.g. BurnZone, buffs).</summary>
+	public float DurationMultiplier { get; set; } = 1f;
+	/// <summary>Base dash cooldown in seconds. Reduced by DashCooldownUp upgrades.</summary>
+	public float DashCooldownBase { get; set; } = 1.5f;
+	/// <summary>Multiplier on dash cooldown (1 = base, 0.8 = 20% faster dash).</summary>
+	public float DashCooldownMultiplier { get; set; } = 1f;
+	/// <summary>Multiplier on silver/premium currency (for future use).</summary>
+	public float SilverMultiplier { get; set; } = 1f;
+
 	private bool _revivalUsed = false;
 
 	// Warding Pendant — brief invincibility after taking a hit
@@ -102,6 +116,11 @@ public sealed class PlayerLocalState : Component
 		GoldMultiplier = 1f;
 		ProjectileCount = 0;
 		XPMultiplier = 1f;
+		Evasion = 0f;
+		Lifesteal = 0f;
+		DurationMultiplier = 1f;
+		DashCooldownMultiplier = 1f;
+		SilverMultiplier = 1f;
 		_shieldRegenTimer = 0f;
 	}
 
@@ -136,6 +155,10 @@ public sealed class PlayerLocalState : Component
 	{
 		// Warding Pendant invincibility frames
 		if ( _iFrameTimer > 0f )
+			return false;
+
+		// Evasion: chance to completely avoid damage
+		if ( Evasion > 0f && System.Random.Shared.NextSingle() < Evasion )
 			return false;
 
 		var actualDamage = Math.Max( 1f, amount - Armor );
