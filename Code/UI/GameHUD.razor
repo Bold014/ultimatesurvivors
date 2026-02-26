@@ -163,12 +163,17 @@
 		@if ( nearBeacon != null && nearBeacon.IsPlayerNearby )
 		{
 			int pct = (int)(nearBeacon.ChargePercent * 100f);
-			<div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: #080f1acc; border: 2px solid #3a6fff; border-radius: 10px; padding: 10px 24px; text-align: center; min-width: 240px;">
-				<div style="font-size: 16px; font-family: monospace; color: #88aaff; font-weight: bold; letter-spacing: 2px;">CHARGING BEACON</div>
-				<div style="margin-top: 6px; background: #0a1030; border: 1px solid #3a6fff; border-radius: 4px; height: 10px; overflow: hidden;">
-					<div style="background: #3a6fff; height: 100%; width: @pct%; transition: width 0.1s;"></div>
+			<div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: #080f1acc; border: 2px solid #3a6fff; border-radius: 10px; padding: 10px 24px; min-width: 280px; display: flex; align-items: center; gap: 16px;">
+				<div style="display: flex; flex-direction: column; line-height: 1.1;">
+					<div style="font-size: 14px; font-family: monospace; color: #88aaff; font-weight: bold; letter-spacing: 2px;">CHARGING</div>
+					<div style="font-size: 12px; font-family: monospace; color: #88aaff; font-weight: bold; letter-spacing: 2px;">BEACON</div>
 				</div>
-				<div style="font-size: 12px; font-family: monospace; color: #6688cc; margin-top: 4px;">@pct%</div>
+				<div style="flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0;">
+					<div style="flex: 1; background: #0a1030; border: 1px solid #3a6fff; border-radius: 4px; height: 10px; overflow: hidden;">
+						<div style="background: #3a6fff; height: 100%; width: @pct%; transition: width 0.1s;"></div>
+					</div>
+					<div style="font-size: 12px; font-family: monospace; color: #88aaff; font-weight: bold; white-space: nowrap;">@pct %</div>
+				</div>
 			</div>
 		}
 
@@ -223,7 +228,7 @@
 				c?.Coins          ?? 0,
 				NearbyChest       != null ? 1 : 0,
 				bc                != null ? 1 : 0,
-				(int)((bc?.ChargePercent ?? 0f) * 20)
+				(int)((bc?.ChargePercent ?? 0f) * 100)
 			)
 		);
 	}

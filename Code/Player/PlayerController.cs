@@ -347,7 +347,7 @@ public sealed class PlayerController : Component
 		if ( _isDashing )
 		{
 			_dashTime -= Time.Delta;
-			WorldPosition += _dashDir * 650f * Time.Delta;
+			WorldPosition += _dashDir * 260f * Time.Delta;
 			WorldPosition = WorldPosition.WithZ( 0f );
 
 			if ( _dashTime <= 0f )
