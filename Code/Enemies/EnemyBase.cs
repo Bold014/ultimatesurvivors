@@ -40,6 +40,8 @@ public sealed class EnemyBase : Component
 	private float _dieTimer = -1f;
 	private float _attackTimer = 0f;
 	private string _lastWalkAnim = "walkdown";
+	/// <summary>Velocity applied each frame for smooth knockback. Decays over time.</summary>
+	private Vector3 _knockbackVelocity = Vector3.Zero;
 
 	protected override void OnStart()
 	{
@@ -50,7 +52,8 @@ public sealed class EnemyBase : Component
 			var spriteGo = new GameObject( true, "EnemySprite" );
 			spriteGo.SetParent( GameObject );
 			spriteGo.LocalPosition = new Vector3( 0f, 0f, 2f );
-			spriteGo.LocalScale = new Vector3( SizeScale * 2f, SizeScale * 2f, SizeScale * 2f );
+			// Negative Y scale flips sprites that are authored upside-down
+			spriteGo.LocalScale = new Vector3( SizeScale * 2f, -SizeScale * 2f, SizeScale * 2f );
 
 			var sprite = ResourceLibrary.Get<Sprite>( SpritePath );
 			_spriteRenderer = spriteGo.Components.Create<SpriteRenderer>();
@@ -132,12 +135,14 @@ public sealed class EnemyBase : Component
 			}
 		}
 
-		if ( dir.LengthSquared > 1f )
+		var step = dir.LengthSquared > 1f ? dir.Normal * Speed * Time.Delta : Vector3.Zero;
+		// Apply smooth knockback velocity (decays each frame, works even when stationary)
+		step += _knockbackVelocity * Time.Delta;
+		_knockbackVelocity *= MathF.Pow( 0.08f, Time.Delta ); // ~92% decay per second for smooth slide
+
+		if ( step.LengthSquared > 0.0001f )
 		{
-
-			var step = dir.Normal * Speed * Time.Delta;
 			var desired = WorldPosition + step;
-
 			if ( !TreeManager.IsTreeAtWorldPos( desired.x, desired.y ) )
 			{
 				WorldPosition = desired;
@@ -151,7 +156,8 @@ public sealed class EnemyBase : Component
 					WorldPosition = slideX;
 				else if ( !TreeManager.IsTreeAtWorldPos( slideY.x, slideY.y ) )
 					WorldPosition = slideY;
-				// Fully blocked — don't move this frame
+				else
+					_knockbackVelocity = Vector3.Zero; // Stop knockback when fully blocked
 			}
 		}
 		WorldPosition = WorldPosition.WithZ( 0f );
@@ -236,7 +242,12 @@ public sealed class EnemyBase : Component
 		WorldPosition = pos;
 	}
 
-	public void TakeDamage( float amount, string weaponId = null )
+	/// <summary>Base knockback distance (units). Multiplied by player's Knockback stat. Applied as smooth velocity over ~0.3s.</summary>
+	private const float BaseKnockbackDistance = 14f;
+	/// <summary>Converts desired total distance to initial velocity (units/sec). Based on decay rate.</summary>
+	private const float KnockbackVelocityFactor = 2.5f;
+
+	public void TakeDamage( float amount, string weaponId = null, Vector3? knockbackFrom = null )
 	{
 		if ( _dieTimer >= 0f ) return;
 
@@ -281,6 +292,25 @@ public sealed class EnemyBase : Component
 		}
 
 		SpawnDamageIndicator( amount, isCrit );
+
+		// Apply knockback: add velocity to push enemy away from damage source (smooth slide over time)
+		if ( knockbackFrom.HasValue && Target != null )
+		{
+			float knockbackMult = playerState?.Knockback ?? 1f;
+			if ( knockbackMult > 0f )
+			{
+				var pos = WorldPosition.WithZ( 0f );
+				var src = knockbackFrom.Value.WithZ( 0f );
+				var dir = pos - src;
+				if ( dir.LengthSquared > 0.01f )
+				{
+					dir = dir.Normal;
+					float totalDist = BaseKnockbackDistance * knockbackMult;
+					float initialSpeed = totalDist * KnockbackVelocityFactor; // units/sec for smooth slide
+					_knockbackVelocity = dir * initialSpeed;
+				}
+			}
+		}
 
 		if ( HP <= 0f )
 		{

@@ -19,9 +19,9 @@
     "MapList": [
       "facepunch.flatgrass"
     ],
-    "RankType": "None",
+    "RankType": "Stat",
     "PerMapRanking": false,
-    "LeaderboardType": "None",
+    "LeaderboardType": "Stat",
     "CsProjName": "",
     "StartupScene": "scenes/menu.scene"
   }

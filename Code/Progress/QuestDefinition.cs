@@ -18,7 +18,9 @@ public enum QuestGoalType
 	/// <summary>Purchase X chests total across all runs.</summary>
 	ChestsPurchased,
 	/// <summary>Fire X projectiles total across all runs.</summary>
-	ProjectilesFired
+	ProjectilesFired,
+	/// <summary>Upgrade a specific weapon to level X or higher in a single run.</summary>
+	WeaponReachLevel
 }
 
 public class QuestDefinition
@@ -86,5 +88,8 @@ public class QuestDefinition
 
 		// --- Projectiles fired quests ---
 		new() { Id = "projectiles_5000", Description = "Fire 1,000 projectiles", GoalType = QuestGoalType.ProjectilesFired, Target = 1000, CoinReward = 25 },
+
+		// --- Weapon level quests ---
+		new() { Id = "axe_level_10", Description = "Upgrade Axe to Level 10 in a single run", GoalType = QuestGoalType.WeaponReachLevel, WeaponName = "Axe", Target = 10, CoinReward = 20 },
 	};
 }

@@ -1,6 +1,6 @@
 /// <summary>
 /// Plays a background music track that loops continuously.
-/// Uses a static SoundEvent so s&box can find it. Looping: set on the mp3 in Assets Browser.
+/// Uses a static SoundEvent so s&box can find it. Looping is set in songloop.sound asset.
 /// Mute state is persisted via PlayerProgress.Data.MusicMuted.
 /// </summary>
 public sealed class MusicManager : Component
@@ -8,10 +8,10 @@ public sealed class MusicManager : Component
 	public static MusicManager Instance { get; private set; }
 
 	/// <summary>
-	/// Static SoundEvent — s&box looks up sounds by "ClassName.FieldName".
-	/// Path is to the raw audio file (mp3/wav) in your addon.
+	/// Static SoundEvent — references the .sound asset so looping is applied.
+	/// songloop.sound has "Looping": true; raw mp3 path bypasses that.
 	/// </summary>
-	static SoundEvent SongLoop = new( "sounds/songloop.mp3" );
+	static SoundEvent SongLoop = new( "sounds/songloop" );
 
 	[Property, Range( 0f, 1f )] public float Volume { get; set; } = 0.4f;
 
@@ -47,6 +47,21 @@ public sealed class MusicManager : Component
 	{
 		if ( !_playing ) return;
 		try { _handle.Volume = PlayerProgress.Data.MusicMuted ? 0f : Volume; } catch { }
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( !_playing ) return;
+		// Manual loop fallback: s&box .sound Looping may not always work
+		try
+		{
+			if ( !_handle.IsPlaying )
+			{
+				_handle = Sound.Play( SongLoop );
+				ApplyMute();
+			}
+		}
+		catch { }
 	}
 
 	protected override void OnDestroy()

@@ -140,7 +140,7 @@
       "OwnerTransfer": 1,
       "Components": [
         {
-          "__type": "Sandbox.MenuManager",
+          "__type": "MenuManager",
           "__guid": "2bf2bf30-2b26-45ae-8580-a05a068cadb3",
           "__enabled": true,
           "Flags": 0,
@@ -267,7 +267,6 @@
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "SoundPath": "sounds/songloop",
           "Volume": 0.4
         }
       ],

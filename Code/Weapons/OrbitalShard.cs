@@ -56,7 +56,7 @@ public sealed class OrbitalShard : Component
 			var dist = (enemy.WorldPosition - WorldPosition).WithZ( 0f ).Length;
 			if ( dist < 20f )
 			{
-				enemy.TakeDamage( Damage, SourceWeaponId );
+				enemy.TakeDamage( Damage, SourceWeaponId, WorldPosition );
 				_hitCooldowns.Add( enemy );
 			}
 		}

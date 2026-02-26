@@ -38,7 +38,7 @@ public sealed class EmberTrailWeapon : WeaponBase
 
 			var zone = go.Components.Create<BurnZone>();
 			zone.Damage = _state.Damage * (0.4f + WeaponLevel * 0.1f);
-			zone.Radius = 13.5f + WeaponLevel * 10f; // base reduced 70% (was 45)
+			zone.SizeScale = _state.Area;
 			float baseLifetime = 2f + WeaponLevel * 0.4f;
 			zone.Lifetime = baseLifetime * _state.DurationMultiplier;
 			zone.PulseInterval = 0.5f;
@@ -58,10 +58,10 @@ public sealed class EmberTrailWeapon : WeaponBase
 
 	public override string GetUpgradeDescription( int nextLevel ) => nextLevel switch
 	{
-		2 => "Zone size +10, Damage: +11%, Lifetime: +9%",
-		3 => "Zone size +10, Damage: +11%, Drop rate: +22%",
+		2 => "Damage: +11%, Lifetime: +9%",
+		3 => "Damage: +11%, Drop rate: +22%",
 		4 => "Drops 2 fire zones per activation",
-		5 => "Zone size +10, Damage: +11%, Drop rate: +29%",
+		5 => "Damage: +11%, Drop rate: +29%",
 		_ => $"Level {nextLevel}: improved stats",
 	};
 }

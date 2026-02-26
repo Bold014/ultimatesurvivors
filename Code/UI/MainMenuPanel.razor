@@ -2,6 +2,7 @@
 @using Sandbox;
 @using Sandbox.UI;
 @using System.Linq;
+@using System.Threading.Tasks;
 @inherits PanelComponent;
 
 @{
@@ -127,37 +128,47 @@
 		<!-- Leaderboard — centered in right third, vertically aligned with buttons -->
 		<div class="widget-panel" style="position: absolute; top: 50%; transform: translateY(-50%); right: 6%; width: 320px;">
 			<div class="widget-header">🏆 LEADERBOARD</div>
+			<div style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">
+				@foreach ( var t in LeaderboardTabs )
+				{
+					var isActive = _lbTab == t.Id;
+					<div class="tab @(isActive ? "tab-active" : "")" onclick="@(() => { PlayClickSound(); _lbTab = t.Id; _ = RefreshLeaderboardAsync(); })">@t.Label</div>
+				}
+			</div>
+			@{
+				var lbTabLabel = LeaderboardTabs.FirstOrDefault( t => t.Id == _lbTab ).Label ?? "Kills";
+			}
 			<div style="display: flex; align-items: center; padding: 0 4px 8px 4px; border-bottom: 2px solid #6a4a1a; margin-bottom: 4px; gap: 8px;">
 				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold; width: 32px;">RANK</span>
 				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold; width: 34px;"></span>
 				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold; flex: 1;">PLAYER</span>
-				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold;">KILLS</span>
+				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold;">@lbTabLabel.ToUpper()</span>
 			</div>
-			<!-- rows container with min-height reserved for 8 slots -->
 			<div style="min-height: 400px; display: flex; flex-direction: column;">
-				@{
-					var lbConnections = Connection.All.ToList();
-					int lbRank = 1;
-				}
-				@if ( lbConnections.Count == 0 )
+				@if ( _lbLoading )
 				{
-					<div style="font-size: 13px; color: #555; font-family: monospace; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">Waiting for players...</div>
+					<div style="font-size: 13px; color: #555; font-family: monospace; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">Loading...</div>
 				}
-				@foreach ( var conn in lbConnections.Take( 8 ) )
+				else if ( _lbError )
 				{
-					var isLocal   = conn == Connection.Local;
-					var kills     = isLocal ? PlayerProgress.Data.TotalKills : 0;
-					var killsStr  = isLocal ? (kills >= 1000 ? $"{kills/1000.0f:F1}K" : kills.ToString()) : "---";
-					var rankColor = lbRank == 1 ? "#f5c518" : lbRank == 2 ? "#c0c0c0" : lbRank == 3 ? "#cd7f32" : "#aaa";
+					<div style="font-size: 13px; color: #a55; font-family: monospace; padding: 10px 4px; border-bottom: 1px solid #2a1a08;">Unable to load leaderboard</div>
+				}
+				else if ( _lbEntries.Count == 0 )
+				{
+					<div style="font-size: 13px; color: #555; font-family: monospace; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">No entries yet</div>
+				}
+				@foreach ( var entry in _lbEntries )
+				{
+					var isLocal   = Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
+					var rankColor = entry.Rank == 1 ? "#f5c518" : entry.Rank == 2 ? "#c0c0c0" : entry.Rank == 3 ? "#cd7f32" : "#aaa";
 					<div style="display: flex; align-items: center; padding: 9px 4px; border-bottom: 1px solid #3a2510; gap: 8px;">
-						<span style="font-size: 14px; font-weight: bold; color: @rankColor; font-family: monospace; width: 32px;">#@lbRank</span>
-						<img src="avatar:@conn.SteamId" style="width: 34px; height: 34px; border-radius: 4px; border: 2px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
-						<span style="font-size: 14px; color: @(isLocal ? "#f5e060" : "#eee"); font-family: monospace; text-shadow: 1px 1px 0 #000; flex: 1; overflow: hidden;">@conn.Name</span>
-						<span style="font-size: 15px; color: #f5c518; font-family: monospace; font-weight: bold;">@killsStr</span>
+						<span style="font-size: 14px; font-weight: bold; color: @rankColor; font-family: monospace; width: 32px;">#@entry.Rank</span>
+						<img src="avatar:@entry.SteamId" style="width: 34px; height: 34px; border-radius: 4px; border: 2px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
+						<span style="font-size: 14px; color: @(isLocal ? "#f5e060" : "#eee"); font-family: monospace; text-shadow: 1px 1px 0 #000; flex: 1; overflow: hidden;">@entry.DisplayName</span>
+						<span style="font-size: 15px; color: #f5c518; font-family: monospace; font-weight: bold;">@LbFormatValue( entry.Value )</span>
 					</div>
-					lbRank++;
 				}
-				@for ( int i = lbConnections.Count; i < 8; i++ )
+				@for ( int i = _lbEntries.Count; i < 8; i++ )
 				{
 					<div style="display: flex; align-items: center; padding: 9px 4px; border-bottom: 1px solid #2a1a08; gap: 8px; opacity: 0.25;">
 						<span style="font-size: 14px; font-weight: bold; color: #666; font-family: monospace; width: 32px;">#@(i + 1)</span>
@@ -732,6 +743,7 @@
 @code
 {
 	static SoundEvent UiClick = new( "sounds/ui_click.mp3" );
+	static SoundEvent QuestClaimSound = new( "sounds/quest_claim.mp3" );
 
 	void PlayClickSound()
 	{
@@ -755,6 +767,55 @@
 	float  _questFeedbackTimer;
 
 	bool _questNotify => QuestDefinition.All.Exists( q => PlayerProgress.CanClaimQuest( q.Id ) );
+
+	// ── Leaderboard ────────────────────────────────────────────────────────
+	readonly struct LbTab
+	{
+		public readonly string Id;
+		public readonly string Label;
+		public readonly string StatName;
+		public LbTab( string id, string label, string statName ) { Id = id; Label = label; StatName = statName; }
+	}
+	class LbEntry { public int Rank; public string DisplayName; public long Value; public ulong SteamId; }
+	static readonly LbTab[] LeaderboardTabs = {
+		new LbTab( "kills", "Kills", "total_kills" ),
+		new LbTab( "runs", "Runs", "runs_completed" ),
+		new LbTab( "survival", "Survival Time", "longest_survival" ),
+	};
+	string _lbTab = "kills";
+	List<LbEntry> _lbEntries = new();
+	bool _lbLoading = true;
+	bool _lbError = false;
+
+	async Task RefreshLeaderboardAsync()
+	{
+		_lbLoading = true; _lbError = false;
+		var tab = LeaderboardTabs.FirstOrDefault( t => t.Id == _lbTab );
+		if ( string.IsNullOrEmpty( tab.Id ) ) tab = LeaderboardTabs[0];
+		try
+		{
+			var board = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", tab.StatName );
+			board.MaxEntries = 8;
+			await board.Refresh();
+			_lbEntries = board.Entries.Select( e => new LbEntry { Rank = (int)e.Rank, DisplayName = e.DisplayName ?? "???", Value = (long)e.Value, SteamId = (ulong)e.SteamId } ).ToList();
+		}
+		catch { _lbError = true; _lbEntries.Clear(); }
+		finally { _lbLoading = false; }
+		return;
+	}
+
+	string LbFormatValue( long value )
+	{
+		var tab = LeaderboardTabs.FirstOrDefault( t => t.Id == _lbTab );
+		if ( string.IsNullOrEmpty( tab.Id ) ) tab = LeaderboardTabs[0];
+		return tab.Id switch
+		{
+			"kills"    => value >= 1000 ? $"{value / 1000.0:F1}K" : value.ToString(),
+			"runs"     => value.ToString(),
+			"survival" => $"{value} min",
+			_          => value.ToString()
+		};
+	}
 
 	// ── Chat ──────────────────────────────────────────────────────────────
 	struct ChatEntry { public string Name; public string Text; public string ColorHex; }
@@ -822,6 +883,7 @@
 	protected override void OnStart()
 	{
 		Panel.Style.PointerEvents = PointerEvents.All;
+		_ = RefreshLeaderboardAsync();
 	}
 
 	protected override void OnDestroy()
@@ -914,6 +976,7 @@
 	{
 		if ( PlayerProgress.TryClaimQuest( id ) )
 		{
+			try { Sound.Play( QuestClaimSound ); } catch { }
 			var def = QuestDefinition.All.Find( q => q.Id == id );
 			_questFeedback      = $"+{def?.CoinReward} coins claimed!";
 			_questFeedbackTimer = 2.5f;
@@ -927,7 +990,7 @@
 		"Level"     => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.ReachLevel ),
 		"Character" => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.KillsAsCharacter ),
 		"Runs"      => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.CompleteRuns ),
-		"Weapon"    => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.KillsWithWeapon ),
+		"Weapon"    => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.KillsWithWeapon || q.GoalType == QuestGoalType.WeaponReachLevel ),
 		"Tome"      => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.TomeReachLevel ),
 		"Deaths"    => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.TotalDeaths ),
 		"No Damage" => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.NoDamageSeconds ),
@@ -977,6 +1040,7 @@
 		QuestGoalType.KillsAsCharacter => "🎭",
 		QuestGoalType.CompleteRuns     => "🏆",
 		QuestGoalType.KillsWithWeapon  => "⚔",
+		QuestGoalType.WeaponReachLevel => "⬆",
 		QuestGoalType.TomeReachLevel   => "📖",
 		QuestGoalType.TotalDeaths      => "☠",
 		QuestGoalType.NoDamageSeconds  => "🛡",

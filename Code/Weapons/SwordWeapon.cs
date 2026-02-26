@@ -66,10 +66,7 @@ public sealed class SwordWeapon : WeaponBase
 			float angle = Vector3.GetAngle( direction, toEnemy.Normal );
 			if ( angle > arcDeg * 0.5f ) continue;
 
-			enemy.TakeDamage( damage, WeaponId );
-
-			if ( WeaponLevel >= 5 )
-				enemy.WorldPosition += toEnemy.Normal * 40f;
+			enemy.TakeDamage( damage, WeaponId, WorldPosition );
 		}
 	}
 
@@ -88,7 +85,7 @@ public sealed class SwordWeapon : WeaponBase
 		go.WorldScale = new Vector3( lengthScale, widthScale, 0.02f );
 
 		var effect = go.Components.Create<SwordSlashEffect>();
-		effect.Lifetime = 0.2f;
+		effect.Lifetime = 0.2f * (_state?.DurationMultiplier ?? 1f);
 	}
 
 	private float GetArcDegrees() => WeaponLevel switch

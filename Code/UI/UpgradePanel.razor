@@ -11,7 +11,7 @@
 		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0d0905ee; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;">
 
 			<!-- ── Title block ────────────────────────────────────────────── -->
-			<div style="background: @TitleBg(source); border: 2px solid @TitleBorder(source); border-radius: 4px; padding: 12px 48px; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);">
+			<div style="background: @TitleBg(source); border: 2px solid @TitleBorder(source); border-radius: 4px; padding: 12px 48px; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 0 0 1px rgba(0,0,0,0.3);">
 				<div style="font-size: 36px; font-weight: bold; color: @TitleColor(source); font-family: monospace; letter-spacing: 5px; text-shadow: 2px 2px 0 #000;">@TitleText(source)</div>
 				<div style="font-size: 12px; color: #a08050; font-family: monospace; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">@SubtitleText(source)</div>
 			</div>
@@ -31,7 +31,7 @@
 					           ? RarityBg( upgrade.Rarity )
 					           : (isWeapon ? "#1a1400" : "#1a1008");
 
-				<div style="width: 200px; background: @cardBg; border: 2px solid @cardBorder; border-radius: 4px; padding: 16px 14px 20px 14px; display: flex; flex-direction: column; gap: 10px; pointer-events: all; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);"
+				<div style="width: 200px; background: @cardBg; border: 2px solid @cardBorder; border-radius: 4px; padding: 16px 14px 20px 14px; display: flex; flex-direction: column; gap: 10px; pointer-events: all; cursor: pointer; box-shadow: 0 0 0 1px rgba(0,0,0,0.2);"
 					 onclick=@(() => SelectUpgrade( idx ))>
 
 					@* ── Rarity / type badge ── *@

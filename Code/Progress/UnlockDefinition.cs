@@ -54,6 +54,7 @@ public class UnlockDefinition
 		new() { Id = "tome_knockback",       Name = "Knockback Tome",        Category = UnlockCategory.Tomes, CoinCost = 150, PrerequisiteQuestId = "kill_500",        Description = "Increases knockback, pushing enemies further when you hit them." },
 		new() { Id = "tome_quantity",        Name = "Quantity Tome",         Category = UnlockCategory.Tomes, CoinCost = 200, PrerequisiteQuestId = "projectiles_5000",Description = "Increases the number of attacks and projectiles." },
 		new() { Id = "tome_xp",             Name = "XP Tome",               Category = UnlockCategory.Tomes, CoinCost = 150, PrerequisiteQuestId = "complete_5",      Description = "Increases XP gained from all sources." },
+		new() { Id = "tome_duration",       Name = "Duration Tome",          Category = UnlockCategory.Tomes, CoinCost = 9,   PrerequisiteQuestId = "axe_level_10",   Description = "Increases the duration of attacks and projectiles." },
 
 		// ── Items ──────────────────────────────────────────────────────────────
 		// Unlocking an item adds it to the chest reward pool so it can appear when you open a chest.

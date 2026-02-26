@@ -1,0 +1,78 @@
+{
+  "Animations": [
+    {
+      "Name": "rise",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "textures/flame/flame_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "textures/flame/flame_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "textures/flame/flame_3.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "textures/flame/flame_4.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "idle",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "textures/flame/flame_4.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "textures/flame/flame_5.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "textures/flame/flame_6.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "textures/flame/flame_7.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "fall",
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "textures/flame/flame_8.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "textures/flame/flame_9.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "textures/flame/flame_10.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "textures/flame/flame_11.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

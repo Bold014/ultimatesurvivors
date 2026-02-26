@@ -1,0 +1,15 @@
+GameHUD
+{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	pointer-events: none;
+}
+
+@keyframes death-pulse
+{
+	0%, 100% { opacity: 1; filter: brightness(1); }
+	50% { opacity: 0.9; filter: brightness(1.1); }
+}

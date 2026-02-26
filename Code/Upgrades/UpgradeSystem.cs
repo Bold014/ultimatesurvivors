@@ -281,6 +281,7 @@ public sealed class UpgradeSystem : Component
 			UpgradeDefinition.UpgradeType.CritChanceUp      => $"+{value * 100f:F0}% critical hit chance",
 			UpgradeDefinition.UpgradeType.KnockbackUp       => $"+{value * 100f:F0}% enemy knockback distance",
 			UpgradeDefinition.UpgradeType.XPMultiplierUp   => $"+{value * 100f:F0}% XP from all sources",
+			UpgradeDefinition.UpgradeType.DurationMultiplierUp => $"+{value * 100f:F0}% attack and projectile duration",
 			_ => $"+{value:F1}"
 		};
 	}
@@ -326,6 +327,8 @@ public sealed class UpgradeSystem : Component
 				return $"Projectiles: +{s.ProjectileCount} → +{s.ProjectileCount + (int)value}";
 			case UpgradeDefinition.UpgradeType.XPMultiplierUp:
 				return $"XP: {s.XPMultiplier:F2}× → {s.XPMultiplier * (1f + value):F2}×";
+			case UpgradeDefinition.UpgradeType.DurationMultiplierUp:
+				return $"Duration: {s.DurationMultiplier:F2}× → {s.DurationMultiplier * (1f + value):F2}×";
 			default:
 				return null;
 		}

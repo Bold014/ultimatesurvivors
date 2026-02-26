@@ -1,5 +1,5 @@
 /// <summary>
-/// Megabonk-style spawner: 10-minute survival, continuous enemy spawning.
+/// Megabonk-style spawner: 10-minute survival, wave-based enemy spawning.
 /// 3 mini-bosses at 2:30, 5:00, 7:30. Final boss at 10:00.
 /// Beat the final boss to win. Lives on the player GameObject.
 /// </summary>
@@ -9,6 +9,7 @@ public sealed class EnemySpawner : Component
 	public float RunTime       => _runTimer;
 	public float TimeRemaining => MathF.Max( 0f, RunDuration - _runTimer );
 	public bool  IsActive      => _isActive;
+	public int   WaveNumber    => _waveNumber;
 	/// <summary>True when we're past 10 min and only the final boss remains (or is dead).</summary>
 	public bool  IsFinalBossPhase => _finalBossPhase;
 	/// <summary>True for one frame when the final boss is defeated. GameManager uses this for tier completion.</summary>
@@ -20,39 +21,59 @@ public sealed class EnemySpawner : Component
 	private const float RunDuration = 600f;  // 10 minutes
 	private static readonly float[] MiniBossTimes = { 150f, 300f, 450f };  // 2:30, 5:00, 7:30
 
-	// ── Spawn tuning: high density for fast leveling ────────────────────────
-	private const float SpawnIntervalStart = 0.45f;   // spawn every 0.45s at start
-	private const float SpawnIntervalEnd   = 0.18f;   // down to 0.18s by 10 min
-	private const float TimeScaleFactor    = 0.04f;   // enemy stat growth over time
+	// ── Wave definitions (10 waves for 10-min run) ─────────────────────────────
+	private readonly struct WaveDef
+	{
+		public readonly int   EnemyCount;
+		public readonly float SpawnRate;
+
+		public WaveDef( int count, float rate ) { EnemyCount = count; SpawnRate = rate; }
+	}
+
+	private static readonly WaveDef[] Waves = new WaveDef[]
+	{
+		new( 18, 0.55f ), new( 22, 0.5f ), new( 26, 0.45f ), new( 30, 0.42f ), new( 34, 0.38f ),
+		new( 38, 0.35f ), new( 42, 0.32f ), new( 46, 0.3f ),  new( 50, 0.28f ), new( 55, 0.25f ),
+	};
+
+	private const float IntermissionTime = 4f;
+	private const float TimeScaleFactor  = 0.04f;
 
 	// ── State ─────────────────────────────────────────────────────────────────
-	private float  _runTimer         = 0f;
-	private float  _spawnTimer       = 0f;
-	private int    _miniBossesSpawned = 0;
-	private bool   _finalBossSpawned = false;
-	private bool   _finalBossPhase   = false;
-	private bool   _tierJustCompleted = false;
-	private bool   _isActive         = false;
-	private Random _rand;
+	private enum SpawnState { Intermission, WaveActive }
+
+	private SpawnState _state           = SpawnState.Intermission;
+	private float     _stateTimer      = 3f;   // 3s grace before wave 1
+	private int       _waveNumber      = 0;
+	private int       _enemiesLeft     = 0;
+	private float     _spawnTimer      = 0f;
+	private float     _runTimer        = 0f;
+	private int       _miniBossesSpawned = 0;
+	private bool      _finalBossSpawned = false;
+	private bool      _finalBossPhase   = false;
+	private bool      _tierJustCompleted = false;
+	private bool      _isActive        = false;
+	private Random    _rand;
 	private readonly List<GameObject> _spawnedEnemies = new();
+	private readonly List<GameObject> _waveEnemies    = new();
 	private GameObject _finalBossObject;
+	private int       _lastCountdownSecond = -1;
 
 	protected override void OnStart()
 	{
 		int seed = Connection.Local != null
 			? Connection.Local.SteamId.GetHashCode()
 			: (int)(Time.Now * 1000);
-		_rand     = new Random( seed );
+		_rand    = new Random( seed );
 		_isActive = true;
-		_spawnTimer = 0f;
 	}
 
 	protected override void OnUpdate()
 	{
 		if ( !_isActive || IsPaused ) return;
 
-		_runTimer   += Time.Delta;
-		_spawnTimer -= Time.Delta;
+		_runTimer += Time.Delta;
+		_stateTimer -= Time.Delta;
 
 		// Check if final boss was killed (object destroyed)
 		if ( _finalBossObject != null && !_finalBossObject.IsValid() )
@@ -62,7 +83,7 @@ public sealed class EnemySpawner : Component
 			ChatComponent.Instance?.AddMessage( "System", "FINAL BOSS DEFEATED! Victory!", new Color( 0.4f, 1f, 0.4f ) );
 		}
 
-		// Past 10 min: only final boss phase (no more regular spawns)
+		// Past 10 min: only final boss phase (no more waves)
 		if ( _runTimer >= RunDuration )
 		{
 			if ( !_finalBossSpawned )
@@ -74,7 +95,7 @@ public sealed class EnemySpawner : Component
 			return;
 		}
 
-		// Spawn mini-bosses at scheduled times
+		// Spawn mini-bosses at scheduled times (can happen during wave or intermission)
 		for ( int i = _miniBossesSpawned; i < MiniBossTimes.Length; i++ )
 		{
 			if ( _runTimer >= MiniBossTimes[i] )
@@ -85,13 +106,92 @@ public sealed class EnemySpawner : Component
 			}
 		}
 
-		// Continuous enemy spawning
-		float interval = SpawnIntervalStart + (SpawnIntervalEnd - SpawnIntervalStart) * (_runTimer / RunDuration);
-		if ( _spawnTimer <= 0f )
+		switch ( _state )
 		{
-			SpawnEnemy( isBoss: false );
-			_spawnTimer = interval;
+			case SpawnState.Intermission:
+				TickIntermission();
+				break;
+			case SpawnState.WaveActive:
+				TickWaveActive();
+				break;
 		}
+	}
+
+	private void TickIntermission()
+	{
+		int nextWave = _waveNumber + 1;
+		if ( nextWave <= Waves.Length )
+		{
+			int secs = (int)Math.Ceiling( _stateTimer );
+			if ( secs <= 3 && secs > 0 && secs != _lastCountdownSecond )
+			{
+				_lastCountdownSecond = secs;
+				ChatComponent.Instance?.AddMessage( "Wave", $"Wave {nextWave} — {secs}…", new Color( 1f, 0.85f, 0.2f ) );
+			}
+		}
+
+		if ( _stateTimer > 0f ) return;
+
+		_waveNumber++;
+		WaveDef? def = GetWaveDef( _waveNumber );
+		if ( !def.HasValue )
+		{
+			_state = SpawnState.Intermission;
+			_stateTimer = 1f;
+			return;
+		}
+
+		StartWave( def.Value );
+	}
+
+	private void TickWaveActive()
+	{
+		WaveDef def = GetWaveDef( _waveNumber ) ?? Waves[^1];
+
+		if ( _enemiesLeft > 0 )
+		{
+			_spawnTimer -= Time.Delta;
+			if ( _spawnTimer <= 0f )
+			{
+				SpawnEnemy( def );
+				_enemiesLeft--;
+				_spawnTimer = def.SpawnRate;
+			}
+		}
+
+		bool allDead = _waveEnemies.All( go => !go.IsValid() );
+		if ( _enemiesLeft <= 0 && allDead )
+			EndWave();
+	}
+
+	private void StartWave( WaveDef def )
+	{
+		_state        = SpawnState.WaveActive;
+		_stateTimer   = 0f;
+		_enemiesLeft  = def.EnemyCount;
+		_spawnTimer   = 0f;
+		_lastCountdownSecond = -1;
+		_waveEnemies.Clear();
+
+		ChatComponent.Instance?.AddMessage( "Wave", $"Wave {_waveNumber}!", new Color( 0.4f, 0.9f, 0.4f ) );
+	}
+
+	private void EndWave()
+	{
+		_state      = SpawnState.Intermission;
+		_stateTimer = IntermissionTime;
+		_lastCountdownSecond = -1;
+
+		int next = _waveNumber + 1;
+		if ( next <= Waves.Length )
+			ChatComponent.Instance?.AddMessage( "Wave", $"Wave {_waveNumber} cleared. Next: Wave {next}", new Color( 0.7f, 0.9f, 1f ) );
+	}
+
+	private WaveDef? GetWaveDef( int w )
+	{
+		if ( w >= 1 && w <= Waves.Length )
+			return Waves[w - 1];
+		return null;
 	}
 
 	private void SpawnFinalBoss()
@@ -138,7 +238,7 @@ public sealed class EnemySpawner : Component
 		return go;
 	}
 
-	private void SpawnEnemy( bool isBoss )
+	private void SpawnEnemy( WaveDef def )
 	{
 		var (go, enemy) = CreateEnemyAtRandomOffset();
 		float timeScale = 1f + _runTimer / 120f;
@@ -147,6 +247,7 @@ public sealed class EnemySpawner : Component
 		EnemyType type = PickType();
 		ApplyType( go, enemy, type, timeScale, phaseScale );
 		_spawnedEnemies.Add( go );
+		_waveEnemies.Add( go );
 	}
 
 	private (GameObject go, EnemyBase enemy) CreateEnemyAtRandomOffset()
@@ -195,6 +296,11 @@ public sealed class EnemySpawner : Component
 				enemy.XPValue                = 22;
 				enemy.EnemyColor             = new Color( 0.5f, 0.5f, 1f );
 				enemy.SizeScale              = 1.2f;
+				enemy.SpritePath             = "sprites/bear/bearanimations.sprite";
+				enemy.DieAnimation           = "die";
+				enemy.DieAnimDuration        = 0.5f;
+				enemy.AttackAnimationPrefix  = "attack";
+				enemy.AttackAnimDuration     = 0.5f;
 				go.Name                      = "EnemyArmored";
 				break;
 
@@ -219,7 +325,7 @@ public sealed class EnemySpawner : Component
 				enemy.DamageCooldownDuration  = 1.0f;
 				enemy.XPValue                = 8;
 				enemy.EnemyColor             = new Color( 0.85f, 0.15f, 0.15f );
-				enemy.SpritePath             = "sprites/orc/orcanimations.sprite";
+				enemy.SpritePath             = "sprites/orcanimations.sprite";
 				enemy.DieAnimation           = "die";
 				enemy.DieAnimDuration        = 0.5f;
 				enemy.AttackAnimationPrefix  = "attack";

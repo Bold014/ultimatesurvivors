@@ -38,7 +38,7 @@ public sealed class AxeWeapon : WeaponBase
 		proj.Direction = dir;
 		proj.Speed = 230f;
 		proj.Damage = _state.Damage * GetDamageMultiplier();
-		proj.Lifetime = 3.2f;
+		proj.Lifetime = 3.2f * _state.DurationMultiplier;
 		proj.Piercing = WeaponLevel >= 4;
 		proj.TintColor = new Color( 1f, 0.55f, 0.1f );
 		proj.SourceWeaponId = WeaponId;

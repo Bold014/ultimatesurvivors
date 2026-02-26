@@ -41,7 +41,7 @@ public sealed class BowWeapon : WeaponBase
 		proj.Direction = dir;
 		proj.Speed = WeaponLevel >= 4 ? 320f : 260f;
 		proj.Damage = _state.Damage * GetDamageMultiplier();
-		proj.Lifetime = 2.0f;
+		proj.Lifetime = 2.0f * _state.DurationMultiplier;
 		proj.Piercing = WeaponLevel >= 4;
 		proj.SpritePath = "sprites/arrow.sprite";
 		proj.SpriteSize = 1f;

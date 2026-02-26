@@ -54,6 +54,10 @@ public sealed class PlayerController : Component
 		_weapons = Components.Get<PlayerWeapons>();
 		_spawner = Components.Get<EnemySpawner>();
 
+		// Create PlayerLocalState if missing (e.g. scene load order, editor play-in-place)
+		if ( _state == null )
+			_state = Components.Create<PlayerLocalState>();
+
 		var charDef = CharacterDefinition.GetByName( MenuManager.SelectedCharacter );
 		_state.Initialize( charDef );
 

@@ -7,6 +7,9 @@ public sealed class GameManager : Component
 {
 	public static GameManager Instance { get; private set; }
 
+	/// <summary>Seconds until return to menu (for death screen countdown). 0 when not returning.</summary>
+	public static float ReturnToMenuCountdown { get; private set; } = 0f;
+
 	private bool _welcomeSent           = false;
 	private float _welcomeDelay         = 1.5f;
 	private bool _runEnded              = false;
@@ -39,15 +42,19 @@ public sealed class GameManager : Component
 		// ── Run-end return to menu ────────────────────────────────────────────
 		if ( _runEnded )
 		{
+			ReturnToMenuCountdown = MathF.Max( 0f, _returnToMenuDelay );
 			_returnToMenuDelay -= Time.Delta;
 			if ( _returnToMenuDelay <= 0f )
 			{
+				ReturnToMenuCountdown = 0f;
 				var opts = new SceneLoadOptions();
 				opts.SetScene( ResourceLibrary.Get<SceneFile>( "scenes/menu.scene" ) );
 				Game.ChangeScene( opts );
 			}
 			return;
 		}
+
+		ReturnToMenuCountdown = 0f;
 
 		CheckTierComplete();
 		CheckRunEnd();
@@ -105,11 +112,17 @@ public sealed class GameManager : Component
 		{
 			var playerState = stats.GameObject.Components.Get<PlayerLocalState>();
 			var tomes       = PlayerTomes.LocalInstance;
+			var weapons    = stats.GameObject.Components.Get<PlayerWeapons>();
 
 			var tomeLevels = new System.Collections.Generic.Dictionary<string, int>();
 			if ( tomes != null )
 				foreach ( var kv in tomes.GetAllLevels() )
 					tomeLevels[kv.Key] = kv.Value;
+
+			var weaponLevels = new System.Collections.Generic.Dictionary<string, int>();
+			if ( weapons != null )
+				foreach ( var w in weapons.Weapons )
+					weaponLevels[w.WeaponDisplayName] = w.WeaponLevel;
 
 			// Completed = survived tier's final wave (we already awarded gold in CheckTierComplete)
 			bool completed = _tierCompleteGoldAwarded;
@@ -133,6 +146,7 @@ public sealed class GameManager : Component
 				KillsByWeapon       = new System.Collections.Generic.Dictionary<string, int>( stats.KillsByWeapon ),
 				NoDamageSeconds     = playerState?.LongestNoDamageSeconds ?? 0,
 				TomeLevels          = tomeLevels,
+				WeaponLevels        = weaponLevels,
 				ChestsOpenedThisRun = Chest.ChestsOpened,
 				ProjectilesFiredThisRun = stats.ProjectilesFired,
 				MapId               = MenuManager.SelectedMap ?? "dark_forest",

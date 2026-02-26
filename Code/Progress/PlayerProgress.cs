@@ -165,6 +165,14 @@ public static class PlayerProgress
 				Data.MaxTomeLevelsByTome[kv.Key] = kv.Value;
 		}
 
+		// Track max weapon levels ever reached (across runs)
+		foreach ( var kv in result.WeaponLevels )
+		{
+			Data.MaxWeaponLevelsByWeapon.TryGetValue( kv.Key, out var prevWl );
+			if ( kv.Value > prevWl )
+				Data.MaxWeaponLevelsByWeapon[kv.Key] = kv.Value;
+		}
+
 		// Track tier completion for map selection unlocks
 		if ( result.Completed && !string.IsNullOrEmpty( result.MapId ) && result.TierCompleted >= 1 )
 		{
@@ -176,6 +184,19 @@ public static class PlayerProgress
 		// Sync quest progress from cumulative stats
 		SyncQuestProgress();
 		Save();
+		SyncStatsToBackend();
+	}
+
+	private static void SyncStatsToBackend()
+	{
+		if ( Connection.Local == null ) return;
+		try
+		{
+			Sandbox.Services.Stats.SetValue( "total_kills", Data.TotalKills );
+			Sandbox.Services.Stats.SetValue( "runs_completed", Data.TotalRunsCompleted );
+			Sandbox.Services.Stats.SetValue( "longest_survival", Data.LongestSurvivalMinutes );
+		}
+		catch { /* Stats may fail in editor or offline */ }
 	}
 
 	private static void SyncQuestProgress()
@@ -193,6 +214,7 @@ public static class PlayerProgress
 				QuestGoalType.KillsAsCharacter => quest.CharacterId != null && Data.KillsByCharacter.TryGetValue( quest.CharacterId, out var k ) ? k : 0,
 				QuestGoalType.KillsWithWeapon  => quest.WeaponName != null && Data.KillsByWeapon.TryGetValue( quest.WeaponName, out var wk ) ? wk : 0,
 				QuestGoalType.TomeReachLevel   => quest.TomeName != null && Data.MaxTomeLevelsByTome.TryGetValue( quest.TomeName, out var tl ) ? tl : 0,
+			QuestGoalType.WeaponReachLevel => quest.WeaponName != null && Data.MaxWeaponLevelsByWeapon.TryGetValue( quest.WeaponName, out var wl ) ? wl : 0,
 			QuestGoalType.TotalDeaths      => Data.TotalDeaths,
 			QuestGoalType.NoDamageSeconds  => Data.LongestNoDamageSeconds,
 			QuestGoalType.ChestsPurchased  => Data.TotalChestsPurchased,
@@ -235,6 +257,8 @@ public class SaveData
 	public int LongestNoDamageSeconds { get; set; } = 0;
 	public int TotalProjectilesFired { get; set; } = 0;
 	public Dictionary<string, int> MaxTomeLevelsByTome { get; set; } = new();
+	/// <summary>Highest weapon level ever reached per weapon (e.g. "Axe" = 10).</summary>
+	public Dictionary<string, int> MaxWeaponLevelsByWeapon { get; set; } = new();
 
 	/// <summary>Highest tier completed per map. e.g. ["dark_forest"] = 2 means T1 and T2 done.</summary>
 	public Dictionary<string, int> HighestTierCompletedByMap { get; set; } = new();
@@ -256,6 +280,8 @@ public class RunResult
 	public Dictionary<string, int> KillsByWeapon { get; set; } = new();
 	public int NoDamageSeconds { get; set; }
 	public Dictionary<string, int> TomeLevels { get; set; } = new();
+	/// <summary>Max weapon level reached per weapon this run (e.g. "Axe" = 10).</summary>
+	public Dictionary<string, int> WeaponLevels { get; set; } = new();
 	public int ChestsOpenedThisRun { get; set; }
 	public int ProjectilesFiredThisRun { get; set; }
 

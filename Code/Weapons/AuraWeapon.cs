@@ -29,7 +29,7 @@ public sealed class AuraWeapon : WeaponBase
 			var dist = (enemy.WorldPosition - WorldPosition).WithZ( 0f ).Length;
 			// Damage if touching the circle (enemy bounds overlap with circle edge)
 			if ( dist <= radius + enemy.HalfExtent )
-				enemy.TakeDamage( damage, WeaponId );
+				enemy.TakeDamage( damage, WeaponId, WorldPosition );
 		}
 	}
 

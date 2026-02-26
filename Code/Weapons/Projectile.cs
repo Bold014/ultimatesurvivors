@@ -129,7 +129,9 @@ public sealed class Projectile : Component
 			var enemyPos = enemy.WorldPosition.WithZ( 0f );
 			if ( SegmentIntersectsCircle( prev, pos, enemyPos, hitRadius, out Vector3 closest ) )
 			{
-				enemy.TakeDamage( Damage, SourceWeaponId );
+				// Push enemy in projectile travel direction (knockback from point behind impact)
+				var knockbackFrom = pos - Direction.Normal * 50f;
+				enemy.TakeDamage( Damage, SourceWeaponId, knockbackFrom );
 				_alreadyHit.Add( enemy );
 
 				if ( !Piercing )

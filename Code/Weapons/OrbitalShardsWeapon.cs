@@ -34,14 +34,19 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 			_lastProjectileCount = projCount;
 		}
 
-		// Sync damage to current player state
+		// Sync damage and orbit radius to current player state (Area affects radius)
 		if ( _state != null )
 		{
+			float baseRadius = 35f + WeaponLevel * 5f;
+			float effectiveRadius = baseRadius * _state.Area;
 			foreach ( var shardGo in _shards )
 			{
 				var shard = shardGo.Components.Get<OrbitalShard>();
 				if ( shard != null )
+				{
 					shard.Damage = _state.Damage * (0.9f + WeaponLevel * 0.15f);
+					shard.OrbitRadius = effectiveRadius;
+				}
 			}
 		}
 	}
@@ -61,7 +66,8 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 
 			var shard = go.Components.Create<OrbitalShard>();
 			shard.AngleOffset = i * angleStep;
-			shard.OrbitRadius = 75f + WeaponLevel * 5f;
+			float baseRadius = 35f + WeaponLevel * 5f;
+			shard.OrbitRadius = baseRadius * (_state?.Area ?? 1f);
 			shard.OrbitSpeed = 120f + WeaponLevel * 20f;
 			shard.Damage = _state != null ? _state.Damage * (0.9f + WeaponLevel * 0.15f) : 10f;
 			shard.SourceWeaponId = WeaponId;

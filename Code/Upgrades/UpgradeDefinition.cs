@@ -186,6 +186,7 @@ public class UpgradeDefinition
 		new() { Name = "Knockback Tome",        Description = "+10% enemy knockback distance",   Type = UpgradeType.KnockbackUp,       Value = 0.10f, MaxLevel = 10, UnlockId = "tome_knockback" },
 		new() { Name = "Quantity Tome",         Description = "+1 projectile to all attacks",     Type = UpgradeType.ProjectileCountUp, Value = 1f,    MaxLevel = 10, UnlockId = "tome_quantity"  },
 		new() { Name = "XP Tome",               Description = "+8% XP from all sources",           Type = UpgradeType.XPMultiplierUp,    Value = 0.08f, MaxLevel = 10, UnlockId = "tome_xp"        },
+		new() { Name = "Duration Tome",         Description = "+8% attack and projectile duration", Type = UpgradeType.DurationMultiplierUp, Value = 0.08f, MaxLevel = 10, UnlockId = "tome_duration" },
 	};
 
 	// ── Shrine: stat boost pool (Megabonk-style, Luck scales rarity) ────────────
