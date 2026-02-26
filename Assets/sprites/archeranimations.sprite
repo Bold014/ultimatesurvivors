@@ -1,0 +1,102 @@
+{
+  "Animations": [
+    {
+      "Name": "walkright",
+      "FrameRate": 7.9998903,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_4.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_5.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_6.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_7.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_12.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_13.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_14.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_15.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_8.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_9.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_10.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_11.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "idle",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_2.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/rogue_non-combat_bow_equipped_3.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

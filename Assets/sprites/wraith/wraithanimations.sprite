@@ -1,0 +1,102 @@
+{
+  "Animations": [
+    {
+      "Name": "walkright",
+      "FrameRate": 7.9998903,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/wraith/wraith_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_3.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_3.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/wraith/wraith_12.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_13.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_14.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_15.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/wraith/wraith_8.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_9.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_10.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_11.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "die",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/wraith/wraith_16.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_17.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_18.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/wraith/wraith_19.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

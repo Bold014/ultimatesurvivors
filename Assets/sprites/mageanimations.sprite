@@ -1,0 +1,102 @@
+{
+  "Animations": [
+    {
+      "Name": "walkright",
+      "FrameRate": 7.9998903,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/mage_masc_dkgrey_4.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_5.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_6.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_7.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/mage_masc_dkgrey_12.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_13.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_14.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_15.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/mage_masc_dkgrey_8.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_9.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_10.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_11.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "idle",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/mage_masc_dkgrey_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_2.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_masc_dkgrey_3.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

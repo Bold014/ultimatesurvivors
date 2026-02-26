@@ -1,0 +1,990 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using System.Linq;
+@inherits PanelComponent;
+
+@{
+	var unlockItems    = UnlockDefinition.ForCategory( _unlockTab );
+	var filteredQuests = GetFilteredQuests();
+	int totalQuests     = QuestDefinition.All.Count;
+	int completedQuests = QuestDefinition.All.FindAll( q => PlayerProgress.IsQuestClaimed( q.Id ) ).Count;
+}
+
+<root>
+	@* ══════════════════════════════════════════════════
+	    MAIN PANEL  (content is a direct child of root)
+	   ══════════════════════════════════════════════════ *@
+	@if ( _view == MenuView.Main )
+	{
+		<!-- Top-right stats — level + coin counter -->
+		<div style="position: absolute; top: 20px; right: 24px; display: flex; align-items: center; gap: 10px;">
+			<div style="display: flex; align-items: center; gap: 8px; background: #0a1030; border: 2px solid #3a6fff; padding: 6px 14px; border-radius: 4px;">
+				<span style="font-size: 12px; color: #88aaff; font-family: monospace; letter-spacing: 1px;">BEST LVL</span>
+				<span style="font-size: 18px; color: #aaccff; font-weight: bold; font-family: monospace;">@PlayerProgress.Data.HighestLevelReached</span>
+			</div>
+			<div style="display: flex; align-items: center; gap: 8px; background: #0d1117; border: 2px solid #5a4a00; padding: 6px 14px; border-radius: 4px;">
+				<img src="ui/coin.png" style="width: 32px; height: 32px;" />
+				<span style="font-size: 18px; color: #f5c518; font-weight: bold;">@PlayerProgress.Data.Coins</span>
+			</div>
+		</div>
+
+		<!-- Title logo -->
+		<div style="position: absolute; top: 2%; left: 0; width: 100%; display: flex; justify-content: center; align-items: center;">
+			<img src="ui/logo.png" style="width: 640px; max-width: 90%; height: auto;" />
+		</div>
+
+		<!-- Buttons — absolutely positioned with spacing from title and between each -->
+		<div class="btn-wrap" style="top: 52%;" onclick=@OnPlayClicked>
+			<img src="ui/btn_play.png" class="btn-play-img" />
+		</div>
+		<div class="btn-wrap" style="top: 68%;" onclick=@(() => { PlayClickSound(); _view = MenuView.Unlocks; })>
+			<img src="ui/btn_unlocks.png" class="btn-play-img" />
+		</div>
+		<div class="btn-wrap" style="top: 84%;" onclick=@(() => { PlayClickSound(); _view = MenuView.Quests; })>
+			<img src="ui/btn_quests.png" class="btn-play-img" />
+		</div>
+
+		<!-- Version — bottom, full width -->
+		<div style="position: absolute; bottom: 12px; left: 0; width: 100%; display: flex; justify-content: center; font-size: 11px; color: #334; letter-spacing: 2px; font-family: monospace;">
+			ULTIMATE SURVIVORS v0.1
+		</div>
+
+		<!-- Mute button — bottom right -->
+		<div class="mute-btn @(PlayerProgress.Data.MusicMuted ? "mute-btn-muted" : "")"
+		     style="position: absolute; bottom: 12px; right: 24px;"
+		     onclick=@OnMuteClicked>
+			@(PlayerProgress.Data.MusicMuted ? "🔇" : "🔊")
+		</div>
+
+		<!-- Active Quests — top left -->
+		<div class="widget-panel" style="position: absolute; top: 16px; left: 16px; width: 460px;">
+			<div class="widget-header">⚔ ACTIVE QUESTS</div>
+			@{
+				var activeQuests = QuestDefinition.All
+					.Where( q => !PlayerProgress.IsQuestClaimed( q.Id ) && PlayerProgress.GetQuestProgress( q.Id ) > 0 )
+					.OrderByDescending( q => (float)PlayerProgress.GetQuestProgress( q.Id ) / q.Target )
+					.Take( 4 )
+					.ToList();
+			}
+			@if ( activeQuests.Count == 0 )
+			{
+				<div style="font-size: 14px; color: #888; font-family: monospace; padding: 8px 0;">No active quests yet</div>
+			}
+			@foreach ( var q in activeQuests )
+			{
+				var prog     = PlayerProgress.GetQuestProgress( q.Id );
+				var pct      = (int)System.Math.Min( 100, (float)prog / q.Target * 100 );
+				var canClaim = PlayerProgress.CanClaimQuest( q.Id );
+				var icon     = QuestIcon( q.GoalType );
+				<div class="quest-entry @(canClaim ? "quest-entry-claim" : "")">
+					<div style="display: flex; align-items: center; gap: 10px;">
+						<div style="width: 36px; height: 36px; flex-shrink: 0; background-color: @(canClaim ? "#2a2200" : "#1a1008"); border: 2px solid @(canClaim ? "#c8a800" : "#6a4a1a"); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 18px;">@icon</div>
+						<div style="flex: 1;">
+							<div style="font-size: 14px; font-weight: bold; color: @(canClaim ? "#f5c518" : "#eee"); font-family: monospace; text-shadow: 1px 1px 0 #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@q.Description</div>
+							<div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+								<div style="flex: 1; background-color: #120c04; height: 10px; border-radius: 4px; border: 1px solid #5a3a10;">
+									<div style="background-color: @(canClaim ? "#c8a800" : "#8a5a20"); height: 100%; width: @pct%; border-radius: 4px;"></div>
+								</div>
+								<span style="font-size: 12px; color: @(canClaim ? "#f5c518" : "#aaa"); font-family: monospace; font-weight: bold; flex-shrink: 0;">@prog / @q.Target</span>
+							</div>
+							@if ( canClaim )
+							{
+								<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+									<span style="font-size: 11px; color: #f5c518; font-weight: bold; font-family: monospace; letter-spacing: 2px; white-space: nowrap;">✓ COMPLETED</span>
+									<div class="claim-btn" onclick=@(() => { PlayClickSound(); QuestClaim( q.Id ); })>CLAIM</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+
+		<!-- Chat — bottom-left, below active quests -->
+		<div class="widget-panel" style="position: absolute; bottom: 5%; left: 6%; width: 320px; pointer-events: all; cursor: @(_chatOpen ? "default" : "pointer");"
+			onclick=@OnChatPanelClick>
+			<div class="widget-header">💬 CHAT</div>
+			<div style="min-height: 180px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;">
+				@foreach ( var msg in _chatMessages )
+				{
+					<div style="font-size: 13px; font-family: monospace; padding: 2px 0; border-bottom: 1px solid #3a2510;">
+						<span style="color: @msg.ColorHex; font-weight: bold;">@msg.Name</span>
+						<span style="color: #ccc;">: @msg.Text</span>
+					</div>
+				}
+			</div>
+			@if ( _chatOpen )
+			{
+				<div style="border: 2px solid #6a4a1a; border-radius: 4px; padding: 6px 10px; pointer-events: all;" onclick=@StopPropagation>
+					<TextEntry style="color: #fff; font-size: 13px; font-family: monospace; width: 100%;"
+						placeholder="Type a message and press Enter..."
+						onsubmit=@OnMenuChatSubmit />
+				</div>
+			}
+			else
+			{
+				<div style="font-size: 12px; color: #a08050; font-family: monospace; padding: 9px 4px;">Click to chat</div>
+			}
+		</div>
+
+		<!-- Leaderboard — centered in right third, vertically aligned with buttons -->
+		<div class="widget-panel" style="position: absolute; top: 50%; transform: translateY(-50%); right: 6%; width: 320px;">
+			<div class="widget-header">🏆 LEADERBOARD</div>
+			<div style="display: flex; align-items: center; padding: 0 4px 8px 4px; border-bottom: 2px solid #6a4a1a; margin-bottom: 4px; gap: 8px;">
+				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold; width: 32px;">RANK</span>
+				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold; width: 34px;"></span>
+				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold; flex: 1;">PLAYER</span>
+				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold;">KILLS</span>
+			</div>
+			<!-- rows container with min-height reserved for 8 slots -->
+			<div style="min-height: 400px; display: flex; flex-direction: column;">
+				@{
+					var lbConnections = Connection.All.ToList();
+					int lbRank = 1;
+				}
+				@if ( lbConnections.Count == 0 )
+				{
+					<div style="font-size: 13px; color: #555; font-family: monospace; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">Waiting for players...</div>
+				}
+				@foreach ( var conn in lbConnections.Take( 8 ) )
+				{
+					var isLocal   = conn == Connection.Local;
+					var kills     = isLocal ? PlayerProgress.Data.TotalKills : 0;
+					var killsStr  = isLocal ? (kills >= 1000 ? $"{kills/1000.0f:F1}K" : kills.ToString()) : "---";
+					var rankColor = lbRank == 1 ? "#f5c518" : lbRank == 2 ? "#c0c0c0" : lbRank == 3 ? "#cd7f32" : "#aaa";
+					<div style="display: flex; align-items: center; padding: 9px 4px; border-bottom: 1px solid #3a2510; gap: 8px;">
+						<span style="font-size: 14px; font-weight: bold; color: @rankColor; font-family: monospace; width: 32px;">#@lbRank</span>
+						<img src="avatar:@conn.SteamId" style="width: 34px; height: 34px; border-radius: 4px; border: 2px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
+						<span style="font-size: 14px; color: @(isLocal ? "#f5e060" : "#eee"); font-family: monospace; text-shadow: 1px 1px 0 #000; flex: 1; overflow: hidden;">@conn.Name</span>
+						<span style="font-size: 15px; color: #f5c518; font-family: monospace; font-weight: bold;">@killsStr</span>
+					</div>
+					lbRank++;
+				}
+				@for ( int i = lbConnections.Count; i < 8; i++ )
+				{
+					<div style="display: flex; align-items: center; padding: 9px 4px; border-bottom: 1px solid #2a1a08; gap: 8px; opacity: 0.25;">
+						<span style="font-size: 14px; font-weight: bold; color: #666; font-family: monospace; width: 32px;">#@(i + 1)</span>
+						<div style="width: 34px; height: 34px; border-radius: 4px; border: 2px solid #3a2510; flex-shrink: 0; background-color: #1a1008;"></div>
+						<span style="font-size: 14px; color: #444; font-family: monospace; flex: 1;">---</span>
+						<span style="font-size: 15px; color: #555; font-family: monospace;">---</span>
+					</div>
+				}
+			</div>
+		</div>
+	}
+
+	@* ══════════════════════════════════════════════════
+	    CHARACTER SELECT PANEL
+	   ══════════════════════════════════════════════════ *@
+	else if ( _view == MenuView.CharacterSelect )
+	{
+		@{
+			var selDef     = CharacterDefinition.GetByName( _selectedCharName ?? "Archer" );
+			var selUnlocked = PlayerProgress.IsUnlocked( CharToUnlockId( selDef.Name ) );
+			var selUnlockDef = UnlockDefinition.All.Find( u => u.Id == CharToUnlockId( selDef.Name ) );
+			var confirmLabel = selDef.Name.ToUpper();
+		}
+		<!-- Dim overlay — also serves as flex centering container -->
+		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center;">
+		<!-- Main panel — fixed width, auto-height, centered by parent flex -->
+		<div style="width: 820px; display: flex; flex-direction: column; font-family: monospace; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
+
+			<!-- Header -->
+			<div style="padding: 18px 28px 16px 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a; display: flex; align-items: center; justify-content: space-between;">
+				<div>
+					<div style="font-size: 30px; font-weight: 900; color: #f5c518; letter-spacing: 4px; text-shadow: 2px 2px 0 #000;">CHARACTER SELECTION</div>
+					<div style="font-size: 12px; color: #a08050; letter-spacing: 2px; margin-top: 4px;">Choose your hero for this run</div>
+				</div>
+				<div class="back-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.Main; })>← BACK</div>
+			</div>
+
+			<!-- Two-column body — height driven by content, not by panel stretch -->
+			<div style="display: flex; flex-direction: row; align-items: flex-start;">
+
+				<!-- LEFT: icon grid — explicit rows of 2, each cell flex:1 to fill row -->
+				<div style="width: 210px; flex-shrink: 0; border-right: 2px solid #3a2510; padding: 14px 10px; display: flex; flex-direction: column; gap: 10px;">
+					<div style="font-size: 11px; color: #a08050; letter-spacing: 2px;">SELECT HERO</div>
+					@{
+						var allChars = CharacterDefinition.All;
+						for ( int _row = 0; _row < allChars.Count; _row += 2 )
+						{
+							<div style="display: flex; flex-direction: row; gap: 8px;">
+							@for ( int _col = _row; _col < System.Math.Min( _row + 2, allChars.Count ); _col++ )
+							{
+								var charDef    = allChars[_col];
+								var unlockId   = CharToUnlockId( charDef.Name );
+								var isUnlocked = PlayerProgress.IsUnlocked( unlockId );
+								var isSelected = _selectedCharName == charDef.Name;
+								<div class="portrait-cell @(isSelected ? "portrait-cell-selected" : (isUnlocked ? "" : "portrait-cell-locked"))"
+								     onclick=@(() => { PlayClickSound(); _selectedCharName = charDef.Name; })>
+								<div style="width: 72px; height: 72px; border-radius: 5px; background-color: @CharColor(charDef.Name); display: flex; align-items: center; justify-content: center;">
+									<img src="@CharIconPath( charDef.Name )" style="width: 56px; height: 56px; image-rendering: pixelated;" />
+								</div>
+									<div style="font-size: 10px; font-weight: bold; color: @(isSelected ? "#f5c518" : (isUnlocked ? "#ccc" : "#666")); text-align: center; margin-top: 4px; letter-spacing: 1px;">
+										@charDef.Name.ToUpper()
+									</div>
+								</div>
+							}
+							</div>
+						}
+					}
+				</div>
+
+				<!-- RIGHT: detail panel -->
+				<div style="flex: 1; padding: 24px 32px; display: flex; flex-direction: column; gap: 20px;">
+
+			<!-- Portrait row: icon + name side by side -->
+				<div style="display: flex; flex-direction: row; align-items: center; gap: 18px; flex-shrink: 0;">
+					<div style="width: 90px; height: 90px; flex-shrink: 0; border-radius: 10px; background-color: @CharColor(selDef.Name); border: 3px solid @(selUnlocked ? "#f5c518" : "#5a3a10"); display: flex; align-items: center; justify-content: center; font-size: 42px;">
+						@if ( selUnlocked )
+						{
+							<img src="@CharIconPath( selDef.Name )" style="width: 70px; height: 70px; image-rendering: pixelated;" />
+						}
+						else
+						{
+							<text>🔒</text>
+						}
+					</div>
+						<div style="font-size: 28px; font-weight: 900; color: @(selUnlocked ? "#f5c518" : "#666"); letter-spacing: 2px; text-shadow: 2px 2px 0 #000;">@selDef.Name.ToUpper()</div>
+					</div>
+					<!-- Description — full width below portrait row -->
+					<div style="font-size: 13px; color: @(selUnlocked ? "#a08050" : "#4a3020"); line-height: 1.6; margin-top: -8px;">@selDef.Description</div>
+
+					<!-- Stats -->
+					<div style="flex-shrink: 0; background-color: #120c04; border: 2px solid #3a2510; border-radius: 8px; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
+						<div style="font-size: 11px; color: #a08050; letter-spacing: 2px; margin-bottom: 2px;">STATS</div>
+						<div style="display: flex; align-items: center; justify-content: space-between;">
+							<span style="font-size: 14px; color: @(selUnlocked ? "#a08050" : "#4a3020"); letter-spacing: 1px;">HP</span>
+							<span style="font-size: 18px; font-weight: bold; color: @(selUnlocked ? "#eee" : "#555");">@selDef.BaseHP.ToString("0")</span>
+						</div>
+						<div style="display: flex; align-items: center; justify-content: space-between;">
+							<span style="font-size: 14px; color: @(selUnlocked ? "#a08050" : "#4a3020"); letter-spacing: 1px;">SPEED</span>
+							<span style="font-size: 18px; font-weight: bold; color: @(selUnlocked ? "#eee" : "#555");">@selDef.BaseSpeed.ToString("0")</span>
+						</div>
+						<div style="display: flex; align-items: center; justify-content: space-between;">
+							<span style="font-size: 14px; color: @(selUnlocked ? "#a08050" : "#4a3020"); letter-spacing: 1px;">DAMAGE</span>
+							<span style="font-size: 18px; font-weight: bold; color: @(selUnlocked ? "#eee" : "#555");">@selDef.BaseDamage.ToString("0")</span>
+						</div>
+					</div>
+
+					<!-- Starting weapon -->
+					<div style="flex-shrink: 0; background-color: #120c04; border: 2px solid @(selUnlocked ? "#6a4a1a" : "#3a2510"); border-radius: 8px; padding: 16px 20px; display: flex; flex-direction: row; align-items: center; gap: 16px;">
+						<div style="width: 64px; height: 64px; flex-shrink: 0; background-color: #1e1408; border: 2px solid @(selUnlocked ? "#8a5a20" : "#3a2510"); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px;">⚔</div>
+						<div style="display: flex; flex-direction: column; gap: 4px;">
+							<div style="font-size: 16px; font-weight: bold; color: @(selUnlocked ? "#f5c518" : "#555");">@WeaponDisplayName( selDef.StartingWeapon )</div>
+							<div style="font-size: 12px; color: @(selUnlocked ? "#a08050" : "#4a3020"); letter-spacing: 1px;">STARTING WEAPON</div>
+						</div>
+					</div>
+
+					<!-- Lock badge or Confirm button -->
+					@if ( !selUnlocked )
+					{
+						<div style="flex-shrink: 0; padding: 16px 20px; background-color: #1a1008; border: 2px solid #5a3a10; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+							<img src="ui/coin.png" style="width: 24px; height: 24px;" />
+							<span style="font-size: 16px; font-weight: bold; color: #6a4a1a; letter-spacing: 1px;">@(selUnlockDef?.CoinCost ?? 0) COINS TO UNLOCK</span>
+						</div>
+					}
+					else
+					{
+						<div class="confirm-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.MapSelect; })>
+							PLAY AS @confirmLabel →
+						</div>
+					}
+
+				</div>
+			</div>
+		</div>
+		</div>
+	}
+
+	@* ══════════════════════════════════════════════════
+	    MAP SELECT PANEL
+	   ══════════════════════════════════════════════════ *@
+	else if ( _view == MenuView.MapSelect )
+	{
+		@{
+			var darkForestTier2Unlocked = PlayerProgress.DevUnlockAll || PlayerProgress.GetHighestTierCompleted( "dark_forest" ) >= 1;
+			var darkForestTier3Unlocked = PlayerProgress.DevUnlockAll || PlayerProgress.GetHighestTierCompleted( "dark_forest" ) >= 2;
+		}
+		<!-- Dim overlay -->
+		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center;">
+		<div style="width: 720px; display: flex; flex-direction: column; font-family: monospace; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
+
+			<!-- Header -->
+			<div style="padding: 18px 28px 16px 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a; display: flex; align-items: center; justify-content: space-between;">
+				<div>
+					<div style="font-size: 28px; font-weight: 900; color: #f5c518; letter-spacing: 4px; text-shadow: 2px 2px 0 #000;">SELECT MAP</div>
+					<div style="font-size: 12px; color: #a08050; letter-spacing: 2px; margin-top: 4px;">Choose your destination</div>
+				</div>
+				<div class="back-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.CharacterSelect; })>← BACK</div>
+			</div>
+
+			<!-- Map cards row -->
+			<div style="display: flex; flex-direction: row; gap: 16px; padding: 24px 28px; flex-wrap: wrap;">
+
+				<!-- Dark Forest — selectable -->
+				<div style="flex: 1; min-width: 200px; background-color: #221508; border: 3px solid @(_selectedMapId == "dark_forest" ? "#f5c518" : "#6a4a1a"); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 14px; cursor: pointer; overflow: hidden;"
+				     onclick=@(() => { PlayClickSound(); _selectedMapId = "dark_forest"; })>
+					<img src="ui/dark_forest.png" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; image-rendering: pixelated;" />
+					<div style="font-size: 20px; font-weight: bold; color: #f5c518; letter-spacing: 2px;">DARK FOREST</div>
+					<div style="font-size: 12px; color: #a08050;">10–30 waves • Boss every 10 waves</div>
+					<!-- Tier buttons -->
+					<div style="display: flex; flex-direction: column; gap: 8px;">
+						<div style="font-size: 11px; color: #a08050; letter-spacing: 1px;">DIFFICULTY TIER</div>
+						<div style="display: flex; gap: 8px; flex-wrap: wrap;">
+							<div class="tier-btn @(_selectedTier == 1 ? "tier-btn-selected" : "") @(true ? "" : "tier-btn-locked")"
+							     onclick=@(() => { PlayClickSound(); _selectedTier = 1; })>
+								Tier 1 • 1x gold
+							</div>
+							<div class="tier-btn @(_selectedTier == 2 ? "tier-btn-selected" : "") @(darkForestTier2Unlocked ? "" : "tier-btn-locked")"
+							     onclick=@(() => { if (darkForestTier2Unlocked) { PlayClickSound(); _selectedTier = 2; } })>
+								@(darkForestTier2Unlocked ? "Tier 2 • 1.1x gold" : "Tier 2 • Beat Tier 1")
+							</div>
+							<div class="tier-btn @(_selectedTier == 3 ? "tier-btn-selected" : "") @(darkForestTier3Unlocked ? "" : "tier-btn-locked")"
+							     onclick=@(() => { if (darkForestTier3Unlocked) { PlayClickSound(); _selectedTier = 3; } })>
+								@(darkForestTier3Unlocked ? "Tier 3 • 1.2x gold" : "Tier 3 • Beat Tier 2")
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Map 2 — locked -->
+				<div style="flex: 1; min-width: 200px; background-color: #120c04; border: 2px solid #3a2510; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0.6;">
+					<div style="font-size: 24px;">🔒</div>
+					<div style="font-size: 18px; font-weight: bold; color: #666; letter-spacing: 2px;">???</div>
+					<div style="font-size: 12px; color: #5a4a1a; letter-spacing: 1px;">COMING SOON</div>
+				</div>
+
+				<!-- Map 3 — locked -->
+				<div style="flex: 1; min-width: 200px; background-color: #120c04; border: 2px solid #3a2510; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0.6;">
+					<div style="font-size: 24px;">🔒</div>
+					<div style="font-size: 18px; font-weight: bold; color: #666; letter-spacing: 2px;">???</div>
+					<div style="font-size: 12px; color: #5a4a1a; letter-spacing: 1px;">COMING SOON</div>
+				</div>
+			</div>
+
+			<!-- Start button -->
+			<div style="padding: 0 28px 24px 28px;">
+				<div class="confirm-btn" onclick=@(() => { PlayClickSound(); MenuManager.StartGame( _selectedCharName ?? "Archer", _selectedMapId ?? "dark_forest", _selectedTier ); })>
+					START RUN →
+				</div>
+			</div>
+		</div>
+		</div>
+	}
+
+	@* ══════════════════════════════════════════════════
+	    UNLOCKS PANEL
+	   ══════════════════════════════════════════════════ *@
+	else if ( _view == MenuView.Unlocks )
+	{
+		<!-- Dim overlay -->
+		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.55);"></div>
+		<!-- Centered panel -->
+		<div style="position: absolute; top: 5%; left: 50%; width: 760px; bottom: 5%; transform: translateX(-50%); display: flex; flex-direction: column; font-family: monospace; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
+
+			<!-- Header -->
+			<div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 28px 0 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a;">
+				<div style="font-size: 32px; font-weight: 900; color: #f5c518; letter-spacing: 4px; text-shadow: 2px 2px 0 #000;">UNLOCKS</div>
+				<div style="display: flex; align-items: center; gap: 8px; background-color: #120c04; border: 2px solid #6a4a1a; padding: 6px 14px; border-radius: 6px;">
+					<img src="ui/coin.png" style="width: 28px; height: 28px;" />
+					<span style="font-size: 16px; color: #f5c518; font-weight: bold;">@PlayerProgress.Data.Coins</span>
+				</div>
+			</div>
+
+			<!-- Category tabs -->
+			<div style="display: flex; gap: 4px; padding: 14px 28px 0 28px; flex-shrink: 0;">
+				@foreach ( UnlockCategory cat in System.Enum.GetValues( typeof(UnlockCategory) ) )
+				{
+					var catTotal = UnlockDefinition.ForCategory( cat ).Count;
+					var catOwned = UnlockDefinition.ForCategory( cat ).FindAll( u => PlayerProgress.IsUnlocked( u.Id ) ).Count;
+					var isActive = cat == _unlockTab;
+					<div class="tab @(isActive ? "tab-active" : "")" onclick=@(() => { PlayClickSound(); _unlockTab = cat; })>
+						@cat.ToString()
+						<span style="font-size: 11px; color: @(isActive ? "#f5c518" : "#a08050"); margin-left: 4px;">@catOwned/@catTotal</span>
+					</div>
+				}
+			</div>
+
+			<!-- Item grid -->
+			<div style="flex: 1; overflow-y: scroll; padding: 16px 28px; display: flex; flex-direction: column; gap: 10px;">
+			@foreach ( var item in unlockItems )
+			{
+				var isOwned      = PlayerProgress.IsUnlocked( item.Id );
+				var meetsPrereq  = PlayerProgress.MeetsPrerequisite( item.Id );
+				var canAfford    = PlayerProgress.Data.Coins >= item.CoinCost;
+				var prereqQuest  = item.PrerequisiteQuestId != null
+					? QuestDefinition.All.Find( q => q.Id == item.PrerequisiteQuestId )
+					: null;
+
+			var charName = ( _unlockTab == UnlockCategory.Characters && item.Id.StartsWith( "char_" ) )
+				? (char.ToUpper( item.Id[5] ) + item.Id[6..])
+				: null;
+			var cardIconBg  = isOwned   ? "#2a1e08"
+				: charName != null       ? CharColor( charName )
+				: "#1a1008";
+			var cardBorder  = isOwned   ? "#c8a800"
+				: meetsPrereq            ? "#6a4a1a"
+				: "#3a2510";
+			var cardIcon    = charName != null ? "" : UnlockCategoryIcon( _unlockTab );
+
+				var cardClass = isOwned ? "unlock-owned"
+					: !meetsPrereq       ? "unlock-locked"
+					: canAfford          ? "unlock-affordable"
+					: "unlock-locked";
+
+			<div class="unlock-card @cardClass">
+				<div style="width: 48px; height: 48px; flex-shrink: 0; background-color: @cardIconBg; border: 2px solid @cardBorder; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; opacity: @(meetsPrereq || isOwned ? "1" : "0.5");">
+					@if ( charName != null )
+					{
+						<img src="@CharIconPath( charName )" style="width: 36px; height: 36px; image-rendering: pixelated;" />
+					}
+					else
+					{
+						<text>@cardIcon</text>
+					}
+				</div>
+					<div style="flex: 1; padding: 0 12px; display: flex; flex-direction: column; justify-content: center;">
+						<div style="font-size: 15px; font-weight: bold; color: @(isOwned ? "#f5c518" : (meetsPrereq ? "#eee" : "#666"));">@item.Name</div>
+						<div style="font-size: 12px; color: @(meetsPrereq || isOwned ? "#a08050" : "#4a3020"); margin-top: 3px;">@item.Description</div>
+						@if ( !isOwned && !meetsPrereq && prereqQuest != null )
+						{
+							<div style="font-size: 11px; color: #8a5a20; margin-top: 5px; letter-spacing: 1px;">🔒 Complete: @prereqQuest.Description</div>
+						}
+					</div>
+					<div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding-left: 8px; min-width: 64px;">
+						@if ( item.IsFree || isOwned )
+						{
+							<div style="font-size: 20px; color: #f5c518;">✓</div>
+							<div style="font-size: 10px; color: #f5c518; letter-spacing: 1px;">OWNED</div>
+						}
+						else if ( !meetsPrereq )
+						{
+							<div style="font-size: 20px; color: #4a3020;">🔒</div>
+						}
+						else
+						{
+							<div class="buy-btn @(canAfford ? "buy-btn-ok" : "buy-btn-no")" onclick=@(() => { PlayClickSound(); UnlockTryBuy( item.Id ); })>
+								<img src="ui/coin.png" style="width: 22px; height: 22px;" />
+								<span style="font-size: 13px; font-weight: bold; color: @(canAfford ? "#f5c518" : "#6a4a1a");">@item.CoinCost</span>
+							</div>
+						}
+					</div>
+				</div>
+			}
+			</div>
+
+			@if ( _unlockFeedback != null )
+			{
+				<div style="flex-shrink: 0; text-align: center; padding: 10px; font-size: 14px; color: @(_unlockFeedbackErr ? "#f55" : "#f5c518"); background-color: #120c04; border-top: 2px solid #6a4a1a; font-family: monospace;">
+					@_unlockFeedback
+				</div>
+			}
+
+			<div style="flex-shrink: 0; padding: 14px 28px 18px 28px; border-top: 2px solid #3a2510;">
+				<div class="back-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.Main; })>← BACK</div>
+			</div>
+		</div>
+	}
+
+	@* ══════════════════════════════════════════════════
+	    QUESTS PANEL
+	   ══════════════════════════════════════════════════ *@
+	else if ( _view == MenuView.Quests )
+	{
+		<!-- Dim overlay -->
+		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.55);"></div>
+		<!-- Centered panel -->
+		<div style="position: absolute; top: 5%; left: 50%; width: 760px; bottom: 5%; transform: translateX(-50%); display: flex; flex-direction: column; font-family: monospace; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
+
+			<!-- Header -->
+			<div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 28px 14px 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a;">
+				<div>
+					<div style="font-size: 32px; font-weight: 900; color: #f5c518; letter-spacing: 4px; text-shadow: 2px 2px 0 #000;">QUESTS</div>
+					<div style="font-size: 12px; color: #a08050; letter-spacing: 2px; margin-top: 3px;">@completedQuests / @totalQuests COMPLETED</div>
+				</div>
+				<div style="display: flex; align-items: center; gap: 8px; background-color: #120c04; border: 2px solid #6a4a1a; padding: 6px 14px; border-radius: 6px;">
+					<img src="ui/coin.png" style="width: 28px; height: 28px;" />
+					<span style="font-size: 16px; color: #f5c518; font-weight: bold;">@PlayerProgress.Data.Coins</span>
+				</div>
+			</div>
+
+			<!-- Filter tabs -->
+			<div style="display: flex; flex-wrap: wrap; gap: 4px; padding: 14px 28px 0 28px; flex-shrink: 0;">
+				@foreach ( var filter in QuestFilters )
+				{
+					var isActive = filter == _questFilter;
+					<div class="tab @(isActive ? "tab-active" : "")" onclick=@(() => { PlayClickSound(); _questFilter = filter; })>@filter</div>
+				}
+			</div>
+
+			<!-- Quest list -->
+			<div style="flex: 1; overflow-y: scroll; padding: 16px 28px 12px 28px; display: flex; flex-direction: column; gap: 12px;">
+				@foreach ( var quest in filteredQuests )
+				{
+					var qprog    = PlayerProgress.GetQuestProgress( quest.Id );
+					var qclaimed = PlayerProgress.IsQuestClaimed( quest.Id );
+					var qclaim   = PlayerProgress.CanClaimQuest( quest.Id );
+					var qpct     = qclaimed ? 100 : (int)System.Math.Min( 100, (float)qprog / quest.Target * 100 );
+
+					<div class="quest-row @(qclaimed ? "quest-done" : (qclaim ? "quest-claimable" : ""))">
+						<div style="width: 52px; height: 52px; flex-shrink: 0; background-color: @(qclaimed ? "#2a1e08" : (qclaim ? "#2a1e00" : "#1a1008")); border: 2px solid @(qclaimed ? "#c8a800" : (qclaim ? "#c8a800" : "#6a4a1a")); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 26px;">
+							@QuestIcon( quest.GoalType )
+						</div>
+						<div style="flex: 1; overflow: hidden;">
+							<div style="font-size: 15px; font-weight: bold; color: @(qclaimed ? "#f5c518" : "#eee");">@quest.Description</div>
+							<div style="background-color: #120c04; height: 12px; width: 100%; border: 1px solid #5a3a10; border-radius: 4px; margin-top: 8px;">
+								<div style="background-color: @(qclaimed ? "#c8a800" : (qclaim ? "#e8b800" : "#8a5a20")); height: 100%; width: @qpct%; border-radius: 4px;"></div>
+							</div>
+							<div style="font-size: 12px; color: #a08050; margin-top: 6px;">
+								@(qclaimed ? $"{quest.Target:N0} / {quest.Target:N0}" : $"{System.Math.Min(qprog,quest.Target):N0} / {quest.Target:N0}")
+							</div>
+						</div>
+						<div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-width: 80px;">
+							<div style="display: flex; align-items: center; gap: 5px;">
+								<img src="ui/coin.png" style="width: 24px; height: 24px;" />
+								<span style="font-size: 15px; font-weight: bold; color: #f5c518;">@quest.CoinReward</span>
+							</div>
+							@if ( qclaimed )   { <div style="font-size: 22px; color: #f5c518;">✓</div> }
+							else if ( qclaim ) { <div class="claim-btn" onclick=@(() => { PlayClickSound(); QuestClaim( quest.Id ); })>CLAIM</div> }
+							else               { <div style="font-size: 11px; color: #6a4a1a; letter-spacing: 1px;">LOCKED</div> }
+						</div>
+					</div>
+				}
+			</div>
+
+			@if ( _questFeedback != null )
+			{
+				<div style="flex-shrink: 0; text-align: center; padding: 10px; font-size: 14px; color: #f5c518; background-color: #120c04; border-top: 2px solid #6a4a1a; font-family: monospace;">
+					@_questFeedback
+				</div>
+			}
+
+			<div style="flex-shrink: 0; padding: 14px 28px 18px 28px; border-top: 2px solid #3a2510;">
+				<div class="back-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.Main; })>← BACK</div>
+			</div>
+		</div>
+	}
+
+</root>
+
+<style>
+	MainMenuPanel {
+		pointer-events: all;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		top: 0;
+		left: 0;
+		background-image: url( ui/menu_bg.png );
+		background-size: cover;
+		background-position: center;
+	}
+	.widget-panel {
+		background-color: rgba(18, 12, 6, 0.92);
+		border: 2px solid #6a4a1a;
+		border-radius: 8px;
+		padding: 14px 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 0px;
+		pointer-events: all;
+	}
+	.widget-header {
+		font-size: 15px;
+		font-weight: bold;
+		letter-spacing: 2px;
+		color: #f5c518;
+		font-family: monospace;
+		text-shadow: 1px 1px 0 #000;
+		border-bottom: 2px solid #6a4a1a;
+		padding-bottom: 8px;
+		margin-bottom: 10px;
+	}
+	.quest-entry {
+		padding: 8px 10px;
+		border-radius: 5px;
+		border: 1px solid #5a3a10;
+		background-color: rgba(30, 18, 6, 0.85);
+		margin-bottom: 8px;
+		display: flex;
+		flex-direction: column;
+	}
+	.quest-entry-claim {
+		border-color: #c8a800;
+		background-color: rgba(40, 28, 0, 0.85);
+	}
+	.btn-wrap {
+		position: absolute;
+		left: 0;
+		width: 100%;
+		height: 72px;
+		overflow: visible;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.btn-wrap:hover  { transform: scale(1.05); }
+	.btn-wrap:active { transform: scale(0.97); }
+	.btn-play-img {
+		width: 420px; height: auto;
+	}
+	.menu-btn {
+		width: 100%; padding: 14px 0; text-align: center;
+		font-size: 22px; font-weight: 900; letter-spacing: 3px;
+		color: #e8e8e8; background: #1a2035; border: 3px solid #2a3a5a; border-radius: 4px;
+		cursor: pointer; text-shadow: 2px 2px 0px #000; font-family: monospace;
+	}
+	.menu-btn:hover  { background: #253050; border-color: #4a6aaa; color: #ffffff; }
+	.menu-btn:active { background: #1a2540; }
+	.menu-btn-play   { color: #7fffaa; border-color: #2a5a3a; font-size: 26px; padding: 16px 0; }
+	.menu-btn-play:hover { background: #1a3525; border-color: #3aaa60; color: #afffcc; }
+	.menu-btn-notify { color: #f5c518; border-color: #5a4a00; }
+	.menu-btn-notify:hover { border-color: #aaa000; color: #ffe040; }
+	.tab {
+		padding: 8px 16px; font-size: 12px; font-weight: bold; letter-spacing: 1px;
+		color: #a08050; background-color: #120c04; border: 2px solid #5a3a10; border-bottom: none;
+		border-radius: 4px 4px 0 0; cursor: pointer;
+		flex-shrink: 0; white-space: nowrap;
+	}
+	.tab:hover  { color: #f5c518; background-color: #1e1408; }
+	.tab-active { color: #f5c518; background-color: #2a1e08; border-color: #c8a800; }
+	.unlock-card {
+		display: flex; align-items: center;
+		width: 100%; padding: 12px 14px;
+		background-color: #221508; border: 2px solid #5a3a10; border-radius: 6px;
+		flex-shrink: 0;
+	}
+	.unlock-owned      { border-color: #c8a800; background-color: #2a1e08; }
+	.unlock-affordable { border-color: #8a5a20; }
+	.unlock-affordable:hover { border-color: #c8a800; }
+	.unlock-locked     { opacity: 0.5; }
+	.buy-btn {
+		display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+		border-radius: 5px; border: 2px solid #8a5a20; background-color: #1a1008;
+		cursor: pointer;
+	}
+	.buy-btn-ok:hover { background-color: #2a1e08; border-color: #c8a800; }
+	.buy-btn-no { opacity: 0.4; cursor: default; }
+	.quest-row {
+		display: flex; align-items: center; gap: 14px; padding: 16px 18px;
+		background-color: #221508; border: 2px solid #5a3a10; border-radius: 6px;
+		flex-shrink: 0;
+	}
+	.quest-done      { border-color: #c8a800; background-color: #2a1e08; }
+	.quest-claimable { border-color: #c8a800; background-color: #2a1a00; }
+	.quest-claimable:hover { border-color: #f5c518; }
+	.claim-btn {
+		padding: 5px 12px; font-size: 12px; font-weight: bold; letter-spacing: 1px;
+		color: #1a1008; background-color: #f5c518; border: 2px solid #c8a800; border-radius: 4px;
+		cursor: pointer; white-space: nowrap; flex-shrink: 0;
+	}
+	.claim-btn:hover { background-color: #ffe040; border-color: #f5c518; }
+	.back-btn {
+		padding: 8px 20px; font-size: 14px; font-weight: bold; letter-spacing: 2px;
+		color: #a08050; background-color: #120c04; border: 2px solid #6a4a1a; border-radius: 5px;
+		cursor: pointer; font-family: monospace;
+	}
+	.back-btn:hover { color: #f5c518; border-color: #c8a800; }
+	.char-card {
+		flex: 1; display: flex; flex-direction: column;
+		padding: 16px; background-color: #221508; border: 2px solid #5a3a10; border-radius: 8px;
+		cursor: pointer;
+	}
+	.char-card:hover { border-color: #c8a800; }
+	.char-card-selected { border-color: #f5c518; background-color: #2a1e08; }
+	.char-card-selected:hover { border-color: #f5c518; }
+	.char-card-locked { cursor: default; opacity: 0.55; }
+	.char-card-locked:hover { border-color: #5a3a10; }
+	.portrait-cell {
+		flex: 1; display: flex; flex-direction: column; align-items: center;
+		padding: 6px; background-color: #221508; border: 2px solid #5a3a10; border-radius: 6px;
+		cursor: pointer;
+	}
+	.portrait-cell:hover { border-color: #c8a800; }
+	.portrait-cell-selected { border-color: #f5c518; background-color: #2a1e08; }
+	.portrait-cell-selected:hover { border-color: #f5c518; }
+	.portrait-cell-locked { opacity: 0.5; }
+	.confirm-btn {
+		width: 100%; padding: 18px 0; font-size: 20px; font-weight: 900; letter-spacing: 3px;
+		text-align: center; color: #1a1008; background-color: #f5c518;
+		border: 2px solid #c8a800; border-radius: 8px;
+		cursor: pointer; font-family: monospace;
+	}
+	.confirm-btn:hover { background-color: #ffe040; border-color: #f5c518; }
+	.confirm-btn:active { background-color: #c8a800; }
+	.tier-btn {
+		padding: 8px 14px; font-size: 12px; font-weight: bold; letter-spacing: 1px;
+		color: #a08050; background-color: #120c04; border: 2px solid #5a3a10; border-radius: 5px;
+		cursor: pointer; white-space: nowrap;
+	}
+	.tier-btn:hover { color: #f5c518; border-color: #8a5a20; }
+	.tier-btn-selected { color: #f5c518; border-color: #f5c518; background-color: #2a1e08; }
+	.tier-btn-locked { opacity: 0.5; cursor: default; }
+	.tier-btn-locked:hover { color: #a08050; border-color: #5a3a10; }
+	.mute-btn {
+		width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+		font-size: 24px; background-color: rgba(18, 12, 6, 0.85); border: 2px solid #6a4a1a;
+		border-radius: 8px; cursor: pointer;
+	}
+	.mute-btn:hover { border-color: #c8a800; background-color: rgba(40, 28, 0, 0.9); }
+	.mute-btn-muted { opacity: 0.6; }
+</style>
+
+@code
+{
+	static SoundEvent UiClick = new( "sounds/ui_click.mp3" );
+
+	void PlayClickSound()
+	{
+		try { Sound.Play( UiClick ); } catch { }
+	}
+
+	enum MenuView { Main, CharacterSelect, MapSelect, Unlocks, Quests }
+	MenuView _view = MenuView.Main;
+
+	string _selectedMapId = "dark_forest";
+	int    _selectedTier  = 1;
+
+	UnlockCategory _unlockTab          = UnlockCategory.Characters;
+	string         _unlockFeedback     = null;
+	bool           _unlockFeedbackErr;
+	float          _unlockFeedbackTimer;
+
+	static readonly string[] QuestFilters = { "All", "Kills", "Survival", "Level", "Character", "Runs", "Weapon", "Tome", "Deaths", "No Damage", "Chests", "Projectiles" };
+	string _questFilter   = "All";
+	string _questFeedback = null;
+	float  _questFeedbackTimer;
+
+	bool _questNotify => QuestDefinition.All.Exists( q => PlayerProgress.CanClaimQuest( q.Id ) );
+
+	// ── Chat ──────────────────────────────────────────────────────────────
+	struct ChatEntry { public string Name; public string Text; public string ColorHex; }
+
+	bool _chatOpen = false;
+	bool _chatSubscribed = false;
+	List<ChatEntry> _chatMessages = new();
+
+	void OnChatPanelClick( PanelEvent e )
+	{
+		PlayClickSound();
+		if ( !_chatOpen ) _chatOpen = true;
+	}
+
+	void OnMenuChatSubmit( PanelEvent e )
+	{
+		if ( e.Target is not TextEntry te ) return;
+		var msg = te.Text?.Trim() ?? "";
+		_chatOpen = false;
+		if ( string.IsNullOrEmpty( msg ) ) return;
+
+		var name = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "Player";
+
+		// Show message immediately (optimistic), then broadcast.
+		_chatMessages.Add( new ChatEntry { Name = name, Text = msg, ColorHex = "#4ae8ff" } );
+		if ( _chatMessages.Count > 8 ) _chatMessages.RemoveAt( 0 );
+
+		var chat = ChatComponent.Instance;
+		if ( chat != null )
+		{
+			chat.CurrentInput = msg;
+			chat.Submit();
+		}
+	}
+
+	void OnChatMessageAdded()
+	{
+		var chat = ChatComponent.Instance;
+		if ( chat == null || chat.Messages.Count == 0 ) return;
+		var latest = chat.Messages[^1];
+		// Avoid duplicating the optimistic message we already added locally.
+		if ( _chatMessages.Count > 0 &&
+		     _chatMessages[^1].Name == latest.PlayerName &&
+		     _chatMessages[^1].Text == latest.Text )
+			return;
+		_chatMessages.Add( new ChatEntry
+		{
+			Name     = latest.PlayerName,
+			Text     = latest.Text,
+			ColorHex = MenuChatColor( latest.NameColor )
+		} );
+		if ( _chatMessages.Count > 8 ) _chatMessages.RemoveAt( 0 );
+	}
+
+	void StopPropagation( PanelEvent e ) => e.StopPropagation();
+
+	string MenuChatColor( Color c )
+	{
+		int r = (int)(c.r * 255);
+		int g = (int)(c.g * 255);
+		int b = (int)(c.b * 255);
+		return $"#{r:X2}{g:X2}{b:X2}";
+	}
+
+	protected override void OnStart()
+	{
+		Panel.Style.PointerEvents = PointerEvents.All;
+	}
+
+	protected override void OnDestroy()
+	{
+		if ( _chatSubscribed && ChatComponent.Instance != null )
+			ChatComponent.Instance.OnMessageAdded -= OnChatMessageAdded;
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( _unlockFeedback != null )
+		{
+			_unlockFeedbackTimer -= Time.Delta;
+			if ( _unlockFeedbackTimer <= 0f ) _unlockFeedback = null;
+		}
+		if ( _questFeedback != null )
+		{
+			_questFeedbackTimer -= Time.Delta;
+			if ( _questFeedbackTimer <= 0f ) _questFeedback = null;
+		}
+
+		// Subscribe to ChatComponent once it becomes available.
+		if ( ChatComponent.Instance != null && !_chatSubscribed )
+		{
+			ChatComponent.Instance.OnMessageAdded += OnChatMessageAdded;
+			_chatSubscribed = true;
+		}
+	}
+
+	// ── Character Selection ───────────────────────────────────────────────
+	string _selectedCharName = null;
+
+	void OnMuteClicked()
+	{
+		PlayClickSound();
+		MusicManager.Instance?.ToggleMute();
+	}
+
+	void OnPlayClicked()
+	{
+		PlayClickSound();
+		// Default to the first unlocked character
+		_selectedCharName = CharacterDefinition.All
+			.FirstOrDefault( c => PlayerProgress.IsUnlocked( CharToUnlockId( c.Name ) ) )
+			?.Name ?? "Archer";
+		_view = MenuView.CharacterSelect;
+	}
+
+	static string CharToUnlockId( string name ) => name?.ToLower() switch
+	{
+		"archer"     => "char_archer",
+		"warrior"    => "char_warrior",
+		"mage"       => "char_mage",
+		"knight"     => "char_knight",
+		"templar"    => "char_templar",
+		"druid"      => "char_druid",
+		"pyromancer" => "char_pyromancer",
+		_            => "char_archer"
+	};
+
+	static string WeaponDisplayName( string internalName ) => internalName switch
+	{
+		"MagicWand" => "Magic Wand",
+		"Aura"      => "Aura Blast",
+		"Axe"       => "Throwing Axe",
+		"StormRod"  => "Storm Rod",
+		"OrbitalShards" => "Orbital Shards",
+		"EmberTrail"    => "Ember Trail",
+		"Sword"         => "Sword",
+		_               => internalName
+	};
+
+	void UnlockTryBuy( string id )
+	{
+		if ( PlayerProgress.TryUnlock( id ) )
+		{
+			var def = UnlockDefinition.All.Find( u => u.Id == id );
+			_unlockFeedback    = $"Unlocked {def?.Name}!";
+			_unlockFeedbackErr = false;
+		}
+		else
+		{
+			_unlockFeedback    = "Not enough coins!";
+			_unlockFeedbackErr = true;
+		}
+		_unlockFeedbackTimer = 2.5f;
+	}
+
+	void QuestClaim( string id )
+	{
+		if ( PlayerProgress.TryClaimQuest( id ) )
+		{
+			var def = QuestDefinition.All.Find( q => q.Id == id );
+			_questFeedback      = $"+{def?.CoinReward} coins claimed!";
+			_questFeedbackTimer = 2.5f;
+		}
+	}
+
+	List<QuestDefinition> GetFilteredQuests() => _questFilter switch
+	{
+		"Kills"     => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.TotalKills ),
+		"Survival"  => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.SurviveMinutes ),
+		"Level"     => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.ReachLevel ),
+		"Character" => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.KillsAsCharacter ),
+		"Runs"      => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.CompleteRuns ),
+		"Weapon"    => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.KillsWithWeapon ),
+		"Tome"      => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.TomeReachLevel ),
+		"Deaths"    => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.TotalDeaths ),
+		"No Damage" => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.NoDamageSeconds ),
+		"Chests"      => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.ChestsPurchased ),
+		"Projectiles" => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.ProjectilesFired ),
+		_             => QuestDefinition.All
+	};
+
+	static string CharColor( string name ) => name switch
+	{
+		"Archer"     => "#0d2a3a",
+		"Warrior"    => "#2a1e00",
+		"Mage"       => "#1e0a2a",
+		"Knight"     => "#2a1500",
+		"Templar"    => "#002a28",
+		"Druid"      => "#0a2a0a",
+		"Pyromancer" => "#2a0800",
+		_            => "#1a1008"
+	};
+
+	static string CharIconPath( string name ) => name switch
+	{
+		"Archer"     => "sprites/rogue_non-combat_bow_equipped_0.png",
+		"Warrior"    => "sprites/axe_warrior_16x16_0.png",
+		"Mage"       => "sprites/mage_masc_dkgrey_0.png",
+		"Knight"     => "sprites/heavy_knight_0.png",
+		"Templar"    => "sprites/paladin_non-combat_animations_0.png",
+		"Druid"      => "sprites/mage_fem_red_0.png",
+		"Pyromancer" => "sprites/mage_hooded_brown_0.png",
+		_            => "sprites/axe_warrior_16x16_0.png"
+	};
+
+	string UnlockCategoryIcon( UnlockCategory cat ) => cat switch
+	{
+		UnlockCategory.Characters => "🧍",
+		UnlockCategory.Weapons    => "⚔",
+		UnlockCategory.Tomes      => "📖",
+		UnlockCategory.Items      => "🎒",
+		_                         => "?"
+	};
+
+	string QuestIcon( QuestGoalType t ) => t switch
+	{
+		QuestGoalType.TotalKills       => "💀",
+		QuestGoalType.SurviveMinutes   => "⏱",
+		QuestGoalType.ReachLevel       => "⬆",
+		QuestGoalType.KillsAsCharacter => "🎭",
+		QuestGoalType.CompleteRuns     => "🏆",
+		QuestGoalType.KillsWithWeapon  => "⚔",
+		QuestGoalType.TomeReachLevel   => "📖",
+		QuestGoalType.TotalDeaths      => "☠",
+		QuestGoalType.NoDamageSeconds  => "🛡",
+		QuestGoalType.ChestsPurchased  => "📦",
+		QuestGoalType.ProjectilesFired => "🏹",
+		_                              => "?"
+	};
+}

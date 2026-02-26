@@ -1,0 +1,28 @@
+DamageIndicator
+{
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transform: scaleX( -1 );
+
+	.dmg-number
+	{
+		font-weight: bold;
+		text-align: center;
+		text-shadow: 1px 1px 0px rgba(0,0,0,0.85), -1px -1px 0px rgba(0,0,0,0.85),
+		             1px -1px 0px rgba(0,0,0,0.85), -1px 1px 0px rgba(0,0,0,0.85);
+		pointer-events: none;
+
+		&.normal
+		{
+			font-size: 20px;
+		}
+
+		&.big
+		{
+			font-size: 28px;
+		}
+	}
+}

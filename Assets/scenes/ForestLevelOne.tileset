@@ -1,0 +1,306 @@
+{
+  "FilePath": "textures/lonesome_forest_floor.png",
+  "TileSize": "16,16",
+  "TileSeparation": "0,0",
+  "TileScale": 1,
+  "Tiles": [
+    {
+      "Id": "bee93528-4b77-4dc7-b72b-af3f90b7d788",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "b7962962-c448-4ad1-aaca-99c752145795",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "e1037099-3940-4371-a029-23bdd791dff9",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "1b6bc15c-845a-4278-87d2-86d75e41815c",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "6eac38ea-3c61-4170-90d9-d2226e0eb523",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "37c47068-32d3-4d57-b255-6b67eb012fdb",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "1dd9ef59-4dc8-4fb2-a32b-1f8d2a0bfa17",
+      "Name": "",
+      "Tags": null,
+      "Position": "0,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "d6e35397-150e-4baf-8535-3f50550d6b92",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "02a72b91-8e67-4f9d-b67d-de97770c34cb",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "98a493d5-9322-48e9-aae1-02c1bfaf8c3d",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "9d8722cd-1106-4a40-b21f-f46cb5b8cf28",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "8334c93d-74af-460e-bd9b-b18408750811",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "d4be8121-7db0-4fb4-beba-7e647ce25523",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "2cb478ba-7eaf-4799-a28d-c29455e8b5c6",
+      "Name": "",
+      "Tags": null,
+      "Position": "0,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "08d7345d-6131-4c70-b3f3-9470b7cd511d",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "5196bb55-f274-415f-807b-ae53c4bf2c8a",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "06d252bf-e13e-44a4-a13c-a5fbb3e70433",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "7c093525-ba10-42e8-83e8-fc4adb9bd1d1",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "f53fd4ee-d408-4831-9840-f7a40fa661ca",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "36b9adbd-6a9a-45a0-8421-59f56c6969d9",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "2f5c79f3-7808-4bc5-a701-3e1c2975a4d0",
+      "Name": "",
+      "Tags": null,
+      "Position": "0,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "b10f952e-f249-4239-80cd-af294842be5b",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "9120be9d-737e-4f59-8dd4-cc08e53ab016",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "e4c5c85b-af1e-4a3a-a9a7-ccdc7b8bd189",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "e1ca96fb-0570-4a12-922e-86c59c1fa2ef",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "2512845e-8238-4994-8c64-834285b6efe2",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "c0ade31b-f767-4b08-9f65-d2b9a90d5474",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "6eaec024-3eb9-40b8-b1a4-b2687c1fa3f7",
+      "Name": "",
+      "Tags": null,
+      "Position": "0,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "f572b4cc-fecf-4ccd-bbe7-e059747190a8",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "d57fdfbc-c3da-4ff6-a696-e84d1dfaca4e",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "b9744438-08a5-4351-b5a4-77941b8bcd62",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "048ec677-2f58-4fc9-95cd-483d09cef060",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "28d53cc7-629f-4381-b462-fcdba2d96675",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "444fc04f-e217-4898-8a51-b33128a8bb33",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,4",
+      "Size": "1,1"
+    }
+  ],
+  "InheritAutotileFrom": null,
+  "AutotileBrushes": [
+    {
+      "Id": "7f65e0cf-9906-49e7-9311-6135a8ae69a8",
+      "Name": null,
+      "AutotileType": "Bitmask2x2Edge",
+      "Tiles": [
+        {
+          "Tiles": []
+        },
+        {
+          "Tiles": []
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        },
+        {
+          "Tiles": null
+        }
+      ],
+      "TileCount": 15
+    }
+  ],
+  "CurrentTextureSize": "112,80",
+  "CurrentTileSize": "16,16",
+  "__references": [],
+  "__version": 0
+}

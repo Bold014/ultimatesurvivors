@@ -1,0 +1,60 @@
+@using Sandbox;
+@inherits PanelComponent;
+
+<root>
+	<div style="position: absolute; bottom: 60px; left: 12px; width: 360px;">
+
+		<div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px;">
+			@if ( Chat != null )
+			{
+				@foreach ( var msg in Chat.Messages.TakeLast( 8 ) )
+				{
+					<div style="font-size: 13px; font-family: monospace; background: #111111; padding: 2px 6px;">
+						<span style="color: @ColorToHex( msg.NameColor );">@msg.PlayerName</span>
+						<span style="color: #dddddd;">: @msg.Text</span>
+					</div>
+				}
+			}
+		</div>
+
+		@if ( Chat?.IsChatOpen == true )
+		{
+			<div style="background: #000000; border: 1px solid #446; padding: 4px 8px;">
+				<TextEntry style="color: #ffffff; font-size: 13px; font-family: monospace; width: 100%;"
+					placeholder="Type a message and press Enter..."
+					onsubmit=@OnSubmit />
+			</div>
+		}
+		else
+		{
+			<div style="font-size: 11px; color: #445566; font-family: monospace;">[Enter] to chat</div>
+		}
+	</div>
+</root>
+
+@code
+{
+	ChatComponent Chat => ChatComponent.Instance;
+
+	void OnSubmit( PanelEvent e )
+	{
+		if ( Chat == null ) return;
+		if ( e.Target is TextEntry te )
+			Chat.CurrentInput = te.Text ?? "";
+		Chat.Submit();
+	}
+
+	string ColorToHex( Color c )
+	{
+		int r = (int)(c.r * 255);
+		int g = (int)(c.g * 255);
+		int b = (int)(c.b * 255);
+		return $"#{r:X2}{g:X2}{b:X2}";
+	}
+
+	protected override int BuildHash() =>
+		System.HashCode.Combine(
+			Chat?.Messages?.Count ?? 0,
+			Chat?.IsChatOpen ?? false
+		);
+}

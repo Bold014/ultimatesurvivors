@@ -1,0 +1,15 @@
+{
+  "__version": 1,
+  "Sounds": [
+    {
+      "Mixer": "Music",
+      "UI": false,
+      "Looping": true,
+      "Volume": "1",
+      "Pitch": "1",
+      "Sounds": [
+        "sounds/songloop.mp3"
+      ]
+    }
+  ]
+}

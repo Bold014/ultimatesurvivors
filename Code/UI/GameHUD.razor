@@ -1,0 +1,257 @@
+@using Sandbox;
+@inherits PanelComponent;
+
+<root>
+	@{
+		var player   = LocalPlayer;
+		var xp       = LocalXP;
+		var stats    = LocalStats;
+		var spawner  = LocalSpawner;
+		var weapons  = LocalWeapons;
+		var passives = LocalPassives;
+		var coins    = LocalCoins;
+		var nearChest   = NearbyChest;
+		var nearBeacon  = NearbyBeacon;
+	}
+
+	@if ( player != null )
+	{
+		<!-- ── XP bar — very top, full width ────────────────────────────────── -->
+		<div style="position: absolute; top: 0; left: 0; right: 0; height: 8px; background: #120c04; border-bottom: 1px solid #3a2510;">
+			<div style="background: #3a6fff; height: 100%; width: @((int)((xp?.XPPercent ?? 0f) * 100))%;"></div>
+		</div>
+
+		<!-- ── Top stats bar ────────────────────────────────────────────────── -->
+		<div style="position: absolute; top: 8px; left: 0; right: 0; height: 44px; background: #1a1008; border-bottom: 2px solid #6a4a1a; display: flex; align-items: center; padding: 0 18px;">
+
+			<!-- LEFT cluster -->
+			<div style="display: flex; align-items: center; gap: 20px; min-width: 300px;">
+
+				<div style="display: flex; align-items: center; gap: 7px;">
+					<div style="width: 22px; height: 22px; border: 2px solid #6a4a1a; border-radius: 50%; background: #120c04; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #a08050; font-family: monospace; font-weight: bold;">T</div>
+					<span style="font-size: 15px; color: #e8d5a0; font-family: monospace; font-weight: bold;">@FormatTime( stats?.TimeAlive ?? 0f )</span>
+				</div>
+
+				<div style="display: flex; align-items: center; gap: 7px;">
+					<div style="width: 22px; height: 22px; border: 2px solid #3a6fff; border-radius: 50%; background: #0a1030; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #88aaff; font-family: monospace; font-weight: bold;">X</div>
+					<span style="font-size: 14px; color: #88aaff; font-family: monospace;">@(xp?.CurrentXP ?? 0) / @(xp?.XPToNextLevel ?? 100)</span>
+				</div>
+
+				<div style="display: flex; align-items: center; gap: 7px;">
+					<div style="width: 22px; height: 22px; border: 2px solid #8a2020; border-radius: 50%; background: #2a0808; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #cc6666; font-family: monospace; font-weight: bold;">K</div>
+					<span style="font-size: 14px; color: #cc8888; font-family: monospace;">@(stats?.Kills ?? 0)</span>
+				</div>
+
+				<div style="display: flex; align-items: center; gap: 7px;">
+					<div style="width: 22px; height: 22px; border: 2px solid #c8a800; border-radius: 50%; background: #2a1f00; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #f5c518; font-family: monospace; font-weight: bold;">$</div>
+					<span style="font-size: 14px; color: #f5c518; font-family: monospace; font-weight: bold;">@(coins?.Coins ?? 0)</span>
+				</div>
+
+			</div>
+
+			<!-- CENTER large timer -->
+			<div style="flex: 1; text-align: center; font-size: 28px; font-family: monospace; color: #f5c518; font-weight: bold; letter-spacing: 5px;">
+				@FormatTime( stats?.TimeAlive ?? 0f )
+			</div>
+
+			<!-- RIGHT cluster -->
+			<div style="display: flex; align-items: center; gap: 20px; min-width: 300px; justify-content: flex-end;">
+
+				<div style="display: flex; align-items: center; gap: 7px;">
+					<div style="width: 22px; height: 22px; border: 2px solid #6a4a1a; border-radius: 3px; background: #120c04; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #f5c518; font-family: monospace; font-weight: bold;">S</div>
+					<span style="font-size: 14px; color: #f5c518; font-family: monospace;">@((int)(stats?.Score ?? 0))</span>
+				</div>
+
+				<div style="display: flex; align-items: center; gap: 7px;">
+					<span style="font-size: 12px; color: #a08050; font-family: monospace; letter-spacing: 1px;">WAVE</span>
+					<span style="font-size: 15px; color: #e8c080; font-family: monospace; font-weight: bold;">@(spawner?.WaveNumber ?? 0)</span>
+				</div>
+
+				<div style="background: #120c04; border: 2px solid #c8a800; padding: 3px 12px; border-radius: 6px;">
+					<span style="font-size: 16px; font-family: monospace; color: #f5c518; font-weight: bold; letter-spacing: 2px;">LVL @(xp?.Level ?? 1)</span>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- ── Left panel ───────────────────────────────────────────────────── -->
+		<div style="position: absolute; top: 62px; left: 12px; width: 280px; background: #1a1008; border: 2px solid #6a4a1a; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+
+		<!-- HP bar -->
+		<div style="display: flex; flex-direction: column; gap: 6px;">
+			<div style="font-size: 12px; color: #a08050; font-family: monospace;">HEALTH</div>
+			<div style="background: #2a0808; border: 1px solid #6a2020; border-radius: 5px; height: 30px; position: relative; overflow: hidden;">
+				<div style="background: #cc2222; height: 100%; width: @((int)((player?.HPPercent ?? 1f) * 100))%;"></div>
+				<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-family: monospace; color: #ffffff; font-weight: bold;">
+					@((int)(player?.HP ?? 0)) / @((int)(player?.MaxHP ?? 0))
+				</div>
+			</div>
+		</div>
+
+		<!-- Shield bar — only shown when MaxShield > 0 -->
+		@if ( (player?.MaxShield ?? 0f) > 0f )
+		{
+			var shieldPct = (int)(Math.Clamp( (player?.Shield ?? 0f) / (player?.MaxShield ?? 1f), 0f, 1f ) * 100);
+			<div style="display: flex; flex-direction: column; gap: 4px;">
+				<div style="font-size: 12px; color: #88aaff; font-family: monospace;">SHIELD</div>
+				<div style="background: #0a1030; border: 1px solid #3a5aaa; border-radius: 5px; height: 16px; position: relative; overflow: hidden;">
+					<div style="background: #3a6fff; height: 100%; width: @shieldPct%; transition: width 0.1s;"></div>
+					<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: monospace; color: #ccddff; font-weight: bold;">
+						@((int)(player?.Shield ?? 0)) / @((int)(player?.MaxShield ?? 0))
+					</div>
+				</div>
+			</div>
+		}
+
+		<!-- Divider -->
+			<div style="height: 1px; background: #3a2510;"></div>
+
+			<!-- Weapon slots -->
+			<div style="display: flex; flex-direction: column; gap: 6px;">
+				<div style="font-size: 12px; color: #a08050; font-family: monospace;">WEAPONS</div>
+				<div style="display: flex; flex-direction: row; gap: 6px;">
+					@for ( int i = 0; i < 4; i++ )
+					{
+						var w = (weapons?.Weapons != null && i < weapons.Weapons.Count) ? weapons.Weapons[i] : null;
+						<div style="width: 52px; height: 52px; background: @(w != null ? "#2a1a04" : "#120c04"); border: 2px solid @(w != null ? "#c8a800" : "#3a2510"); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; overflow: hidden;">
+							@if ( w != null )
+							{
+								<div style="font-size: 12px; color: #f5c518; font-weight: bold; font-family: monospace;">@WeaponAbbrev( w.WeaponDisplayName )</div>
+								<div style="font-size: 10px; color: #e8c080; font-family: monospace;">Lv@(w.WeaponLevel)</div>
+							}
+						</div>
+					}
+				</div>
+			</div>
+
+			<!-- Tome slots -->
+			<div style="display: flex; flex-direction: column; gap: 6px;">
+				<div style="font-size: 12px; color: #a08050; font-family: monospace;">TOMES</div>
+				<div style="display: flex; flex-direction: row; gap: 6px;">
+					@for ( int i = 0; i < 4; i++ )
+					{
+						var p = (passives?.Passives != null && i < passives.Passives.Count) ? passives.Passives[i] : null;
+						<div style="width: 52px; height: 52px; background: @(p != null ? "#1a0c20" : "#120c04"); border: 2px solid @(p != null ? "#8a5a20" : "#3a2510"); border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+							@if ( p != null )
+							{
+								<div style="font-size: 10px; color: #e8c080; font-weight: bold; font-family: monospace; text-align: center;">@PassiveAbbrev( p )</div>
+							}
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+
+		<!-- ── Chest interaction prompt ─────────────────────────────────────── -->
+		@if ( nearChest != null && nearChest.IsPlayerNearby )
+		{
+			var canAfford = (coins?.Coins ?? 0) >= nearChest.Cost;
+			var isFree = player?.IsNextChestFree ?? false;
+			var canOpen = canAfford || isFree;
+			<div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1a1008cc; border: 2px solid @(canOpen ? "#c8a800" : "#883322"); border-radius: 10px; padding: 10px 24px; text-align: center;">
+				<div style="font-size: 18px; font-family: monospace; color: @(canOpen ? "#f5c518" : "#cc6666"); font-weight: bold;">
+					[E] Open Chest — @(isFree ? "FREE" : $"{nearChest.Cost} coins")
+				</div>
+				@if ( !canOpen )
+				{
+					<div style="font-size: 12px; font-family: monospace; color: #cc6666; margin-top: 4px;">Not enough coins</div>
+				}
+			</div>
+		}
+
+		<!-- ── Beacon charging prompt ─────────────────────────────────────────── -->
+		@if ( nearBeacon != null && nearBeacon.IsPlayerNearby )
+		{
+			int pct = (int)(nearBeacon.ChargePercent * 100f);
+			<div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: #080f1acc; border: 2px solid #3a6fff; border-radius: 10px; padding: 10px 24px; text-align: center; min-width: 240px;">
+				<div style="font-size: 16px; font-family: monospace; color: #88aaff; font-weight: bold; letter-spacing: 2px;">CHARGING BEACON</div>
+				<div style="margin-top: 6px; background: #0a1030; border: 1px solid #3a6fff; border-radius: 4px; height: 10px; overflow: hidden;">
+					<div style="background: #3a6fff; height: 100%; width: @pct%; transition: width 0.1s;"></div>
+				</div>
+				<div style="font-size: 12px; font-family: monospace; color: #6688cc; margin-top: 4px;">@pct%</div>
+			</div>
+		}
+
+		<!-- ── Death overlay ─────────────────────────────────────────────────── -->
+		@if ( stats?.IsAlive == false )
+		{
+			<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #000000; opacity: 0.7;"></div>
+			<div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%,-50%); text-align: center;">
+				<div style="font-size: 56px; color: #cc2222; font-family: monospace; font-weight: bold; letter-spacing: 8px;">YOU DIED</div>
+				<div style="font-size: 16px; color: #a08050; font-family: monospace; margin-top: 14px; letter-spacing: 3px;">RETURNING TO MENU...</div>
+			</div>
+		}
+	}
+</root>
+
+@code
+{
+	PlayerLocalState LocalPlayer   => Scene?.GetAllComponents<PlayerLocalState>().FirstOrDefault();
+	PlayerXP         LocalXP       => Scene?.GetAllComponents<PlayerXP>().FirstOrDefault();
+	PlayerStats      LocalStats    => Scene?.GetAllComponents<PlayerStats>().FirstOrDefault();
+	PlayerWeapons    LocalWeapons  => Scene?.GetAllComponents<PlayerWeapons>().FirstOrDefault();
+	PlayerPassives   LocalPassives => Scene?.GetAllComponents<PlayerPassives>().FirstOrDefault();
+	EnemySpawner     LocalSpawner  => Scene?.GetAllComponents<EnemySpawner>().FirstOrDefault();
+	PlayerCoins      LocalCoins    => Scene?.GetAllComponents<PlayerCoins>().FirstOrDefault();
+	Chest            NearbyChest   => Scene?.GetAllComponents<Chest>().FirstOrDefault( c => c.IsPlayerNearby );
+	LevelUpBeacon    NearbyBeacon  => Scene?.GetAllComponents<LevelUpBeacon>().FirstOrDefault( b => b.IsPlayerNearby );
+
+	protected override int BuildHash()
+	{
+		var s  = LocalStats;
+		var xp = LocalXP;
+		var pl = LocalPlayer;
+		var sp = LocalSpawner;
+		var w  = LocalWeapons;
+		var c  = LocalCoins;
+		var bc = NearbyBeacon;
+		return System.HashCode.Combine(
+			System.HashCode.Combine(
+				System.HashCode.Combine(
+					(int)(s?.TimeAlive ?? 0f),
+					xp?.CurrentXP     ?? 0,
+					xp?.Level         ?? 1,
+					s?.Kills          ?? 0,
+					(int)((pl?.HPPercent ?? 1f) * 100),
+					(int)((pl?.MaxShield ?? 0f) > 0f ? (pl?.Shield ?? 0f) / (pl?.MaxShield ?? 1f) * 100 : -1),
+					sp?.WaveNumber    ?? 0,
+					w?.Weapons?.Count ?? 0
+				),
+				s?.IsAlive ?? true
+			),
+			System.HashCode.Combine(
+				c?.Coins          ?? 0,
+				NearbyChest       != null ? 1 : 0,
+				bc                != null ? 1 : 0,
+				(int)((bc?.ChargePercent ?? 0f) * 20)
+			)
+		);
+	}
+
+	string FormatTime( float seconds )
+	{
+		int mins = (int)(seconds / 60);
+		int secs = (int)(seconds % 60);
+		return $"{mins}:{secs:D2}";
+	}
+
+	string WeaponAbbrev( string displayName ) => displayName switch
+	{
+		"Magic Wand"     => "MW",
+		"Axe"            => "AXE",
+		"Aura"           => "AUR",
+		"Storm Rod"      => "SR",
+		"Orbital Shards" => "OS",
+		"Ember Trail"    => "ET",
+		_ => displayName.Length > 3 ? displayName[..3].ToUpper() : displayName.ToUpper()
+	};
+
+	string PassiveAbbrev( string name )
+	{
+		if ( string.IsNullOrEmpty( name ) ) return "?";
+		var words = name.Split( ' ' );
+		if ( words.Length >= 2 )
+			return $"{words[0][..Math.Min(3,words[0].Length)]}\n{words[1][..Math.Min(3,words[1].Length)]}".ToUpper();
+		return name.Length > 3 ? name[..3].ToUpper() : name.ToUpper();
+	}
+}

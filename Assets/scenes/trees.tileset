@@ -1,0 +1,15 @@
+{
+  "FilePath": "textures/treesolo.png",
+  "TileSize": "32,16",
+  "TileSeparation": "0,0",
+  "TileScale": 1,
+  "Tiles": [
+    {
+      "Id": "a4f7e2c1-b8d3-4a6f-9e21-c5d8f3b72a90",
+      "Name": "Tree",
+      "Tags": null,
+      "Position": "0,0",
+      "Size": "1,1"
+    }
+  ]
+}

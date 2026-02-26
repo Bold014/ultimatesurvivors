@@ -1,0 +1,77 @@
+@using Sandbox;
+@inherits PanelComponent;
+
+<root>
+	@if ( IsVisible )
+	{
+		<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; padding: 24px; min-width: 560px; font-family: monospace;">
+
+			<div style="font-size: 28px; color: #f5c518; font-weight: bold; text-align: center; margin-bottom: 18px; letter-spacing: 4px;">
+				LEADERBOARD
+			</div>
+
+			<div style="display: flex; font-size: 11px; color: #a08050; border-bottom: 2px solid #6a4a1a; padding-bottom: 8px; margin-bottom: 8px; letter-spacing: 1px;">
+				<span style="flex: 0.4; text-align: center;">#</span>
+				<span style="flex: 2;">PLAYER</span>
+				<span style="flex: 1;">CLASS</span>
+				<span style="flex: 0.7; text-align: center;">LVL</span>
+				<span style="flex: 0.7; text-align: center;">KILLS</span>
+				<span style="flex: 1; text-align: center;">SCORE</span>
+				<span style="flex: 1; text-align: center;">TIME</span>
+				<span style="flex: 0.8; text-align: center;">STATUS</span>
+			</div>
+
+			@{
+				int rank = 1;
+			}
+			@foreach ( var p in AllPlayers )
+			{
+				var rowColor = p.IsAlive ? "#e8d5a0" : "#5a4a30";
+				var bgColor  = rank == 1 ? "#2a1a04" : "#120c04";
+				var rankColor = rank == 1 ? "#f5c518" : rank == 2 ? "#c0c0c0" : rank == 3 ? "#cd7f32" : "#a08050";
+
+				<div style="display: flex; font-size: 13px; color: @rowColor; padding: 6px 0; border-bottom: 1px solid #3a2510; background: @bgColor;">
+					<span style="flex: 0.4; text-align: center; color: @rankColor; font-weight: bold;">@rank.</span>
+					<span style="flex: 2;">@p.PlayerName</span>
+					<span style="flex: 1; color: #e8c080;">@p.CharacterName</span>
+					<span style="flex: 0.7; text-align: center;">@p.Level</span>
+					<span style="flex: 0.7; text-align: center;">@p.Kills</span>
+					<span style="flex: 1; text-align: center; color: #f5c518; font-weight: bold;">@((int)p.Score)</span>
+					<span style="flex: 1; text-align: center;">@FormatTime( p.TimeAlive )</span>
+					<span style="flex: 0.8; text-align: center; color: @(p.IsAlive ? "#44cc44" : "#cc4444");">@(p.IsAlive ? "Alive" : "Dead")</span>
+				</div>
+
+				rank++;
+			}
+
+			<div style="margin-top: 14px; font-size: 11px; color: #5a3a10; text-align: center; letter-spacing: 2px;">HOLD [TAB] TO VIEW LEADERBOARD</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	bool IsVisible => Input.Down( "score" );
+
+	IEnumerable<PlayerStats> AllPlayers =>
+		Scene?.GetAllComponents<PlayerStats>()
+			.OrderByDescending( p => p.Score )
+			.ThenByDescending( p => p.Kills )
+		?? Enumerable.Empty<PlayerStats>();
+
+	string FormatTime( float seconds )
+	{
+		int mins = (int)(seconds / 60);
+		int secs = (int)(seconds % 60);
+		return $"{mins:D2}:{secs:D2}";
+	}
+
+	protected override int BuildHash()
+	{
+		var players = AllPlayers.ToList();
+		int hash = System.HashCode.Combine( IsVisible, players.Count );
+		foreach ( var p in players )
+			hash = System.HashCode.Combine( hash, (int)p.TimeAlive, p.Kills, p.IsAlive );
+		return hash;
+	}
+}

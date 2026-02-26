@@ -1,0 +1,215 @@
+@using Sandbox;
+@inherits PanelComponent;
+
+<root>
+	@if ( IsVisible )
+	{
+		var sys    = UpgSys;
+		var source = sys?.CurrentSource ?? UpgradeSystem.RewardSource.LevelUp;
+
+		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0d0905ee; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;">
+
+			<!-- ── Title block ────────────────────────────────────────────── -->
+			<div style="background: @TitleBg(source); border: 3px solid @TitleBorder(source); border-radius: 10px; padding: 12px 48px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+				<div style="font-size: 36px; font-weight: bold; color: @TitleColor(source); font-family: monospace; letter-spacing: 5px;">@TitleText(source)</div>
+				<div style="font-size: 12px; color: #a08050; font-family: monospace; letter-spacing: 3px;">@SubtitleText(source)</div>
+			</div>
+
+			<!-- ── Cards row ──────────────────────────────────────────────── -->
+			<div style="display: flex; gap: 16px; justify-content: center;">
+				@for ( int i = 0; i < (sys?.CurrentChoices?.Count ?? 0); i++ )
+				{
+					var upgrade = sys.CurrentChoices[i];
+					var idx     = i;
+					var isWeapon  = upgrade.Type == UpgradeDefinition.UpgradeType.WeaponUnlock
+					             || upgrade.Type == UpgradeDefinition.UpgradeType.WeaponLevelUp;
+					var cardBorder = source == UpgradeSystem.RewardSource.Shrine
+					               ? RarityBorderColor( upgrade.Rarity )
+					               : (isWeapon ? "#c8a800" : "#6a4a1a");
+					var cardBg = source == UpgradeSystem.RewardSource.Shrine
+					           ? RarityBg( upgrade.Rarity )
+					           : (isWeapon ? "#1a1400" : "#1a1008");
+
+				<div style="width: 200px; background: @cardBg; border: 2px solid @cardBorder; border-radius: 10px; padding: 16px 14px 20px 14px; display: flex; flex-direction: column; gap: 10px; pointer-events: all; cursor: pointer;"
+					 onclick=@(() => SelectUpgrade( idx ))>
+
+					@* ── Rarity / type badge ── *@
+					@if ( source == UpgradeSystem.RewardSource.Shrine )
+					{
+						<div style="background: @RarityBadgeBg(upgrade.Rarity); border: 1px solid @RarityBorderColor(upgrade.Rarity); border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: @RarityTextColor(upgrade.Rarity); font-weight: bold; letter-spacing: 1px;">
+							@upgrade.Rarity.ToString().ToUpper()
+						</div>
+					}
+					else if ( isWeapon && upgrade.IsNewWeapon )
+					{
+						<div style="background: #1a3010; border: 1px solid #44aa44; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #88ee88; font-weight: bold; letter-spacing: 1px;">
+							NEW WEAPON
+						</div>
+					}
+					else if ( isWeapon )
+					{
+						<div style="background: #1a1400; border: 1px solid #c8a800; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #f5c518; font-weight: bold; letter-spacing: 1px;">
+							WEAPON
+						</div>
+					}
+					else if ( source == UpgradeSystem.RewardSource.Chest )
+					{
+						<div style="background: #0d0d20; border: 1px solid #7755cc; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #aa88ff; font-weight: bold; letter-spacing: 1px;">
+							ITEM
+						</div>
+					}
+					else if ( upgrade.MaxLevel > 0 )
+					{
+						var prevLevel = upgrade.NextLevel - 1;
+						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #cc99ff; font-weight: bold; letter-spacing: 1px;">
+							TOME  LVL @prevLevel → @upgrade.NextLevel / @upgrade.MaxLevel
+						</div>
+					}
+					else
+					{
+						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 4px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #cc99ff; font-weight: bold; letter-spacing: 1px;">
+							TOME
+						</div>
+					}
+
+					@* ── Upgrade name ── *@
+					<div style="font-size: 17px; color: #f0e0b0; font-family: monospace; font-weight: bold; padding-bottom: 2px;">
+						@upgrade.Name
+					</div>
+
+					@* ── Divider ── *@
+					<div style="height: 1px; background: #3a2510;"></div>
+
+					@* ── Description ── *@
+					<div style="font-size: 12px; color: #c8b090; font-family: monospace; padding-top: 2px;">
+						@upgrade.Description
+					</div>
+
+					@* ── Cumulative stat preview (tomes only) ── *@
+					@if ( upgrade.StatPreview != null )
+					{
+						var parts = upgrade.StatPreview.Split( '→' );
+						@if ( parts.Length == 2 )
+						{
+							<div style="font-size: 13px; font-family: monospace; display: flex; align-items: center; gap: 4px; padding-top: 2px;">
+								<span style="color: #888870;">@parts[0].Trim()</span>
+								<span style="color: #88aaff;">→</span>
+								<span style="color: #88ee88; font-weight: bold;">@parts[1].Trim()</span>
+							</div>
+						}
+					}
+
+				</div>
+				}
+			</div>
+
+			<!-- ── Ignore Offers button (shrine only) ─────────────────────── -->
+			@if ( sys?.CanIgnore == true )
+			{
+				<div style="background: #2a0808; border: 2px solid #883322; border-radius: 8px; padding: 10px 32px; pointer-events: all; cursor: pointer; font-size: 15px; font-family: monospace; color: #cc6655; font-weight: bold; letter-spacing: 2px;"
+					 onclick=@(() => IgnoreOffers())>
+					IGNORE OFFERS
+				</div>
+			}
+			else
+			{
+				<div style="font-size: 11px; color: #5a3a10; font-family: monospace; letter-spacing: 3px;">
+					CLICK A CARD TO SELECT
+				</div>
+			}
+
+		</div>
+	}
+</root>
+
+@code
+{
+	UpgradeSystem UpgSys  => Scene?.GetAllComponents<UpgradeSystem>().FirstOrDefault();
+	bool IsVisible        => UpgSys?.IsShowingUpgrades ?? false;
+
+	void SelectUpgrade( int index ) => UpgSys?.SelectUpgrade( index );
+	void IgnoreOffers()             => UpgSys?.SelectIgnore();
+
+	// ── Title helpers per source ──────────────────────────────────────────────
+
+	string TitleText( UpgradeSystem.RewardSource s ) => s switch
+	{
+		UpgradeSystem.RewardSource.LevelUp => "LEVEL UP!",
+		UpgradeSystem.RewardSource.Shrine  => "CHARGE SHRINE",
+		UpgradeSystem.RewardSource.Chest   => "CHEST REWARD",
+		_                                  => "CHOOSE"
+	};
+
+	string SubtitleText( UpgradeSystem.RewardSource s ) => s switch
+	{
+		UpgradeSystem.RewardSource.LevelUp => "CHOOSE A TOME OR WEAPON",
+		UpgradeSystem.RewardSource.Shrine  => "THE SHRINE OFFERS A REWARD",
+		UpgradeSystem.RewardSource.Chest   => "CHOOSE AN ITEM",
+		_                                  => "CHOOSE YOUR UPGRADE"
+	};
+
+	string TitleBg( UpgradeSystem.RewardSource s ) => s switch
+	{
+		UpgradeSystem.RewardSource.LevelUp => "#1a1008",
+		UpgradeSystem.RewardSource.Shrine  => "#080f1a",
+		UpgradeSystem.RewardSource.Chest   => "#140a1a",
+		_                                  => "#1a1008"
+	};
+
+	string TitleBorder( UpgradeSystem.RewardSource s ) => s switch
+	{
+		UpgradeSystem.RewardSource.LevelUp => "#c8a800",
+		UpgradeSystem.RewardSource.Shrine  => "#3a6fff",
+		UpgradeSystem.RewardSource.Chest   => "#7755cc",
+		_                                  => "#c8a800"
+	};
+
+	string TitleColor( UpgradeSystem.RewardSource s ) => s switch
+	{
+		UpgradeSystem.RewardSource.LevelUp => "#f5c518",
+		UpgradeSystem.RewardSource.Shrine  => "#88aaff",
+		UpgradeSystem.RewardSource.Chest   => "#cc99ff",
+		_                                  => "#f5c518"
+	};
+
+	// ── Rarity helpers ────────────────────────────────────────────────────────
+
+	string RarityBorderColor( UpgradeDefinition.UpgradeRarity r ) => r switch
+	{
+		UpgradeDefinition.UpgradeRarity.Common   => "#44aa44",
+		UpgradeDefinition.UpgradeRarity.Uncommon => "#4488ff",
+		UpgradeDefinition.UpgradeRarity.Rare     => "#cc44cc",
+		_                                        => "#888888"
+	};
+
+	string RarityBg( UpgradeDefinition.UpgradeRarity r ) => r switch
+	{
+		UpgradeDefinition.UpgradeRarity.Common   => "#0a1a0a",
+		UpgradeDefinition.UpgradeRarity.Uncommon => "#080f1a",
+		UpgradeDefinition.UpgradeRarity.Rare     => "#150a15",
+		_                                        => "#111111"
+	};
+
+	string RarityBadgeBg( UpgradeDefinition.UpgradeRarity r ) => r switch
+	{
+		UpgradeDefinition.UpgradeRarity.Common   => "#0d1f0d",
+		UpgradeDefinition.UpgradeRarity.Uncommon => "#0a1030",
+		UpgradeDefinition.UpgradeRarity.Rare     => "#1a0a1a",
+		_                                        => "#111111"
+	};
+
+	string RarityTextColor( UpgradeDefinition.UpgradeRarity r ) => r switch
+	{
+		UpgradeDefinition.UpgradeRarity.Common   => "#66cc66",
+		UpgradeDefinition.UpgradeRarity.Uncommon => "#6699ff",
+		UpgradeDefinition.UpgradeRarity.Rare     => "#dd66dd",
+		_                                        => "#aaaaaa"
+	};
+
+	protected override int BuildHash() =>
+		System.HashCode.Combine(
+			UpgSys?.IsShowingUpgrades ?? false,
+			UpgSys?.CurrentChoices?.Count ?? 0,
+			(int)(UpgSys?.CurrentSource ?? 0)
+		);
+}

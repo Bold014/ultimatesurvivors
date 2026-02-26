@@ -1,0 +1,102 @@
+{
+  "Animations": [
+    {
+      "Name": "walkright",
+      "FrameRate": 7.9998903,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/axe_warrior_16x16_4.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_5.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_6.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_7.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/axe_warrior_16x16_12.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_13.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_14.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_15.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/axe_warrior_16x16_8.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_9.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_10.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_11.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "idle",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/axe_warrior_16x16_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_2.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/axe_warrior_16x16_3.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

@@ -1,0 +1,102 @@
+{
+  "Animations": [
+    {
+      "Name": "knightwalkright",
+      "FrameRate": 7.9998903,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/heavy_knight_4.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_5.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_6.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_7.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "knightwalkup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/heavy_knight_12.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_13.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_14.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_15.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "knightwalkdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/heavy_knight_8.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_9.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_10.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_11.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "knightidle",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/heavy_knight_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_2.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/heavy_knight_3.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

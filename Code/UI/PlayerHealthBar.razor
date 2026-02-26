@@ -1,0 +1,18 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+
+<root>
+	<div class="hp-bg">
+		<div class="hp-fill" style="width: @FillPct%;"></div>
+	</div>
+</root>
+
+@code
+{
+	public float HPPercent { get; set; } = 1f;
+
+	int FillPct => (int)(Math.Clamp( HPPercent, 0f, 1f ) * 100);
+
+	protected override int BuildHash() => System.HashCode.Combine( FillPct );
+}

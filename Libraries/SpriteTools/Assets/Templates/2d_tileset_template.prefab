@@ -1,0 +1,69 @@
+{
+  "RootObject": {
+    "__guid": "6ea51db6-ccca-4f99-b136-44b985a35428",
+    "__version": 1,
+    "Flags": 0,
+    "Name": "2d_tileset_template",
+    "Position": "0,0,0",
+    "Rotation": "0,0,0,1",
+    "Scale": "1,1,1",
+    "Tags": "",
+    "Enabled": true,
+    "NetworkMode": 2,
+    "NetworkInterpolation": true,
+    "NetworkOrphaned": 0,
+    "OwnerTransfer": 1,
+    "Components": [
+      {
+        "__type": "SpriteTools.TilesetComponent",
+        "__guid": "badc1680-45e3-4736-9369-323f156f5c93",
+        "__enabled": true,
+        "__version": 1,
+        "ColliderWidth": 0,
+        "Friction": null,
+        "HasCollider": false,
+        "InternalControls": null,
+        "IsTrigger": false,
+        "Layers": [],
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "OnTriggerEnter": null,
+        "OnTriggerExit": null,
+        "Static": true,
+        "Surface": null,
+        "SurfaceVelocity": "0,0,0"
+      }
+    ],
+    "Children": [],
+    "__properties": {
+      "NetworkInterpolation": true,
+      "TimeScale": 1,
+      "WantsSystemScene": true,
+      "Metadata": {},
+      "NavMesh": {
+        "Enabled": false,
+        "IncludeStaticBodies": true,
+        "IncludeKeyframedBodies": true,
+        "EditorAutoUpdate": true,
+        "AgentHeight": 64,
+        "AgentRadius": 16,
+        "AgentStepSize": 18,
+        "AgentMaxSlope": 40,
+        "ExcludedBodies": "",
+        "IncludedBodies": ""
+      }
+    },
+    "__variables": []
+  },
+  "ResourceVersion": 2,
+  "ShowInMenu": true,
+  "MenuPath": "2D Object/2D Tileset",
+  "MenuIcon": "calendar_view_month",
+  "DontBreakAsTemplate": false,
+  "__references": [],
+  "__version": 2
+}

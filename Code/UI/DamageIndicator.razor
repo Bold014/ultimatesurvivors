@@ -1,0 +1,38 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+
+<root>
+	<div class="dmg-number @SizeClass" style="opacity: @Opacity; color: @TextColor;">@DisplayText</div>
+</root>
+
+@code
+{
+	public float Damage { get; set; }
+	public bool IsCritical { get; set; } = false;
+
+	private const float Lifetime = 0.85f;
+	private float _elapsed = 0f;
+
+	private float Opacity => Math.Clamp( 1f - (_elapsed / Lifetime), 0f, 1f );
+	private string DisplayText => IsCritical
+		? $"CRIT {(int)MathF.Ceiling( Damage )}!"
+		: ((int)MathF.Ceiling( Damage )).ToString();
+	private string SizeClass => (IsCritical || Damage >= 30f) ? "big" : "normal";
+	private string TextColor => IsCritical
+		? "rgb(255, 50, 50)"
+		: (Damage >= 50f ? "rgb(255,110,20)" : "rgb(255,220,55)");
+
+	protected override void OnUpdate()
+	{
+		_elapsed += Time.Delta;
+
+		// Float upward in world space — +X is screen-up in top-down orthographic view
+		GameObject.WorldPosition += new Vector3( 35f * Time.Delta, 0f, 0f );
+
+		if ( _elapsed >= Lifetime )
+			GameObject.Destroy();
+	}
+
+	protected override int BuildHash() => System.HashCode.Combine( (int)(_elapsed * 15), IsCritical, (int)Damage );
+}

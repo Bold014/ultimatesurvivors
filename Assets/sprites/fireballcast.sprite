@@ -1,0 +1,30 @@
+{
+  "Animations": [
+    {
+      "Name": "fireballcast",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/fireball_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/fireball_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/fireball_2.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/fireball_3.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

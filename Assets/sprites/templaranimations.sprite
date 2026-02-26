@@ -1,0 +1,102 @@
+{
+  "Animations": [
+    {
+      "Name": "walkright",
+      "FrameRate": 7.9998903,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/paladin_non-combat_animations_4.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_5.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_6.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_7.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/paladin_non-combat_animations_12.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_13.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_14.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_15.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/paladin_non-combat_animations_8.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_9.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_10.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_11.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "idle",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/paladin_non-combat_animations_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_2.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/paladin_non-combat_animations_3.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

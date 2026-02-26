@@ -1,0 +1,102 @@
+{
+  "Animations": [
+    {
+      "Name": "idle",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/mage_fem_red_0.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_1.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_2.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_3.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkright",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/mage_fem_red_4.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_5.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_6.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_7.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/mage_fem_red_8.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_9.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_10.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_11.png",
+          "BroadcastMessages": []
+        }
+      ]
+    },
+    {
+      "Name": "walkup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        {
+          "Texture": "sprites/mage_fem_red_12.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_13.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_14.png",
+          "BroadcastMessages": []
+        },
+        {
+          "Texture": "sprites/mage_fem_red_15.png",
+          "BroadcastMessages": []
+        }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}
