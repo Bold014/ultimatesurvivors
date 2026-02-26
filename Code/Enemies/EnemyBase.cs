@@ -208,21 +208,8 @@ public sealed class EnemyBase : Component
 
 	private void SpawnDamageIndicator( float amount, bool isCritical = false )
 	{
-		var go = new GameObject( true, "DmgIndicator" );
-
-		// Slight Y jitter so simultaneous hits don't all stack on top of each other
-		float yOffset = (System.Random.Shared.NextSingle() - 0.5f) * 18f;
-		go.WorldPosition = WorldPosition + new Vector3( 20f, yOffset, 1f );
-		go.WorldRotation = Rotation.From( new Angles( 90f, 0f, 0f ) );
-		go.WorldScale = new Vector3( 2.5f, 2.5f, 2.5f );
-
-		// WorldPanel must exist first so PanelComponent can attach to it (matches PlayerController pattern)
-		var wp = go.Components.Create<Sandbox.WorldPanel>();
-		wp.PanelSize = new Vector2( 100f, 36f );
-
-		var indicator = go.Components.Create<DamageIndicator>();
-		indicator.Damage = amount;
-		indicator.IsCritical = isCritical;
+		var pos = WorldPosition + new Vector3( 20f, (System.Random.Shared.NextSingle() - 0.5f) * 18f, 1f );
+		DamageIndicatorManager.Instance?.RequestIndicator( pos, amount, isCritical );
 	}
 
 	private void Die( string weaponId = null )

@@ -412,8 +412,7 @@ public sealed class PlayerController : Component
 		// Follow player every frame — 20 units below in screen space (-X = screen-down)
 		_hpBarGo.WorldPosition = WorldPosition + new Vector3( -14f, 0f, 1f );
 		_hpBar.HPPercent = Math.Clamp( _state.HPPercent, 0f, 1f );
-		_hpBar.HasShield = _state.MaxShield > 0f;
-		_hpBar.ShieldPercent = _hpBar.HasShield
+		_hpBar.ShieldPercent = _state.MaxShield > 0f
 			? Math.Clamp( _state.Shield / _state.MaxShield, 0f, 1f )
 			: 0f;
 	}

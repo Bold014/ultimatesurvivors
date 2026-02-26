@@ -21,6 +21,11 @@ public sealed class GameManager : Component
 		Log.Info( "[GameManager] OnStart — spawning player" );
 		SpawnPlayer();
 		Log.Info( "[GameManager] SpawnPlayer() returned" );
+
+		// Add DamageIndicatorManager to HUD for screen-space damage numbers (avoids WorldPanel culling)
+		var hud = Scene.Children.FirstOrDefault( c => c.Name == "HUD" );
+		if ( hud != null && hud.Components.Get<DamageIndicatorManager>() == null )
+			hud.Components.Create<DamageIndicatorManager>();
 	}
 
 	protected override void OnUpdate()
