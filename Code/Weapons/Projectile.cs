@@ -162,3 +162,5 @@ public sealed class Projectile : Component
 		return ((c - closest).WithZ( 0f )).LengthSquared < r * r;
 	}
 }
+
+}
