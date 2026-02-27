@@ -29,24 +29,24 @@
 			<div style="flex: 1; display: flex; align-items: center; gap: 24px; justify-content: flex-start; min-width: 0;">
 
 				<div style="display: flex; align-items: center; gap: 8px;">
-					<div style="width: 24px; height: 24px; border: 2px solid #3a6fff; border-radius: 50%; background: #0a1030; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #88aaff; font-family: monospace; font-weight: bold; box-shadow: 0 0 6px rgba(58,111,255,0.2);">X</div>
-					<span style="font-size: 14px; color: #aaccff; font-family: monospace;">@(xp?.CurrentXP ?? 0) / @(xp?.XPToNextLevel ?? 100)</span>
+					<div style="width: 24px; height: 24px; border: 2px solid #3a6fff; border-radius: 50%; background: #0a1030; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #88aaff; font-family: Minecraft; font-weight: bold; box-shadow: 0 0 6px rgba(58,111,255,0.2);">X</div>
+					<span style="font-size: 14px; color: #aaccff; font-family: Minecraft;">@(xp?.CurrentXP ?? 0) / @(xp?.XPToNextLevel ?? 100)</span>
 				</div>
 
 				<div style="display: flex; align-items: center; gap: 8px;">
-					<div style="width: 24px; height: 24px; border: 2px solid #8a2020; border-radius: 50%; background: #2a0808; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #ff6666; font-family: monospace; font-weight: bold;">K</div>
-					<span style="font-size: 14px; color: #e8aaaa; font-family: monospace;">@(stats?.Kills ?? 0)</span>
+					<div style="width: 24px; height: 24px; border: 2px solid #8a2020; border-radius: 50%; background: #2a0808; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #ff6666; font-family: Minecraft; font-weight: bold;">K</div>
+					<span style="font-size: 14px; color: #e8aaaa; font-family: Minecraft;">@(stats?.Kills ?? 0)</span>
 				</div>
 
 				<div style="display: flex; align-items: center; gap: 8px;">
-					<div style="width: 24px; height: 24px; border: 2px solid #c8a800; border-radius: 50%; background: #2a1f00; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #f5c518; font-family: monospace; font-weight: bold;">$</div>
-					<span style="font-size: 14px; color: #f5c518; font-family: monospace; font-weight: bold;">@(coins?.Coins ?? 0)</span>
+					<div style="width: 24px; height: 24px; border: 2px solid #c8a800; border-radius: 50%; background: #2a1f00; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #f5c518; font-family: Minecraft; font-weight: bold;">$</div>
+					<span style="font-size: 14px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@(coins?.Coins ?? 0)</span>
 				</div>
 
 			</div>
 
 			<!-- CENTER countdown timer (10 min until final boss) -->
-			<div style="flex: 0 0 auto; font-size: 26px; font-family: monospace; color: #f5c518; font-weight: bold; letter-spacing: 6px; text-shadow: 0 0 12px rgba(245,197,24,0.15);">
+			<div style="flex: 0 0 auto; font-size: 26px; font-family: Minecraft; color: #f5c518; font-weight: bold; letter-spacing: 6px; text-shadow: 0 0 12px rgba(245,197,24,0.15);">
 				@(spawner?.IsFinalBossPhase == true ? "FINAL BOSS!" : FormatTime( spawner?.TimeRemaining ?? 600f ))
 			</div>
 
@@ -54,21 +54,21 @@
 			<div style="flex: 1; display: flex; align-items: center; gap: 24px; justify-content: flex-end; min-width: 0;">
 
 				<div style="display: flex; align-items: center; gap: 8px;">
-					<div style="width: 24px; height: 24px; border: 2px solid #6a4a1a; border-radius: 4px; background: #120c04; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #f5c518; font-family: monospace; font-weight: bold;">S</div>
-					<span style="font-size: 14px; color: #f5c518; font-family: monospace;">@((int)(stats?.Score ?? 0))</span>
+					<div style="width: 24px; height: 24px; border: 2px solid #6a4a1a; border-radius: 4px; background: #120c04; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #f5c518; font-family: Minecraft; font-weight: bold;">S</div>
+					<span style="font-size: 14px; color: #f5c518; font-family: Minecraft;">@((int)(stats?.Score ?? 0))</span>
 				</div>
 
 				<div style="display: flex; align-items: center; gap: 8px; background: #120c04; border: 1px solid #4a3520; padding: 4px 12px; border-radius: 6px;">
-					<span style="font-size: 11px; color: #a08050; font-family: monospace; letter-spacing: 2px;">WAVE</span>
-					<span style="font-size: 16px; color: #f5c518; font-family: monospace; font-weight: bold;">@(spawner?.IsFinalBossPhase == true ? "BOSS!" : (spawner?.WaveNumber ?? 0).ToString())</span>
+					<span style="font-size: 11px; color: #a08050; font-family: Minecraft; letter-spacing: 2px;">WAVE</span>
+					<span style="font-size: 16px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@(spawner?.IsFinalBossPhase == true ? "BOSS!" : (spawner?.WaveNumber ?? 0).ToString())</span>
 				</div>
 				<div style="display: flex; align-items: center; gap: 8px; background: #120c04; border: 1px solid #4a3520; padding: 4px 12px; border-radius: 6px;">
-					<span style="font-size: 11px; color: #a08050; font-family: monospace; letter-spacing: 2px;">MINI</span>
-					<span style="font-size: 16px; color: #f5c518; font-family: monospace; font-weight: bold;">@(spawner?.MiniBossesSpawned ?? 0)/3</span>
+					<span style="font-size: 11px; color: #a08050; font-family: Minecraft; letter-spacing: 2px;">PHASE</span>
+					<span style="font-size: 16px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@(spawner?.IntensityPhase ?? 0)</span>
 				</div>
 
 				<div style="background: linear-gradient(180deg, #2a2008 0%, #1a1404 100%); border: 2px solid #c8a800; padding: 4px 14px; border-radius: 8px; box-shadow: 0 0 10px rgba(200,168,0,0.2);">
-					<span style="font-size: 16px; font-family: monospace; color: #f5c518; font-weight: bold; letter-spacing: 2px;">LVL @(xp?.Level ?? 1)</span>
+					<span style="font-size: 16px; font-family: Minecraft; color: #f5c518; font-weight: bold; letter-spacing: 2px;">LVL @(xp?.Level ?? 1)</span>
 				</div>
 
 			</div>
@@ -79,10 +79,10 @@
 
 		<!-- HP bar -->
 		<div style="display: flex; flex-direction: column; gap: 6px;">
-			<div style="font-size: 11px; color: #c08050; font-family: monospace; letter-spacing: 2px;">HEALTH</div>
+			<div style="font-size: 11px; color: #c08050; font-family: Minecraft; letter-spacing: 2px;">HEALTH</div>
 			<div style="background: #1a0808; border: 2px solid #6a2020; border-radius: 8px; height: 34px; position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
 				<div style="background: linear-gradient(90deg, #cc2222 0%, #e84444 100%); height: 100%; width: @((int)((player?.HPPercent ?? 1f) * 100))%; transition: width 0.12s ease-out; box-shadow: 0 0 8px rgba(204,34,34,0.4);"></div>
-				<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-family: monospace; color: #ffffff; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+				<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-family: Minecraft; color: #ffffff; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
 					@((int)(player?.HP ?? 0)) / @((int)(player?.MaxHP ?? 0))
 				</div>
 			</div>
@@ -93,10 +93,10 @@
 		{
 			var shieldPct = (int)(Math.Clamp( (player?.Shield ?? 0f) / (player?.MaxShield ?? 1f), 0f, 1f ) * 100);
 			<div style="display: flex; flex-direction: column; gap: 4px;">
-				<div style="font-size: 11px; color: #88aaff; font-family: monospace; letter-spacing: 2px;">SHIELD</div>
+				<div style="font-size: 11px; color: #88aaff; font-family: Minecraft; letter-spacing: 2px;">SHIELD</div>
 				<div style="background: #0a1030; border: 2px solid #3a5aaa; border-radius: 6px; height: 18px; position: relative; overflow: hidden;">
 					<div style="background: linear-gradient(90deg, #3a6fff 0%, #5a8fff 100%); height: 100%; width: @shieldPct%; transition: width 0.12s ease-out;"></div>
-					<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: monospace; color: #ccddff; font-weight: bold;">
+					<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: Minecraft; color: #ccddff; font-weight: bold;">
 						@((int)(player?.Shield ?? 0)) / @((int)(player?.MaxShield ?? 0))
 					</div>
 				</div>
@@ -108,20 +108,38 @@
 
 			<!-- Weapon slots -->
 			<div style="display: flex; flex-direction: column; gap: 8px;">
-				<div style="font-size: 11px; color: #c08050; font-family: monospace; letter-spacing: 2px;">WEAPONS</div>
+				<div style="font-size: 11px; color: #c08050; font-family: Minecraft; letter-spacing: 2px;">WEAPONS</div>
 				<div style="display: flex; flex-direction: row; gap: 8px;">
 					@for ( int i = 0; i < 4; i++ )
 					{
 						var w = (weapons?.Weapons != null && i < weapons.Weapons.Count) ? weapons.Weapons[i] : null;
-						<div style="width: 52px; height: 52px; background: @(w != null ? "linear-gradient(180deg, #2a1a04 0%, #1a1004 100%)" : "#0a0804"); border: 2px solid @(w != null ? "#c8a800" : "#2a2010"); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; overflow: hidden; box-shadow: @(w != null ? "0 0 8px rgba(200,168,0,0.1)" : "none");">
+						<div style="width: 52px; height: 52px; background: @(w != null ? "linear-gradient(180deg, #2a1a04 0%, #1a1004 100%)" : "#0a0804"); border: 2px solid @(w != null ? "#c8a800" : "#2a2010"); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; overflow: hidden; box-shadow: @(w != null ? "0 0 8px rgba(200,168,0,0.1)" : "none"); ">
 							@if ( w != null )
 							{
-								<div style="font-size: 11px; color: #f5c518; font-weight: bold; font-family: monospace;">@WeaponAbbrev( w.WeaponDisplayName )</div>
-								<div style="font-size: 9px; color: #e8c080; font-family: monospace; background: #1a1008; padding: 1px 4px; border-radius: 3px;">Lv@(w.WeaponLevel)</div>
+								var wIcon = WeaponIconPath( w.WeaponDisplayName );
+								var wName = w.WeaponDisplayName ?? "";
+								var isStormRod = wName.Equals( "Storm Rod", System.StringComparison.OrdinalIgnoreCase );
+								var isEmberTrail = wName.Equals( "Ember Trail", System.StringComparison.OrdinalIgnoreCase );
+								@if ( wIcon != null )
+								{
+									@if ( isStormRod || isEmberTrail )
+									{
+										<div style="width: 44px; height: 44px; background-image: url('@wIcon'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated; flex-shrink: 0;"></div>
+									}
+									else
+									{
+										<img src="@wIcon" style="width: 40px; height: 40px; image-rendering: pixelated; flex-shrink: 0;" />
+									}
+								}
+								else
+								{
+									<div style="font-size: 11px; color: #f5c518; font-weight: bold; font-family: Minecraft;">@WeaponAbbrev( w.WeaponDisplayName )</div>
+								}
+								<div style="font-size: 9px; color: #e8c080; font-family: Minecraft; background: #1a1008; padding: 1px 4px; border-radius: 3px;">Lv@(w.WeaponLevel)</div>
 							}
 							else
 							{
-								<div style="font-size: 12px; color: #3a3020; font-family: monospace;">@(i+1)</div>
+								<div style="font-size: 12px; color: #3a3020; font-family: Minecraft;">@(i+1)</div>
 							}
 						</div>
 					}
@@ -130,19 +148,27 @@
 
 			<!-- Tome slots -->
 			<div style="display: flex; flex-direction: column; gap: 8px;">
-				<div style="font-size: 11px; color: #c08050; font-family: monospace; letter-spacing: 2px;">TOMES</div>
+				<div style="font-size: 11px; color: #c08050; font-family: Minecraft; letter-spacing: 2px;">TOMES</div>
 				<div style="display: flex; flex-direction: row; gap: 8px;">
 					@for ( int i = 0; i < 4; i++ )
 					{
 						var p = (passives?.Passives != null && i < passives.Passives.Count) ? passives.Passives[i] : null;
-						<div style="width: 52px; height: 52px; background: @(p != null ? "linear-gradient(180deg, #1a0c20 0%, #120818 100%)" : "#0a0804"); border: 2px solid @(p != null ? "#8a5a20" : "#2a2010"); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+						<div style="width: 52px; height: 52px; background: @(p != null ? "linear-gradient(180deg, #1a0c20 0%, #120818 100%)" : "#0a0804"); border: 2px solid @(p != null ? "#8a5a20" : "#2a2010"); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; overflow: hidden;">
 							@if ( p != null )
 							{
-								<div style="font-size: 10px; color: #e8c080; font-weight: bold; font-family: monospace; text-align: center;">@PassiveAbbrev( p )</div>
+								var tIcon = TomeIconPath( p );
+								@if ( tIcon != null )
+								{
+									<div style="width: 40px; height: 40px; background-image: url('@tIcon'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+								}
+								else
+								{
+									<div style="font-size: 10px; color: #e8c080; font-weight: bold; font-family: Minecraft; text-align: center;">@PassiveAbbrev( p )</div>
+								}
 							}
 							else
 							{
-								<div style="font-size: 12px; color: #3a3020; font-family: monospace;">@(i+1)</div>
+								<div style="font-size: 12px; color: #3a3020; font-family: Minecraft;">@(i+1)</div>
 							}
 						</div>
 					}
@@ -162,12 +188,12 @@
 			var isFree = player?.IsNextChestFree ?? false;
 			var canOpen = canAfford || isFree;
 			<div style="position: absolute; bottom: @(chestBottom)px; left: 50%; transform: translateX(-50%); background: #1a1008ee; border: 2px solid @(canOpen ? "#c8a800" : "#883322"); border-radius: 10px; padding: 10px 24px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
-				<div style="font-size: 16px; font-family: monospace; color: @(canOpen ? "#f5c518" : "#cc6666"); font-weight: bold;">
+				<div style="font-size: 16px; font-family: Minecraft; color: @(canOpen ? "#f5c518" : "#cc6666"); font-weight: bold;">
 					[E] Open Chest — @(isFree ? "FREE" : $"{nearChest.Cost} coins")
 				</div>
 				@if ( !canOpen )
 				{
-					<div style="font-size: 11px; font-family: monospace; color: #cc6666; margin-top: 2px;">Not enough coins</div>
+					<div style="font-size: 11px; font-family: Minecraft; color: #cc6666; margin-top: 2px;">Not enough coins</div>
 				}
 			</div>
 		}
@@ -177,12 +203,12 @@
 		{
 			int pct = (int)(nearBeacon.ChargePercent * 100f);
 			<div style="position: absolute; bottom: @(beaconBottom)px; left: 50%; transform: translateX(-50%); background: #080f1aee; border: 2px solid #3a6fff; border-radius: 8px; padding: 8px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
-				<span style="font-size: 11px; font-family: monospace; color: #88aaff; font-weight: bold; letter-spacing: 1px; white-space: nowrap;">CHARGING BEACON</span>
+				<span style="font-size: 11px; font-family: Minecraft; color: #88aaff; font-weight: bold; letter-spacing: 1px; white-space: nowrap;">CHARGING BEACON</span>
 				<div style="display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1;">
 					<div style="flex: 1; min-width: 60px; background: #0a1030; border: 1px solid #3a6fff; border-radius: 3px; height: 8px; overflow: hidden;">
 						<div style="background: #3a6fff; height: 100%; width: @pct%; transition: width 0.1s;"></div>
 					</div>
-					<span style="font-size: 11px; font-family: monospace; color: #88aaff; font-weight: bold; white-space: nowrap;">@pct%</span>
+					<span style="font-size: 11px; font-family: Minecraft; color: #88aaff; font-weight: bold; white-space: nowrap;">@pct%</span>
 				</div>
 			</div>
 		}
@@ -190,64 +216,67 @@
 		<!-- ── Death overlay ─────────────────────────────────────────────────── -->
 		@if ( stats?.IsAlive == false )
 		{
-			<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background: #0a0000; opacity: 0.92;">
-			<div style="width: 640px; max-width: 92%; display: flex; flex-direction: column; align-items: center;">
-				<div style="font-size: 64px; color: #cc2222; font-family: monospace; font-weight: bold; letter-spacing: 8px; white-space: nowrap; text-shadow: 0 0 20px rgba(204,34,34,0.5);">YOU DIED</div>
-				<div style="font-size: 16px; color: #884444; font-family: monospace; margin-top: 10px; letter-spacing: 3px;">RUN SUMMARY</div>
+			<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #0a0505 0%, #0d0808 50%, #080404 100%);">
+			<div style="width: 680px; max-width: 94%; display: flex; flex-direction: column; align-items: center; font-family: Minecraft;">
+				<!-- Title block -->
+				<div style="text-align: center; margin-bottom: 28px;">
+					<div style="font-size: 56px; font-weight: bold; letter-spacing: 12px; color: #e03030; text-shadow: 0 0 24px rgba(224,48,48,0.6), 0 2px 4px rgba(0,0,0,0.8);">YOU DIED</div>
+					<div style="font-size: 13px; color: #8a6a5a; letter-spacing: 4px; margin-top: 12px; text-transform: uppercase;">Run Summary</div>
+				</div>
 
-				<!-- Two-column stats panel — fills the open space on the right -->
-				<div style="margin-top: 20px; width: 100%; display: flex; flex-direction: row; gap: 20px;">
-					<!-- Left: This run stats -->
-					<div style="flex: 1; min-width: 0; background: #1a0c08; border: 2px solid #4a2020; border-radius: 8px; padding: 20px 24px;">
-						<div style="font-size: 16px; color: #884444; font-family: monospace; letter-spacing: 3px; margin-bottom: 14px;">THIS RUN</div>
+				<!-- Stats panels -->
+				<div style="width: 100%; display: flex; gap: 24px;">
+					<!-- This Run -->
+					<div style="flex: 1; min-width: 0; background: linear-gradient(180deg, #1a100c 0%, #140c08 100%); border: 1px solid #3a2520; border-radius: 12px; padding: 24px 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+						<div style="font-size: 12px; color: #6a5040; letter-spacing: 4px; margin-bottom: 20px; text-transform: uppercase;">This Run</div>
 						@{
 							var topWeapon = stats?.KillsByWeapon?.OrderByDescending( kv => kv.Value ).FirstOrDefault();
 						}
-						<div style="display: flex; flex-direction: column; gap: 10px;">
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Time Survived</span>
-								<span style="font-size: 20px; color: #f5c518; font-family: monospace; font-weight: bold;">@FormatTime( stats?.TimeAlive ?? 0f )</span>
+						<div style="display: flex; flex-direction: column; gap: 12px;">
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Time Survived</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 60px;">@FormatTime( stats?.TimeAlive ?? 0f )</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Kills</span>
-								<span style="font-size: 20px; color: #e8aaaa; font-family: monospace; font-weight: bold;">@(stats?.Kills ?? 0)</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Kills</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 60px;">@(stats?.Kills ?? 0)</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Level</span>
-								<span style="font-size: 20px; color: #88aaff; font-family: monospace; font-weight: bold;">@(stats?.Level ?? 1)</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Level</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 60px;">@(stats?.Level ?? 1)</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Wave</span>
-								<span style="font-size: 20px; color: #f5c518; font-family: monospace; font-weight: bold;">@(spawner?.WaveNumber ?? 0)</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Wave</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 60px;">@(spawner?.WaveNumber ?? 0)</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Score</span>
-								<span style="font-size: 20px; color: #e8c080; font-family: monospace; font-weight: bold;">@((int)(stats?.Score ?? 0))</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Score</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 60px;">@((int)(stats?.Score ?? 0))</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Chests</span>
-								<span style="font-size: 20px; color: #c8a050; font-family: monospace; font-weight: bold;">@(Chest.ChestsOpened)</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Chests</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 60px;">@(Chest.ChestsOpened)</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Projectiles</span>
-								<span style="font-size: 20px; color: #aaccff; font-family: monospace; font-weight: bold;">@(stats?.ProjectilesFired ?? 0)</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Projectiles</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 60px;">@(stats?.ProjectilesFired ?? 0)</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Dodge Streak</span>
-								<span style="font-size: 20px; color: #6aff88; font-family: monospace; font-weight: bold;">@(player?.LongestNoDamageSeconds ?? 0)s</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Dodge Streak</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 60px;">@((int)(player?.LongestNoDamageSeconds ?? 0))s</span>
 							</div>
 							@if ( (topWeapon?.Value ?? 0) > 0 )
 							{
-								<div style="display: flex; flex-direction: row; justify-content: center; align-items: center; margin-top: 6px; padding-top: 12px; border-top: 1px solid #2a1515; font-size: 16px; color: #a08060; font-family: monospace;">
-									Best: <span style="color: #f5c518; font-weight: bold;">@(topWeapon?.Key ?? "?")</span> — @(topWeapon?.Value ?? 0) kills
+								<div style="margin-top: 8px; padding-top: 16px; border-top: 1px solid #2a1a18; text-align: center; font-size: 14px; color: #8a7a6a;">
+									Best weapon: <span style="color: #e8c878; font-weight: bold;">@(topWeapon?.Key ?? "?")</span> — @(topWeapon?.Value ?? 0) kills
 								</div>
 							}
 						</div>
 					</div>
 
-					<!-- Right: Personal bests — uses the previously empty space -->
-					<div style="flex: 1; min-width: 0; background: #0f0804; border: 2px solid #3a1810; border-radius: 8px; padding: 20px 24px;">
-						<div style="font-size: 16px; color: #884444; font-family: monospace; letter-spacing: 3px; margin-bottom: 14px;">PERSONAL BESTS</div>
+					<!-- Personal Bests -->
+					<div style="flex: 1; min-width: 0; background: linear-gradient(180deg, #140c0a 0%, #100806 100%); border: 1px solid #2a1a18; border-radius: 12px; padding: 24px 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+						<div style="font-size: 12px; color: #6a5040; letter-spacing: 4px; margin-bottom: 20px; text-transform: uppercase;">Personal Bests</div>
 						@{
 							var runSurviveMin = (int)((stats?.TimeAlive ?? 0f) / 60f);
 							var runLevel = stats?.Level ?? 1;
@@ -259,41 +288,51 @@
 							var bestDodge = PlayerProgress.Data.LongestNoDamageSeconds;
 							var isNewDodge = runDodge > bestDodge;
 						}
-						<div style="display: flex; flex-direction: column; gap: 10px;">
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Longest Survival</span>
-								<span style="font-size: 20px; color: @(isNewSurvival ? "#6aff88" : "#f5c518"); font-family: monospace; font-weight: bold;">
-									@(isNewSurvival ? runSurviveMin : bestSurvive) min @(isNewSurvival ? "★ NEW!" : "")
-								</span>
+						<div style="display: flex; flex-direction: column; gap: 12px;">
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Longest Survival</span>
+								<span style="font-size: 18px; font-weight: bold; color: @(isNewSurvival ? "#5ae88a" : "#e8c878"); text-align: right; min-width: 80px;">@(isNewSurvival ? runSurviveMin : bestSurvive) min@(isNewSurvival ? " ★" : "")</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Highest Level</span>
-								<span style="font-size: 20px; color: @(isNewLevel ? "#6aff88" : "#88aaff"); font-family: monospace; font-weight: bold;">
-									@(isNewLevel ? runLevel : bestLevel) @(isNewLevel ? "★ NEW!" : "")
-								</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Highest Level</span>
+								<span style="font-size: 18px; font-weight: bold; color: @(isNewLevel ? "#5ae88a" : "#e8c878"); text-align: right; min-width: 80px;">@(isNewLevel ? runLevel : bestLevel)@(isNewLevel ? " ★" : "")</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Total Kills</span>
-								<span style="font-size: 20px; color: #e8aaaa; font-family: monospace; font-weight: bold;">@(PlayerProgress.Data.TotalKills + (stats?.Kills ?? 0))</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Total Kills</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 80px;">@(PlayerProgress.Data.TotalKills + (stats?.Kills ?? 0))</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Runs Completed</span>
-								<span style="font-size: 20px; color: #c8a050; font-family: monospace; font-weight: bold;">@(PlayerProgress.Data.TotalRunsCompleted)</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Runs Completed</span>
+								<span style="font-size: 18px; font-weight: bold; color: #e8c878; text-align: right; min-width: 80px;">@(PlayerProgress.Data.TotalRunsCompleted)</span>
 							</div>
-							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-								<span style="font-size: 17px; color: #a08060; font-family: monospace;">Best Dodge</span>
-								<span style="font-size: 20px; color: #6aff88; font-family: monospace; font-weight: bold;">
-									@(isNewDodge ? runDodge : bestDodge)s @(isNewDodge ? "★ NEW!" : "")
-								</span>
+							<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 16px;">
+								<span style="font-size: 15px; color: #9a7a6a; flex-shrink: 0;">Best Dodge</span>
+								<span style="font-size: 18px; font-weight: bold; color: @(isNewDodge ? "#5ae88a" : "#e8c878"); text-align: right; min-width: 80px;">@(isNewDodge ? runDodge : bestDodge)s@(isNewDodge ? " ★" : "")</span>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div style="font-size: 20px; color: #c08050; font-family: monospace; margin-top: 20px; letter-spacing: 3px; white-space: nowrap;">
-					Returning in @((int)MathF.Ceiling( GameManager.ReturnToMenuCountdown )) s
+				<!-- Countdown -->
+				@{
+					var countdownSec = (int)MathF.Ceiling( GameManager.ReturnToMenuCountdown );
+				}
+				<div style="margin-top: 28px; font-size: 15px; color: #7a5a4a; letter-spacing: 2px;">
+					Returning in @countdownSec second@(countdownSec == 1 ? "" : "s")
 				</div>
 			</div>
+			</div>
+		}
+
+		<!-- Boss HP bar — centered at bottom, visible during final boss phase -->
+		@if ( spawner?.IsFinalBossPhase == true && DragonBoss.Instance != null )
+		{
+			var bossPct = (int)(DragonBoss.Instance.HPPercent * 100);
+			<div style="position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); width: 400px; background: linear-gradient(180deg, #1a0808 0%, #0f0404 100%); border: 2px solid #8a2020; border-radius: 12px; padding: 12px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
+				<div style="font-size: 12px; color: #e84444; font-family: Minecraft; letter-spacing: 3px; margin-bottom: 6px;">DRAGON BOSS</div>
+				<div style="background: #0a0404; border: 1px solid #4a1010; border-radius: 8px; height: 24px; position: relative; overflow: hidden;">
+					<div style="background: linear-gradient(90deg, #cc2222 0%, #e84444 100%); height: 100%; width: @bossPct%; transition: width 0.15s ease-out; box-shadow: 0 0 8px rgba(204,34,34,0.5);"></div>
+				</div>
 			</div>
 		}
 	}
@@ -301,13 +340,13 @@
 
 @code
 {
-	PlayerLocalState LocalPlayer   => Scene?.GetAllComponents<PlayerLocalState>().FirstOrDefault();
-	PlayerXP         LocalXP       => Scene?.GetAllComponents<PlayerXP>().FirstOrDefault();
-	PlayerStats      LocalStats    => Scene?.GetAllComponents<PlayerStats>().FirstOrDefault();
-	PlayerWeapons    LocalWeapons  => Scene?.GetAllComponents<PlayerWeapons>().FirstOrDefault();
-	PlayerPassives   LocalPassives => Scene?.GetAllComponents<PlayerPassives>().FirstOrDefault();
-	EnemySpawner     LocalSpawner  => Scene?.GetAllComponents<EnemySpawner>().FirstOrDefault();
-	PlayerCoins      LocalCoins    => Scene?.GetAllComponents<PlayerCoins>().FirstOrDefault();
+	PlayerLocalState LocalPlayer   => PlayerLocalState.LocalInstance;
+	PlayerXP         LocalXP       => PlayerXP.LocalInstance;
+	PlayerStats      LocalStats    => PlayerStats.LocalInstance;
+	PlayerWeapons    LocalWeapons  => PlayerWeapons.LocalInstance;
+	PlayerPassives   LocalPassives => PlayerPassives.LocalInstance;
+	EnemySpawner     LocalSpawner  => EnemySpawner.LocalInstance;
+	PlayerCoins      LocalCoins    => PlayerCoins.LocalInstance;
 	Chest            NearbyChest   => Scene?.GetAllComponents<Chest>().FirstOrDefault( c => c.IsPlayerNearby );
 	LevelUpBeacon    NearbyBeacon  => Scene?.GetAllComponents<LevelUpBeacon>().FirstOrDefault( b => b.IsPlayerNearby );
 
@@ -327,12 +366,13 @@
 			s?.Kills          ?? 0,
 			(int)((pl?.HPPercent ?? 1f) * 100),
 			(int)((pl?.MaxShield ?? 0f) > 0f ? (pl?.Shield ?? 0f) / (pl?.MaxShield ?? 1f) * 100 : -1),
-			sp?.MiniBossesSpawned ?? 0,
+			sp?.IntensityPhase ?? 0,
 			sp?.WaveNumber ?? 0
 		);
 		int h2 = System.HashCode.Combine(
 			(int)(sp?.TimeRemaining ?? 600f),
 			sp?.IsFinalBossPhase == true ? 1 : 0,
+			(int)((DragonBoss.Instance?.HPPercent ?? 0f) * 100),
 			w?.Weapons?.Count ?? 0,
 			s?.IsAlive ?? true,
 			(int)GameManager.ReturnToMenuCountdown
@@ -363,6 +403,49 @@
 		"Ember Trail"    => "ET",
 		_ => displayName.Length > 3 ? displayName[..3].ToUpper() : displayName.ToUpper()
 	};
+
+	static string WeaponIconPath( string weaponNameOrId )
+	{
+		var key = (weaponNameOrId ?? "").ToLowerInvariant()
+			.Replace( " ", "" ).Replace( "throwing", "" );
+		if ( key.StartsWith( "weapon_" ) ) key = key[7..];
+		return key switch
+		{
+			"magicwand" => "ui/weapons/magicwand.png",
+			"bow" => "ui/weapons/bow.png",
+			"axe" => "ui/weapons/axe.png",
+			"aura" or "aurablast" => "ui/weapons/aura.png",
+			"stormrod" => "ui/weapons/stormrod.png",
+			"orbitalshards" => "ui/weapons/orbitalshards.png",
+			"embertrail" => "ui/weapons/embertrail.png",
+			"sword" => "ui/weapons/sword.png",
+			_ => null
+		};
+	}
+
+	static string TomeIconPath( string tomeName )
+	{
+		var key = (tomeName ?? "").ToLowerInvariant().Replace( " ", "" );
+		return key switch
+		{
+			"agility" or "agilitytome" => "ui/tomes/agility.png",
+			"size" or "sizetome" => "ui/tomes/size.png",
+			"shield" or "shieldtome" => "ui/tomes/shield.png",
+			"regen" or "regentome" => "ui/tomes/regen.png",
+			"lifesteal" or "lifestealtome" => "ui/tomes/lifesteal.png",
+			"projectilespeed" or "projectilespeedtome" => "ui/tomes/projectilespeed.png",
+			"hp" or "hptome" => "ui/tomes/hp.png",
+			"golden" or "goldentome" => "ui/tomes/golden.png",
+			"damage" or "damagetome" => "ui/tomes/damage.png",
+			"cooldown" or "cooldowntome" => "ui/tomes/cooldown.png",
+			"precision" or "precisiontome" => "ui/tomes/precision.png",
+			"knockback" or "knockbacktome" => "ui/tomes/knockback.png",
+			"quantity" or "quantitytome" => "ui/tomes/quantity.png",
+			"duration" or "durationtome" => "ui/tomes/duration.png",
+			"xp" or "xptome" => "ui/tomes/xp.png",
+			_ => null
+		};
+	}
 
 	string PassiveAbbrev( string name )
 	{

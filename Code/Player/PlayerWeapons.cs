@@ -4,6 +4,8 @@
 /// </summary>
 public sealed class PlayerWeapons : Component
 {
+	public static PlayerWeapons LocalInstance { get; private set; }
+
 	public const int MaxWeapons = 4;
 
 	private readonly List<WeaponBase> _weapons = new();
@@ -14,7 +16,13 @@ public sealed class PlayerWeapons : Component
 
 	protected override void OnStart()
 	{
+		LocalInstance = this;
 		if ( IsProxy ) return;
+	}
+
+	protected override void OnDestroy()
+	{
+		if ( LocalInstance == this ) LocalInstance = null;
 	}
 
 	/// <summary>Returns true if the player already owns the weapon with this display name.</summary>

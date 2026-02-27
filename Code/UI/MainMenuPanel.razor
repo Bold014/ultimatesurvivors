@@ -12,7 +12,10 @@
 	int completedQuests = QuestDefinition.All.FindAll( q => PlayerProgress.IsQuestClaimed( q.Id ) ).Count;
 }
 
-<root>
+<root style="@(LocalGameRunner.IsInLocalGame ? "opacity: 0; pointer-events: none;" : "")">
+	@* Hide menu when in local game (prefab overlay); GameHUD from prefab is shown instead *@
+	@if ( !LocalGameRunner.IsInLocalGame )
+	{
 	@* ══════════════════════════════════════════════════
 	    MAIN PANEL  (content is a direct child of root)
 	   ══════════════════════════════════════════════════ *@
@@ -33,17 +36,17 @@
 
 		<!-- Buttons — absolutely positioned with spacing from title and between each -->
 		<div class="btn-wrap" style="top: 52%;" onclick=@OnPlayClicked>
-			<img src="ui/btn_play.png" class="btn-play-img" />
+			<div class="menu-main-btn"><span class="menu-main-btn-text">PLAY</span></div>
 		</div>
 		<div class="btn-wrap" style="top: 68%;" onclick=@(() => { PlayClickSound(); _view = MenuView.Unlocks; })>
-			<img src="ui/btn_unlocks.png" class="btn-play-img" />
+			<div class="menu-main-btn"><span class="menu-main-btn-text">UNLOCKS</span></div>
 		</div>
 		<div class="btn-wrap" style="top: 84%;" onclick=@(() => { PlayClickSound(); _view = MenuView.Quests; })>
-			<img src="ui/btn_quests.png" class="btn-play-img" />
+			<div class="menu-main-btn"><span class="menu-main-btn-text">QUESTS</span></div>
 		</div>
 
 		<!-- Version — bottom, full width -->
-		<div style="position: absolute; bottom: 12px; left: 0; width: 100%; display: flex; justify-content: center; font-size: 11px; color: #334; letter-spacing: 2px; font-family: monospace;">
+		<div style="position: absolute; bottom: 12px; left: 0; width: 100%; display: flex; justify-content: center; font-size: 11px; color: #334; letter-spacing: 2px; font-family: Minecraft;">
 			ULTIMATE SURVIVORS v0.1
 		</div>
 
@@ -66,7 +69,7 @@
 			}
 			@if ( activeQuests.Count == 0 )
 			{
-				<div style="font-size: 14px; color: #888; font-family: monospace; padding: 8px 0;">No active quests yet</div>
+				<div style="font-size: 14px; color: #888; font-family: Minecraft; padding: 8px 0;">No active quests yet</div>
 			}
 			@foreach ( var q in activeQuests )
 			{
@@ -78,17 +81,17 @@
 					<div style="display: flex; align-items: center; gap: 10px;">
 						<div style="width: 36px; height: 36px; flex-shrink: 0; background-color: @(canClaim ? "#2a2200" : "#1a1008"); border: 2px solid @(canClaim ? "#c8a800" : "#6a4a1a"); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 18px;">@icon</div>
 						<div style="flex: 1;">
-							<div style="font-size: 14px; font-weight: bold; color: @(canClaim ? "#f5c518" : "#eee"); font-family: monospace; text-shadow: 1px 1px 0 #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@q.Description</div>
+							<div style="font-size: 14px; font-weight: bold; color: @(canClaim ? "#f5c518" : "#eee"); font-family: Minecraft; text-shadow: 1px 1px 0 #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@q.Description</div>
 							<div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
 								<div style="flex: 1; background-color: #120c04; height: 10px; border-radius: 4px; border: 1px solid #5a3a10;">
 									<div style="background-color: @(canClaim ? "#c8a800" : "#8a5a20"); height: 100%; width: @pct%; border-radius: 4px;"></div>
 								</div>
-								<span style="font-size: 12px; color: @(canClaim ? "#f5c518" : "#aaa"); font-family: monospace; font-weight: bold; flex-shrink: 0;">@prog / @q.Target</span>
+								<span style="font-size: 12px; color: @(canClaim ? "#f5c518" : "#aaa"); font-family: Minecraft; font-weight: bold; flex-shrink: 0;">@prog / @q.Target</span>
 							</div>
 							@if ( canClaim )
 							{
 								<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
-									<span style="font-size: 11px; color: #f5c518; font-weight: bold; font-family: monospace; letter-spacing: 2px; white-space: nowrap;">✓ COMPLETED</span>
+									<span style="font-size: 11px; color: #f5c518; font-weight: bold; font-family: Minecraft; letter-spacing: 2px; white-space: nowrap;">✓ COMPLETED</span>
 									<div class="claim-btn" onclick=@(() => { PlayClickSound(); QuestClaim( q.Id ); })>CLAIM</div>
 								</div>
 							}
@@ -105,7 +108,7 @@
 			<div style="min-height: 180px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;">
 				@foreach ( var msg in _chatMessages )
 				{
-					<div style="font-size: 13px; font-family: monospace; padding: 2px 0; border-bottom: 1px solid #3a2510;">
+					<div style="font-size: 13px; font-family: Minecraft; padding: 2px 0; border-bottom: 1px solid #3a2510;">
 						<span style="color: @msg.ColorHex; font-weight: bold;">@msg.Name</span>
 						<span style="color: #ccc;">: @msg.Text</span>
 					</div>
@@ -114,14 +117,14 @@
 			@if ( _chatOpen )
 			{
 				<div style="border: 2px solid #6a4a1a; border-radius: 4px; padding: 6px 10px; pointer-events: all;" onclick=@StopPropagation>
-					<TextEntry style="color: #fff; font-size: 13px; font-family: monospace; width: 100%;"
+					<TextEntry style="color: #fff; font-size: 13px; font-family: Minecraft; width: 100%;"
 						placeholder="Type a message and press Enter..."
 						onsubmit=@OnMenuChatSubmit />
 				</div>
 			}
 			else
 			{
-				<div style="font-size: 12px; color: #a08050; font-family: monospace; padding: 9px 4px;">Click to chat</div>
+				<div style="font-size: 12px; color: #a08050; font-family: Minecraft; padding: 9px 4px;">Click to chat</div>
 			}
 		</div>
 
@@ -139,42 +142,42 @@
 				var lbTabLabel = LeaderboardTabs.FirstOrDefault( t => t.Id == _lbTab ).Label ?? "Kills";
 			}
 			<div style="display: flex; align-items: center; padding: 0 4px 8px 4px; border-bottom: 2px solid #6a4a1a; margin-bottom: 4px; gap: 8px;">
-				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold; width: 32px;">RANK</span>
-				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold; width: 34px;"></span>
-				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold; flex: 1;">PLAYER</span>
-				<span style="font-size: 11px; color: #a08050; font-family: monospace; font-weight: bold;">@lbTabLabel.ToUpper()</span>
+				<span style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; width: 32px;">RANK</span>
+				<span style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; width: 34px;"></span>
+				<span style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; flex: 1;">PLAYER</span>
+				<span style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold;">@lbTabLabel.ToUpper()</span>
 			</div>
 			<div style="min-height: 400px; display: flex; flex-direction: column;">
 				@if ( _lbLoading )
 				{
-					<div style="font-size: 13px; color: #555; font-family: monospace; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">Loading...</div>
+					<div style="font-size: 13px; color: #555; font-family: Minecraft; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">Loading...</div>
 				}
 				else if ( _lbError )
 				{
-					<div style="font-size: 13px; color: #a55; font-family: monospace; padding: 10px 4px; border-bottom: 1px solid #2a1a08;">Unable to load leaderboard</div>
+					<div style="font-size: 13px; color: #a55; font-family: Minecraft; padding: 10px 4px; border-bottom: 1px solid #2a1a08;">Unable to load leaderboard</div>
 				}
 				else if ( _lbEntries.Count == 0 )
 				{
-					<div style="font-size: 13px; color: #555; font-family: monospace; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">No entries yet</div>
+					<div style="font-size: 13px; color: #555; font-family: Minecraft; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">No entries yet</div>
 				}
 				@foreach ( var entry in _lbEntries )
 				{
 					var isLocal   = Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
 					var rankColor = entry.Rank == 1 ? "#f5c518" : entry.Rank == 2 ? "#c0c0c0" : entry.Rank == 3 ? "#cd7f32" : "#aaa";
 					<div style="display: flex; align-items: center; padding: 9px 4px; border-bottom: 1px solid #3a2510; gap: 8px;">
-						<span style="font-size: 14px; font-weight: bold; color: @rankColor; font-family: monospace; width: 32px;">#@entry.Rank</span>
+						<span style="font-size: 14px; font-weight: bold; color: @rankColor; font-family: Minecraft; width: 32px;">#@entry.Rank</span>
 						<img src="avatar:@entry.SteamId" style="width: 34px; height: 34px; border-radius: 4px; border: 2px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
-						<span style="font-size: 14px; color: @(isLocal ? "#f5e060" : "#eee"); font-family: monospace; text-shadow: 1px 1px 0 #000; flex: 1; overflow: hidden;">@entry.DisplayName</span>
-						<span style="font-size: 15px; color: #f5c518; font-family: monospace; font-weight: bold;">@LbFormatValue( entry.Value )</span>
+						<span style="font-size: 14px; color: @(isLocal ? "#f5e060" : "#eee"); font-family: Minecraft; text-shadow: 1px 1px 0 #000; flex: 1; overflow: hidden;">@entry.DisplayName</span>
+						<span style="font-size: 15px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@LbFormatValue( entry.Value )</span>
 					</div>
 				}
 				@for ( int i = _lbEntries.Count; i < 8; i++ )
 				{
 					<div style="display: flex; align-items: center; padding: 9px 4px; border-bottom: 1px solid #2a1a08; gap: 8px; opacity: 0.25;">
-						<span style="font-size: 14px; font-weight: bold; color: #666; font-family: monospace; width: 32px;">#@(i + 1)</span>
+						<span style="font-size: 14px; font-weight: bold; color: #666; font-family: Minecraft; width: 32px;">#@(i + 1)</span>
 						<div style="width: 34px; height: 34px; border-radius: 4px; border: 2px solid #3a2510; flex-shrink: 0; background-color: #1a1008;"></div>
-						<span style="font-size: 14px; color: #444; font-family: monospace; flex: 1;">---</span>
-						<span style="font-size: 15px; color: #555; font-family: monospace;">---</span>
+						<span style="font-size: 14px; color: #444; font-family: Minecraft; flex: 1;">---</span>
+						<span style="font-size: 15px; color: #555; font-family: Minecraft;">---</span>
 					</div>
 				}
 			</div>
@@ -195,7 +198,7 @@
 		<!-- Dim overlay — also serves as flex centering container -->
 		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center;">
 		<!-- Main panel — fixed width, auto-height, centered by parent flex -->
-		<div style="width: 820px; display: flex; flex-direction: column; font-family: monospace; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
+		<div style="width: 820px; display: flex; flex-direction: column; font-family: Minecraft; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
 
 			<!-- Header -->
 			<div style="padding: 18px 28px 16px 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a; display: flex; align-items: center; justify-content: space-between;">
@@ -277,7 +280,29 @@
 
 					<!-- Starting weapon -->
 					<div style="flex-shrink: 0; background-color: #120c04; border: 2px solid @(selUnlocked ? "#6a4a1a" : "#3a2510"); border-radius: 8px; padding: 16px 20px; display: flex; flex-direction: row; align-items: center; gap: 16px;">
-						<div style="width: 64px; height: 64px; flex-shrink: 0; background-color: #1e1408; border: 2px solid @(selUnlocked ? "#8a5a20" : "#3a2510"); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px;">⚔</div>
+						<div style="width: 64px; height: 64px; flex-shrink: 0; background-color: #1e1408; border: 2px solid @(selUnlocked ? "#8a5a20" : "#3a2510"); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+							@{
+								var startWeaponIcon = WeaponIconPath( selDef.StartingWeapon );
+							}
+							@if ( startWeaponIcon != null )
+							{
+								var startWeapon = selDef.StartingWeapon ?? "";
+								var isStormRod = startWeapon.Equals( "StormRod", System.StringComparison.OrdinalIgnoreCase );
+								var isEmberTrail = startWeapon.Equals( "EmberTrail", System.StringComparison.OrdinalIgnoreCase );
+								@if ( isStormRod || isEmberTrail )
+								{
+									<div style="width: 58px; height: 58px; background-image: url('@startWeaponIcon'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+								}
+								else
+								{
+									<img src="@startWeaponIcon" style="width: 48px; height: 48px; image-rendering: pixelated;" />
+								}
+							}
+							else
+							{
+								<text>⚔</text>
+							}
+						</div>
 						<div style="display: flex; flex-direction: column; gap: 4px;">
 							<div style="font-size: 16px; font-weight: bold; color: @(selUnlocked ? "#f5c518" : "#555");">@WeaponDisplayName( selDef.StartingWeapon )</div>
 							<div style="font-size: 12px; color: @(selUnlocked ? "#a08050" : "#4a3020"); letter-spacing: 1px;">STARTING WEAPON</div>
@@ -316,7 +341,7 @@
 		}
 		<!-- Dim overlay -->
 		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center;">
-		<div style="width: 720px; display: flex; flex-direction: column; font-family: monospace; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
+		<div style="width: 720px; display: flex; flex-direction: column; font-family: Minecraft; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
 
 			<!-- Header -->
 			<div style="padding: 18px 28px 16px 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a; display: flex; align-items: center; justify-content: space-between;">
@@ -335,7 +360,7 @@
 				     onclick=@(() => { PlayClickSound(); _selectedMapId = "dark_forest"; })>
 					<img src="ui/dark_forest.png" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; image-rendering: pixelated;" />
 					<div style="font-size: 20px; font-weight: bold; color: #f5c518; letter-spacing: 2px;">DARK FOREST</div>
-					<div style="font-size: 12px; color: #a08050;">10 min survival • 3 mini-bosses + final boss</div>
+					<div style="font-size: 12px; color: #a08050;">10 min survival • intense waves + final boss</div>
 					<!-- Tier buttons -->
 					<div style="display: flex; flex-direction: column; gap: 8px;">
 						<div style="font-size: 11px; color: #a08050; letter-spacing: 1px;">DIFFICULTY TIER</div>
@@ -389,7 +414,7 @@
 		<!-- Dim overlay -->
 		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.55);"></div>
 		<!-- Centered panel -->
-		<div style="position: absolute; top: 5%; left: 50%; width: 760px; bottom: 5%; transform: translateX(-50%); display: flex; flex-direction: column; font-family: monospace; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
+		<div style="position: absolute; top: 5%; left: 50%; width: 760px; bottom: 5%; transform: translateX(-50%); display: flex; flex-direction: column; font-family: Minecraft; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
 
 			<!-- Header -->
 			<div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 28px 0 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a;">
@@ -428,6 +453,12 @@
 			var charName = ( _unlockTab == UnlockCategory.Characters && item.Id.StartsWith( "char_" ) )
 				? (char.ToUpper( item.Id[5] ) + item.Id[6..])
 				: null;
+			var weaponIcon  = ( _unlockTab == UnlockCategory.Weapons && item.Id.StartsWith( "weapon_" ) )
+				? WeaponIconPath( item.Id )
+				: null;
+			var tomeIcon    = ( _unlockTab == UnlockCategory.Tomes && item.Id.StartsWith( "tome_" ) )
+				? TomeIconPath( item.Id )
+				: null;
 			var cardIconBg  = isOwned   ? "#2a1e08"
 				: charName != null       ? CharColor( charName )
 				: "#1a1008";
@@ -442,10 +473,26 @@
 					: "unlock-locked";
 
 			<div class="unlock-card @cardClass">
-				<div style="width: 48px; height: 48px; flex-shrink: 0; background-color: @cardIconBg; border: 2px solid @cardBorder; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; opacity: @(meetsPrereq || isOwned ? "1" : "0.5");">
+				<div style="width: 72px; height: 72px; flex-shrink: 0; background-color: @cardIconBg; border: 2px solid @cardBorder; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; opacity: @(meetsPrereq || isOwned ? "1" : "0.5");">
 					@if ( charName != null )
 					{
-						<img src="@CharIconPath( charName )" style="width: 36px; height: 36px; image-rendering: pixelated;" />
+						<img src="@CharIconPath( charName )" style="width: 56px; height: 56px; image-rendering: pixelated;" />
+					}
+					else if ( weaponIcon != null )
+					{
+						var isEmberTrail = item.Id == "weapon_embertrail";
+						@if ( isEmberTrail )
+						{
+							<div style="width: 58px; height: 58px; background-image: url('@weaponIcon'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+						}
+						else
+						{
+							<div style="width: 56px; height: 56px; background-image: url('@weaponIcon'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+						}
+					}
+					else if ( tomeIcon != null )
+					{
+						<div style="width: 56px; height: 56px; background-image: url('@tomeIcon'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
 					}
 					else
 					{
@@ -484,7 +531,7 @@
 
 			@if ( _unlockFeedback != null )
 			{
-				<div style="flex-shrink: 0; text-align: center; padding: 10px; font-size: 14px; color: @(_unlockFeedbackErr ? "#f55" : "#f5c518"); background-color: #120c04; border-top: 2px solid #6a4a1a; font-family: monospace;">
+				<div style="flex-shrink: 0; text-align: center; padding: 10px; font-size: 14px; color: @(_unlockFeedbackErr ? "#f55" : "#f5c518"); background-color: #120c04; border-top: 2px solid #6a4a1a; font-family: Minecraft;">
 					@_unlockFeedback
 				</div>
 			}
@@ -503,7 +550,7 @@
 		<!-- Dim overlay -->
 		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.55);"></div>
 		<!-- Centered panel -->
-		<div style="position: absolute; top: 5%; left: 50%; width: 760px; bottom: 5%; transform: translateX(-50%); display: flex; flex-direction: column; font-family: monospace; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
+		<div style="position: absolute; top: 5%; left: 50%; width: 760px; bottom: 5%; transform: translateX(-50%); display: flex; flex-direction: column; font-family: Minecraft; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
 
 			<!-- Header -->
 			<div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 28px 14px 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a;">
@@ -563,7 +610,7 @@
 
 			@if ( _questFeedback != null )
 			{
-				<div style="flex-shrink: 0; text-align: center; padding: 10px; font-size: 14px; color: #f5c518; background-color: #120c04; border-top: 2px solid #6a4a1a; font-family: monospace;">
+				<div style="flex-shrink: 0; text-align: center; padding: 10px; font-size: 14px; color: #f5c518; background-color: #120c04; border-top: 2px solid #6a4a1a; font-family: Minecraft;">
 					@_questFeedback
 				</div>
 			}
@@ -572,6 +619,7 @@
 				<div class="back-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.Main; })>← BACK</div>
 			</div>
 		</div>
+	}
 	}
 
 </root>
@@ -603,7 +651,7 @@
 		font-weight: bold;
 		letter-spacing: 2px;
 		color: #f5c518;
-		font-family: monospace;
+		font-family: Minecraft;
 		text-shadow: 1px 1px 0 #000;
 		border-bottom: 2px solid #6a4a1a;
 		padding-bottom: 8px;
@@ -635,14 +683,35 @@
 	}
 	.btn-wrap:hover  { transform: scale(1.05); }
 	.btn-wrap:active { transform: scale(0.97); }
-	.btn-play-img {
-		width: 420px; height: auto;
+	.menu-main-btn {
+		width: 420px;
+		margin: 0 auto;
+		padding: 16px 32px;
+		background: linear-gradient(180deg, #221508 0%, #1a1008 50%, #120c04 100%);
+		border: 3px solid #6a4a1a;
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+	}
+	.btn-wrap:hover .menu-main-btn {
+		border-color: #c8a800;
+		background: linear-gradient(180deg, #2a1e08 0%, #221508 50%, #1a1008 100%);
+		box-shadow: 0 0 16px rgba(200,168,0,0.2);
+	}
+	.menu-main-btn-text {
+		font-size: 24px;
+		letter-spacing: 6px;
+		color: #f5c518;
+		font-family: Pixeled;
+		text-shadow: 2px 2px 0 #000, 1px 1px 0 #1a1008;
 	}
 	.menu-btn {
 		width: 100%; padding: 14px 0; text-align: center;
 		font-size: 22px; font-weight: 900; letter-spacing: 3px;
 		color: #e8e8e8; background: #1a2035; border: 3px solid #2a3a5a; border-radius: 4px;
-		cursor: pointer; text-shadow: 2px 2px 0px #000; font-family: monospace;
+		cursor: pointer; text-shadow: 2px 2px 0px #000; font-family: Minecraft;
 	}
 	.menu-btn:hover  { background: #253050; border-color: #4a6aaa; color: #ffffff; }
 	.menu-btn:active { background: #1a2540; }
@@ -660,7 +729,7 @@
 	.tab-active { color: #f5c518; background-color: #2a1e08; border-color: #c8a800; }
 	.unlock-card {
 		display: flex; align-items: center;
-		width: 100%; padding: 12px 14px;
+		width: 100%; padding: 14px 16px;
 		background-color: #221508; border: 2px solid #5a3a10; border-radius: 6px;
 		flex-shrink: 0;
 	}
@@ -692,7 +761,7 @@
 	.back-btn {
 		padding: 8px 20px; font-size: 14px; font-weight: bold; letter-spacing: 2px;
 		color: #a08050; background-color: #120c04; border: 2px solid #6a4a1a; border-radius: 5px;
-		cursor: pointer; font-family: monospace;
+		cursor: pointer; font-family: Minecraft;
 	}
 	.back-btn:hover { color: #f5c518; border-color: #c8a800; }
 	.char-card {
@@ -718,7 +787,7 @@
 		width: 100%; padding: 18px 0; font-size: 20px; font-weight: 900; letter-spacing: 3px;
 		text-align: center; color: #1a1008; background-color: #f5c518;
 		border: 2px solid #c8a800; border-radius: 8px;
-		cursor: pointer; font-family: monospace;
+		cursor: pointer; font-family: Minecraft;
 	}
 	.confirm-btn:hover { background-color: #ffe040; border-color: #f5c518; }
 	.confirm-btn:active { background-color: #c8a800; }
@@ -1031,6 +1100,55 @@
 		UnlockCategory.Items      => "🎒",
 		_                         => "?"
 	};
+
+	static string WeaponIconPath( string weaponNameOrId )
+	{
+		var key = (weaponNameOrId ?? "").ToLowerInvariant()
+			.Replace( " ", "" ).Replace( "throwing", "" );
+		if ( key.StartsWith( "weapon_" ) ) key = key[7..];
+		return key switch
+		{
+			"magicwand" => "ui/weapons/magicwand.png",
+			"bow" => "ui/weapons/bow.png",
+			"axe" => "ui/weapons/axe.png",
+			"aura" or "aurablast" => "ui/weapons/aura.png",
+			"stormrod" => "ui/weapons/stormrod.png",
+			"orbitalshards" => "ui/weapons/orbitalshards.png",
+			"embertrail" => "ui/weapons/embertrail.png",
+			"sword" => "ui/weapons/sword.png",
+			_ => null
+		};
+	}
+
+	static string TomeIconPath( string tomeId )
+	{
+		if ( string.IsNullOrEmpty( tomeId ) || !tomeId.StartsWith( "tome_" ) ) return null;
+		var key = tomeId[5..];
+		return TomeIconPathFromKey( key );
+	}
+
+	static string TomeIconPathFromKey( string key )
+	{
+		return key switch
+		{
+			"agility" or "agilitytome" => "ui/tomes/agility.png",
+			"size" or "sizetome" => "ui/tomes/size.png",
+			"shield" or "shieldtome" => "ui/tomes/shield.png",
+			"regen" or "regentome" => "ui/tomes/regen.png",
+			"lifesteal" or "lifestealtome" => "ui/tomes/lifesteal.png",
+			"projectilespeed" or "projectilespeedtome" => "ui/tomes/projectilespeed.png",
+			"hp" or "hptome" => "ui/tomes/hp.png",
+			"golden" or "goldentome" => "ui/tomes/golden.png",
+			"damage" or "damagetome" => "ui/tomes/damage.png",
+			"cooldown" or "cooldowntome" => "ui/tomes/cooldown.png",
+			"precision" or "precisiontome" => "ui/tomes/precision.png",
+			"knockback" or "knockbacktome" => "ui/tomes/knockback.png",
+			"quantity" or "quantitytome" => "ui/tomes/quantity.png",
+			"duration" or "durationtome" => "ui/tomes/duration.png",
+			"xp" or "xptome" => "ui/tomes/xp.png",
+			_ => null
+		};
+	}
 
 	string QuestIcon( QuestGoalType t ) => t switch
 	{

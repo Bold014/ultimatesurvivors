@@ -12,6 +12,8 @@ public sealed class BurnZone : Component
 	public float SizeScale { get; set; } = 1f;
 	/// <summary>Weapon that created this zone — used to attribute kills for quest tracking.</summary>
 	public string SourceWeaponId { get; set; } = null;
+	/// <summary>When set, damages this GameObject (e.g. player) instead of enemies. Used by DragonBoss fire attacks.</summary>
+	public GameObject DamageTarget { get; set; } = null;
 
 	private const string FlameSpritePath = "textures/flame/flameanimation.sprite";
 	/// <summary>Base radius for damage — scaled by SizeScale. Enemies within this distance are "touching".</summary>
@@ -89,11 +91,29 @@ public sealed class BurnZone : Component
 
 	private void DamageEnemiesTouchingFlame()
 	{
-		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
+		if ( DamageTarget != null && DamageTarget.IsValid )
 		{
-			var dist = (enemy.WorldPosition - WorldPosition).WithZ( 0f ).Length;
-			if ( dist <= BaseFlameHitRadius * SizeScale + enemy.HalfExtent )
-				enemy.TakeDamage( Damage, SourceWeaponId, WorldPosition );
+			var dist = (DamageTarget.WorldPosition - WorldPosition).WithZ( 0f ).Length;
+			const float playerHalfExtent = 1f;
+			if ( dist <= BaseFlameHitRadius * SizeScale + playerHalfExtent )
+			{
+				var playerState = DamageTarget.Components.Get<PlayerLocalState>();
+				if ( playerState != null )
+				{
+					bool died = playerState.TakeDamage( Damage );
+					if ( died )
+						DamageTarget.Components.Get<PlayerStats>()?.Die();
+				}
+			}
+		}
+		else
+		{
+			foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
+			{
+				var dist = (enemy.WorldPosition - WorldPosition).WithZ( 0f ).Length;
+				if ( dist <= BaseFlameHitRadius * SizeScale + enemy.HalfExtent )
+					enemy.TakeDamage( Damage, SourceWeaponId, WorldPosition );
+			}
 		}
 	}
 }

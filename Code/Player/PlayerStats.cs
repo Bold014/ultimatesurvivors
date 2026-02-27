@@ -5,6 +5,8 @@ using System.Collections.Generic;
 /// </summary>
 public sealed class PlayerStats : Component
 {
+	public static PlayerStats LocalInstance { get; private set; }
+
 	public string PlayerName    { get; set; } = "Player";
 	public string CharacterName { get; set; } = "Archer";
 	public int    Kills         { get; set; } = 0;
@@ -24,6 +26,12 @@ public sealed class PlayerStats : Component
 
 	protected override void OnStart()
 	{
+		LocalInstance = this;
+	}
+
+	protected override void OnDestroy()
+	{
+		if ( LocalInstance == this ) LocalInstance = null;
 	}
 
 	protected override void OnUpdate()

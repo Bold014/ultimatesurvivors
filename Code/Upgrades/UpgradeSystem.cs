@@ -27,6 +27,7 @@ public sealed class UpgradeSystem : Component
 	protected override void OnStart()
 	{
 		LocalInstance = this;
+		Log.Info( "[UpgradeSystem] OnStart — LocalInstance set." );
 	}
 
 	private void EnsureInitialized()
@@ -95,11 +96,17 @@ public sealed class UpgradeSystem : Component
 
 	private void Open( RewardSource source )
 	{
+		Log.Info( $"[UpgradeSystem] Open called — source={source}" );
 		EnsureInitialized();
-		if ( _rand == null ) return;
+		if ( _rand == null )
+		{
+			Log.Error( "[UpgradeSystem] Open aborted — _rand is null after EnsureInitialized!" );
+			return;
+		}
 
 		CurrentSource      = source;
 		IsShowingUpgrades  = true;
+		Log.Info( $"[UpgradeSystem] IsShowingUpgrades=true, building choices..." );
 		CanIgnore          = source == RewardSource.Shrine;
 		_weapons?.SetPaused( true );
 		_spawner?.SetPaused( true );
@@ -111,6 +118,7 @@ public sealed class UpgradeSystem : Component
 			RewardSource.Chest   => BuildChestChoices(),
 			_                    => BuildLevelUpChoices()
 		};
+		Log.Info( $"[UpgradeSystem] CurrentChoices.Count={CurrentChoices?.Count ?? -1}" );
 	}
 
 	private void ClosePanel()

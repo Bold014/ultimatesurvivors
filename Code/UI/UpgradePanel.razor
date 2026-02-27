@@ -8,12 +8,12 @@
 		var sys    = UpgSys;
 		var source = sys?.CurrentSource ?? UpgradeSystem.RewardSource.LevelUp;
 
-		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0d0905ee; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;">
+		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0d0905ee; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; pointer-events: all; z-index: 1000;">
 
 			<!-- ── Title block ────────────────────────────────────────────── -->
 			<div style="background: @TitleBg(source); border: 2px solid @TitleBorder(source); border-radius: 4px; padding: 12px 48px; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 0 0 1px rgba(0,0,0,0.3);">
-				<div style="font-size: 36px; font-weight: bold; color: @TitleColor(source); font-family: monospace; letter-spacing: 5px; text-shadow: 2px 2px 0 #000;">@TitleText(source)</div>
-				<div style="font-size: 12px; color: #a08050; font-family: monospace; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">@SubtitleText(source)</div>
+				<div style="font-size: 36px; font-weight: bold; color: @TitleColor(source); font-family: Minecraft; letter-spacing: 5px; text-shadow: 2px 2px 0 #000;">@TitleText(source)</div>
+				<div style="font-size: 12px; color: #a08050; font-family: Minecraft; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">@SubtitleText(source)</div>
 			</div>
 
 			<!-- ── Cards row ──────────────────────────────────────────────── -->
@@ -34,47 +34,66 @@
 				<div style="width: 200px; background: @cardBg; border: 2px solid @cardBorder; border-radius: 4px; padding: 16px 14px 20px 14px; display: flex; flex-direction: column; gap: 10px; pointer-events: all; cursor: pointer; box-shadow: 0 0 0 1px rgba(0,0,0,0.2);"
 					 onclick=@(() => SelectUpgrade( idx ))>
 
+					@* ── Thumbnail (tomes & weapons only) ── *@
+					@{
+						var iconPath = isWeapon ? WeaponIconPath( upgrade.WeaponName ) : TomeIconPath( upgrade.Name );
+					}
+					@if ( iconPath != null )
+					{
+						var isEmberTrail = isWeapon && upgrade.WeaponName?.Contains( "Ember Trail" ) == true;
+						<div style="width: 96px; height: 96px; align-self: center; background: #0d0805; border: 1px solid @cardBorder; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+							@if ( isEmberTrail )
+							{
+								<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+							}
+							else
+							{
+								<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+							}
+						</div>
+					}
+
 					@* ── Rarity / type badge ── *@
 					@if ( source == UpgradeSystem.RewardSource.Shrine )
 					{
-						<div style="background: @RarityBadgeBg(upgrade.Rarity); border: 1px solid @RarityBorderColor(upgrade.Rarity); border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: @RarityTextColor(upgrade.Rarity); font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+						<div style="background: @RarityBadgeBg(upgrade.Rarity); border: 1px solid @RarityBorderColor(upgrade.Rarity); border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: @RarityTextColor(upgrade.Rarity); font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							@upgrade.Rarity.ToString().ToUpper()
 						</div>
 					}
 					else if ( isWeapon && upgrade.IsNewWeapon )
 					{
-						<div style="background: #1a2008; border: 1px solid #5a8a2a; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #88ee88; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+						<div style="background: #1a2008; border: 1px solid #5a8a2a; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #88ee88; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							NEW WEAPON
 						</div>
 					}
 					else if ( isWeapon )
 					{
-						<div style="background: #1a1400; border: 1px solid #c8a800; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #f5c518; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+						<div style="background: #1a1400; border: 1px solid #c8a800; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #f5c518; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							WEAPON
 						</div>
 					}
 					else if ( source == UpgradeSystem.RewardSource.Chest )
 					{
-						<div style="background: #0d0d20; border: 1px solid #7755cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #aa88ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+						<div style="background: #0d0d20; border: 1px solid #7755cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #aa88ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							ITEM
 						</div>
 					}
 					else if ( upgrade.MaxLevel > 0 )
 					{
 						var prevLevel = upgrade.NextLevel - 1;
-						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							TOME  LVL @prevLevel → @upgrade.NextLevel / @upgrade.MaxLevel
 						</div>
 					}
 					else
 					{
-						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: monospace; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
 							TOME
 						</div>
 					}
 
 					@* ── Upgrade name ── *@
-					<div style="font-size: 17px; color: #f0e0b0; font-family: monospace; font-weight: bold; padding-bottom: 2px; text-shadow: 1px 1px 0 #000;">
+					<div style="font-size: 17px; color: #f0e0b0; font-family: Minecraft; font-weight: bold; padding-bottom: 2px; text-shadow: 1px 1px 0 #000;">
 						@upgrade.Name
 					</div>
 
@@ -82,7 +101,7 @@
 					<div style="height: 1px; background: #3a2510;"></div>
 
 					@* ── Description ── *@
-					<div style="font-size: 12px; color: #c8b090; font-family: monospace; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
+					<div style="font-size: 12px; color: #c8b090; font-family: Minecraft; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
 						@upgrade.Description
 					</div>
 
@@ -92,7 +111,7 @@
 						var parts = upgrade.StatPreview.Split( '→' );
 						@if ( parts.Length == 2 )
 						{
-							<div style="font-size: 13px; font-family: monospace; display: flex; align-items: center; gap: 4px; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
+							<div style="font-size: 13px; font-family: Minecraft; display: flex; align-items: center; gap: 4px; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
 								<span style="color: #888870;">@parts[0].Trim()</span>
 								<span style="color: #e8c060;">→</span>
 								<span style="color: #88ee88; font-weight: bold;">@parts[1].Trim()</span>
@@ -107,14 +126,14 @@
 			<!-- ── Ignore Offers button (shrine only) ─────────────────────── -->
 			@if ( sys?.CanIgnore == true )
 			{
-				<div style="background: #1a1008; border: 2px solid #6a4a1a; border-radius: 4px; padding: 10px 32px; pointer-events: all; cursor: pointer; font-size: 15px; font-family: monospace; color: #a08050; font-weight: bold; letter-spacing: 2px; text-shadow: 1px 1px 0 #000;"
+				<div style="background: #1a1008; border: 2px solid #6a4a1a; border-radius: 4px; padding: 10px 32px; pointer-events: all; cursor: pointer; font-size: 15px; font-family: Minecraft; color: #a08050; font-weight: bold; letter-spacing: 2px; text-shadow: 1px 1px 0 #000;"
 					 onclick=@(() => IgnoreOffers())>
 					IGNORE OFFERS
 				</div>
 			}
 			else
 			{
-				<div style="font-size: 11px; color: #5a3a10; font-family: monospace; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">
+				<div style="font-size: 11px; color: #5a3a10; font-family: Minecraft; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">
 					CLICK A CARD TO SELECT
 				</div>
 			}
@@ -132,7 +151,7 @@
 		try { Sound.Play( UiClick ); } catch { }
 	}
 
-	UpgradeSystem UpgSys  => Scene?.GetAllComponents<UpgradeSystem>().FirstOrDefault();
+	UpgradeSystem UpgSys  => UpgradeSystem.LocalInstance;
 	bool IsVisible        => UpgSys?.IsShowingUpgrades ?? false;
 
 	void SelectUpgrade( int index )
@@ -223,10 +242,65 @@
 		_                                        => "#aaaaaa"
 	};
 
-	protected override int BuildHash() =>
-		System.HashCode.Combine(
-			UpgSys?.IsShowingUpgrades ?? false,
-			UpgSys?.CurrentChoices?.Count ?? 0,
-			(int)(UpgSys?.CurrentSource ?? 0)
+	// ── Thumbnail icon paths (same as inventory/unlock page) ───────────────────
+
+	static string WeaponIconPath( string weaponNameOrId )
+	{
+		var key = (weaponNameOrId ?? "").ToLowerInvariant()
+			.Replace( " ", "" ).Replace( "throwing", "" );
+		if ( key.StartsWith( "weapon_" ) ) key = key[7..];
+		return key switch
+		{
+			"magicwand" => "ui/weapons/magicwand.png",
+			"bow" => "ui/weapons/bow.png",
+			"axe" => "ui/weapons/axe.png",
+			"aura" or "aurablast" => "ui/weapons/aura.png",
+			"stormrod" => "ui/weapons/stormrod.png",
+			"orbitalshards" => "ui/weapons/orbitalshards.png",
+			"embertrail" => "ui/weapons/embertrail.png",
+			"sword" => "ui/weapons/sword.png",
+			_ => null
+		};
+	}
+
+	static string TomeIconPath( string tomeName )
+	{
+		var key = (tomeName ?? "").ToLowerInvariant().Replace( " ", "" );
+		return key switch
+		{
+			"agility" or "agilitytome" => "ui/tomes/agility.png",
+			"size" or "sizetome" => "ui/tomes/size.png",
+			"shield" or "shieldtome" => "ui/tomes/shield.png",
+			"regen" or "regentome" => "ui/tomes/regen.png",
+			"lifesteal" or "lifestealtome" => "ui/tomes/lifesteal.png",
+			"projectilespeed" or "projectilespeedtome" => "ui/tomes/projectilespeed.png",
+			"hp" or "hptome" => "ui/tomes/hp.png",
+			"golden" or "goldentome" => "ui/tomes/golden.png",
+			"damage" or "damagetome" => "ui/tomes/damage.png",
+			"cooldown" or "cooldowntome" => "ui/tomes/cooldown.png",
+			"precision" or "precisiontome" => "ui/tomes/precision.png",
+			"knockback" or "knockbacktome" => "ui/tomes/knockback.png",
+			"quantity" or "quantitytome" => "ui/tomes/quantity.png",
+			"duration" or "durationtome" => "ui/tomes/duration.png",
+			"xp" or "xptome" => "ui/tomes/xp.png",
+			_ => null
+		};
+	}
+
+	private bool _lastVisible = false;
+	protected override int BuildHash()
+	{
+		var sys = UpgSys;
+		bool showing = sys?.IsShowingUpgrades ?? false;
+		if ( showing != _lastVisible )
+		{
+			_lastVisible = showing;
+			Log.Info( $"[UpgradePanel] BuildHash — IsShowingUpgrades changed to {showing}. UpgSys={(sys != null ? "SET" : "NULL")}. Choices={sys?.CurrentChoices?.Count ?? -1}" );
+		}
+		return System.HashCode.Combine(
+			showing,
+			sys?.CurrentChoices?.Count ?? 0,
+			(int)(sys?.CurrentSource ?? 0)
 		);
+	}
 }

@@ -1,0 +1,1311 @@
+{
+  "ResourceVersion": 1,
+  "Animations": [
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "walkright",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_0.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_1.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_2.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_3.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_4.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_5.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "walkup",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_6.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_7.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_8.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_9.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_10.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_11.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "walkleft",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_12.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_13.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_14.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_15.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_16.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_17.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "walkdown",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_18.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_19.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_20.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_21.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_22.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/walk/dragonwalk_23.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "dragondeath",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/death/dragondeath_0.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/death/dragondeath_1.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/death/dragondeath_2.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/death/dragondeath_3.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/death/dragondeath_4.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/death/dragondeath_5.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/death/dragondeath_6.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/death/dragondeath_7.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/death/dragondeath_8.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "meleeright",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/melee/melee_0.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_1.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_2.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_3.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_4.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_5.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "meleeup",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/melee/melee_6.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_7.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_8.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_9.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_10.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_11.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "meleeleft",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/melee/melee_12.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_13.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_14.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_15.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_16.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_17.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "meleedown",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/melee/melee_18.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_19.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_20.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_21.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_22.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/melee/melee_23.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "launchright",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/launch/launch_0.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_1.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_2.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_3.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_4.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_5.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_6.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_7.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "launchup",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/launch/launch_8.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_9.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_10.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_11.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_12.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_13.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_14.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_15.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "launchleft",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/launch/launch_16.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_17.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_18.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_19.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_20.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_21.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_22.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_23.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "launchdown",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/launch/launch_24.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_25.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_26.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_27.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_28.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_29.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_30.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/launch/launch_31.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "idleright",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_0.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_1.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_2.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_3.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_4.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_5.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_6.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_7.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "idleup",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_8.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_9.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_10.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_11.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_12.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_13.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_14.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_15.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "idleleft",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_16.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_17.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_18.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_19.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_20.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_21.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_22.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_23.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "idledown",
+      "Frames": [
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_24.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_25.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_26.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_27.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_28.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_29.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_30.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        },
+        {
+          "FilePath": "sprites/dragon/idle/dragonidle_31.png",
+          "Events": [],
+          "SpriteSheetRect": {
+            "Position": "0,0",
+            "Size": "0,0"
+          }
+        }
+      ],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "hoverright",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "hoverup",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "hoverleft",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "hoverdown",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "flyright",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "flyup",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "flyleft",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "flydown",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "breathright",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "breathup",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "breathleft",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    },
+    {
+      "FrameRate": 15,
+      "Origin": "0.5,0.5",
+      "Looping": false,
+      "LoopModeVal": 1,
+      "Name": "breathdown",
+      "Frames": [],
+      "Attachments": [],
+      "LoopStart": null,
+      "LoopEnd": null
+    }
+  ],
+  "__references": [],
+  "__version": 1
+}

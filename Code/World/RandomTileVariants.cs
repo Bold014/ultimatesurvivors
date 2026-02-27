@@ -29,6 +29,9 @@ public class RandomTileVariants : Component
 	/// <summary>Atlas row of the base ground tile.</summary>
 	[Property] public int GroundRow { get; set; } = 0;
 
+	/// <summary>Rotation applied to the base ground tile (0 / 90 / 180 / 270).</summary>
+	[Property] public int GroundAngle { get; set; } = 0;
+
 	/// <summary>
 	/// Variant/decoration tiles scattered randomly over the ground.
 	/// Format: "col,row" or "col,row,angle" (angle = 0/90/180/270).
@@ -44,12 +47,17 @@ public class RandomTileVariants : Component
 	Guid _groundGuid;
 	List<(Guid guid, int angle)> _variants = new();
 	bool _ready;
+	System.Random _rng;
 
 	protected override void OnStart()
 	{
+		// Fallback: if Tileset not assigned (e.g. prefab serialization), get from same GameObject
+		if ( !Tileset.IsValid() )
+			Tileset = GameObject.Components.Get<TilesetComponent>();
+
 		if ( !Tileset.IsValid() )
 		{
-			Log.Warning( "[MapGen] Tileset property is not set!" );
+			Log.Warning( "[MapGen] Tileset property is not set and no TilesetComponent on this GameObject!" );
 			return;
 		}
 
@@ -102,6 +110,14 @@ public class RandomTileVariants : Component
 					Log.Warning( $"[MapGen] Variant ({col},{row}) not in tileset — skipped." );
 			}
 		}
+
+		// Seed with current time so every run produces a different map layout
+		int seed = (int)(System.DateTime.UtcNow.Ticks & 0x7FFFFFFF);
+		_rng = new System.Random( seed );
+
+		Log.Info( $"[MapGen] Ready. seed={seed} groundTile=({GroundColumn},{GroundRow}) guid={_groundGuid} variants={_variants.Count} variantPercent={VariantPercent}" );
+		for ( int i = 0; i < _variants.Count; i++ )
+			Log.Info( $"[MapGen] Variant[{i}] guid={_variants[i].guid} angle={_variants[i].angle}" );
 
 		_ready = true;
 	}
@@ -160,28 +176,28 @@ public class RandomTileVariants : Component
 		}
 	}
 
+	private int _chunksGenerated = 0;
+
 	void GenerateChunk( Vector2Int chunk, Vector2Int tileSize )
 	{
 		int startX = chunk.x * ChunkSize;
 		int startY = chunk.y * ChunkSize;
 		bool useVariants = _variants.Count > 0 && VariantPercent > 0;
+		int variantCount = 0;
 
 		for ( int x = startX; x < startX + ChunkSize; x++ )
 		{
 			for ( int y = startY; y < startY + ChunkSize; y++ )
 			{
-				var mapPos = new Vector2Int( x, y );
-				Guid tileGuid = _groundGuid;
-				int tileAngle = 0;
+			var mapPos = new Vector2Int( x, y );
+			Guid tileGuid = _groundGuid;
+			int tileAngle = GroundAngle;
 
-				if ( useVariants )
+				if ( useVariants && _rng.Next( 100 ) < VariantPercent )
 				{
-					int hash = Math.Abs( x * 73856093 ^ y * 19349663 ) + Game.Random.Int( 0, 100 - VariantPercent );
-					if ( hash % 100 < VariantPercent )
-					{
-						int vi = Math.Abs( x * 31 + y * 17 ) % _variants.Count;
-						(tileGuid, tileAngle) = _variants[vi];
-					}
+					int vi = (int)(Math.Abs( (long)x * 31 + (long)y * 17 ) % _variants.Count);
+					(tileGuid, tileAngle) = _variants[vi];
+					variantCount++;
 				}
 
 				_layer.SetTile( mapPos, tileGuid, Vector2Int.Zero, tileAngle, rebuild: false );
@@ -189,5 +205,10 @@ public class RandomTileVariants : Component
 		}
 
 		Tileset.IsDirty = true;
+
+		// Log first 3 chunks so we can verify variants are actually being placed
+		if ( _chunksGenerated < 3 )
+			Log.Info( $"[MapGen] Chunk {_chunksGenerated} @ ({chunk.x},{chunk.y}): {variantCount} variants placed out of {ChunkSize * ChunkSize} tiles (useVariants={useVariants})" );
+		_chunksGenerated++;
 	}
 }

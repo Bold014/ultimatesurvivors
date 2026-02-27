@@ -22,6 +22,10 @@ public sealed class MenuManager : Component
 	/// </summary>
 	public static int SelectedTier { get; private set; } = 1;
 
+	// Deferred game start — set by StartGame, executed next OnUpdate so the
+	// onclick lambda has fully returned before we clone the prefab.
+	private static bool _pendingStart;
+
 	protected override void OnStart()
 	{
 		Instance = this;
@@ -31,6 +35,18 @@ public sealed class MenuManager : Component
 	protected override void OnUpdate()
 	{
 		Mouse.Visibility = MouseVisibility.Visible;
+
+		if ( _pendingStart )
+		{
+			_pendingStart = false;
+			var runner = LocalGameRunner.Instance;
+			if ( runner == null )
+			{
+				Log.Error( "[MenuManager] LocalGameRunner.Instance is null — make sure a LocalGameRunner component exists in the menu scene." );
+				return;
+			}
+			runner.StartLocalGame();
+		}
 	}
 
 	protected override void OnDestroy()
@@ -44,8 +60,10 @@ public sealed class MenuManager : Component
 		SelectedCharacter = characterName;
 		SelectedMap       = mapId ?? "dark_forest";
 		SelectedTier     = System.Math.Clamp( tier, 1, 3 );
-		var options = new SceneLoadOptions();
-		options.SetScene( ResourceLibrary.Get<SceneFile>( "scenes/game.scene" ) );
-		Game.ChangeScene( options );
+
+		Log.Info( $"[MenuManager] StartGame — char={SelectedCharacter} map={SelectedMap} tier={SelectedTier}" );
+
+		// Defer to next frame so the panel onclick finishes before the prefab is cloned.
+		_pendingStart = true;
 	}
 }

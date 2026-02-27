@@ -1,0 +1,22 @@
+{
+  "publish": {
+    "Enabled": false,
+    "ProjectConfig": {
+      "Title": "Game",
+      "Type": "map",
+      "Org": "local",
+      "Ident": "game",
+      "Schema": 0,
+      "IncludeSourceFiles": false,
+      "Resources": null,
+      "PackageReferences": null,
+      "EditorReferences": null,
+      "Mounts": null,
+      "IsStandaloneOnly": false,
+      "Metadata": {
+        "SingleAssetSource": "scenes/game.scene",
+        "ParentPackage": "roguegames.ultimatesurvivors"
+      }
+    }
+  }
+}

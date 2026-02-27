@@ -1,10 +1,12 @@
 /// <summary>
 /// Megabonk-style spawner: 10-minute survival, wave-based enemy spawning.
-/// 3 mini-bosses at 2:30, 5:00, 7:30. Final boss at 10:00.
+/// 3 intensity phases at 2:30, 5:00, 7:30 ramp up wave difficulty. Final boss at 10:00.
 /// Beat the final boss to win. Lives on the player GameObject.
 /// </summary>
 public sealed class EnemySpawner : Component
 {
+	public static EnemySpawner LocalInstance { get; private set; }
+
 	// ── Public API ────────────────────────────────────────────────────────────
 	public float RunTime       => _runTimer;
 	public float TimeRemaining => MathF.Max( 0f, RunDuration - _runTimer );
@@ -15,11 +17,11 @@ public sealed class EnemySpawner : Component
 	/// <summary>True for one frame when the final boss is defeated. GameManager uses this for tier completion.</summary>
 	public bool  TierJustCompleted => _tierJustCompleted;
 
-	/// <summary>Number of mini-bosses spawned so far (0–3).</summary>
-	public int MiniBossesSpawned => _miniBossesSpawned;
+	/// <summary>Current intensity phase (0–3). Increments at 2:30, 5:00, 7:30.</summary>
+	public int IntensityPhase => _intensityPhase;
 
 	private const float RunDuration = 600f;  // 10 minutes
-	private static readonly float[] MiniBossTimes = { 150f, 300f, 450f };  // 2:30, 5:00, 7:30
+	private static readonly float[] IntensityPhaseTimes = { 150f, 300f, 450f };  // 2:30, 5:00, 7:30
 
 	// ── Wave definitions (10 waves for 10-min run) ─────────────────────────────
 	private readonly struct WaveDef
@@ -48,7 +50,8 @@ public sealed class EnemySpawner : Component
 	private int       _enemiesLeft     = 0;
 	private float     _spawnTimer      = 0f;
 	private float     _runTimer        = 0f;
-	private int       _miniBossesSpawned = 0;
+	private int       _intensityPhase  = 0;
+	private float     _effectiveSpawnRate = 0f;
 	private bool      _finalBossSpawned = false;
 	private bool      _finalBossPhase   = false;
 	private bool      _tierJustCompleted = false;
@@ -61,11 +64,17 @@ public sealed class EnemySpawner : Component
 
 	protected override void OnStart()
 	{
+		LocalInstance = this;
 		int seed = Connection.Local != null
 			? Connection.Local.SteamId.GetHashCode()
 			: (int)(Time.Now * 1000);
 		_rand    = new Random( seed );
 		_isActive = true;
+	}
+
+	protected override void OnDestroy()
+	{
+		if ( LocalInstance == this ) LocalInstance = null;
 	}
 
 	protected override void OnUpdate()
@@ -95,14 +104,13 @@ public sealed class EnemySpawner : Component
 			return;
 		}
 
-		// Spawn mini-bosses at scheduled times (can happen during wave or intermission)
-		for ( int i = _miniBossesSpawned; i < MiniBossTimes.Length; i++ )
+		// Intensity phase surges at 2:30, 5:00, 7:30 (ramps wave difficulty)
+		for ( int i = _intensityPhase; i < IntensityPhaseTimes.Length; i++ )
 		{
-			if ( _runTimer >= MiniBossTimes[i] )
+			if ( _runTimer >= IntensityPhaseTimes[i] )
 			{
-				_miniBossesSpawned = i + 1;
-				SpawnMiniBoss();
-				ChatComponent.Instance?.AddMessage( "Boss", $"Mini-boss {_miniBossesSpawned}/3!", Color.Magenta );
+				_intensityPhase = i + 1;
+				ChatComponent.Instance?.AddMessage( "Wave", $"INTENSITY SURGE! Phase {_intensityPhase}!", Color.Magenta );
 			}
 		}
 
@@ -155,7 +163,7 @@ public sealed class EnemySpawner : Component
 			{
 				SpawnEnemy( def );
 				_enemiesLeft--;
-				_spawnTimer = def.SpawnRate;
+				_spawnTimer = _effectiveSpawnRate;
 			}
 		}
 
@@ -166,10 +174,14 @@ public sealed class EnemySpawner : Component
 
 	private void StartWave( WaveDef def )
 	{
-		_state        = SpawnState.WaveActive;
-		_stateTimer   = 0f;
-		_enemiesLeft  = def.EnemyCount;
-		_spawnTimer   = 0f;
+		float countMult = 1f + _intensityPhase * 0.2f;
+		float rateMult  = 1f - _intensityPhase * 0.12f;
+
+		_state             = SpawnState.WaveActive;
+		_stateTimer        = 0f;
+		_enemiesLeft       = (int)(def.EnemyCount * countMult);
+		_effectiveSpawnRate = def.SpawnRate * rateMult;
+		_spawnTimer        = 0f;
 		_lastCountdownSecond = -1;
 		_waveEnemies.Clear();
 
@@ -197,42 +209,47 @@ public sealed class EnemySpawner : Component
 	private void SpawnFinalBoss()
 	{
 		ChatComponent.Instance?.AddMessage( "Boss", "FINAL BOSS INCOMING!", new Color( 1f, 0.2f, 0.2f ) );
-		_finalBossObject = SpawnBoss( isFinalBoss: true );
+		_finalBossObject = SpawnFinalBossEntity();
 	}
 
-	private void SpawnMiniBoss()
+	/// <summary>Dev command: spawn the dragon boss immediately for testing. Skips the 10-min wait. Spawns far (380–460 units) so it flies in from out of view.</summary>
+	public void SpawnDragonBossForTesting()
 	{
-		SpawnBoss( isFinalBoss: false );
+		if ( _finalBossObject != null && _finalBossObject.IsValid() )
+		{
+			ChatComponent.Instance?.AddMessage( "Dev", "Dragon boss already spawned.", Color.Yellow );
+			return;
+		}
+		_finalBossSpawned = true;
+		_finalBossPhase   = true;
+		ChatComponent.Instance?.AddMessage( "Boss", "FINAL BOSS INCOMING!", new Color( 1f, 0.2f, 0.2f ) );
+		_finalBossObject = SpawnFinalBossEntity();
+		ChatComponent.Instance?.AddMessage( "Dev", "Dragon boss spawned — watch it fly in!", new Color( 0.4f, 1f, 0.4f ) );
 	}
 
-	private GameObject SpawnBoss( bool isFinalBoss )
+	private GameObject SpawnFinalBossEntity( float? spawnMinDist = null, float? spawnMaxDist = null )
 	{
-		var (go, enemy) = CreateEnemyAtRandomOffset();
+		var (go, enemy) = spawnMinDist.HasValue && spawnMaxDist.HasValue
+			? CreateEnemyAtRandomOffset( spawnMinDist.Value, spawnMaxDist.Value )
+			: CreateEnemyAtRandomOffset();
 		float timeScale = 1f + _runTimer / 120f;
-		float phaseScale = isFinalBoss ? 1.6f : (1f + _miniBossesSpawned * 0.2f);
+		float phaseScale = 1.6f;
 
-		if ( isFinalBoss )
-		{
-			enemy.MaxHP                  = 1200f * timeScale * phaseScale;
-			enemy.Speed                  = 18f;
-			enemy.ContactDamage          = 55f * timeScale;
-			enemy.DamageCooldownDuration  = 2.0f;
-			enemy.XPValue                = 120;
-			enemy.EnemyColor             = new Color( 0.9f, 0.1f, 0.1f );
-			enemy.SizeScale              = 2.5f;
-			go.Name                      = "FinalBoss";
-		}
-		else
-		{
-			enemy.MaxHP                  = 400f * timeScale * phaseScale;
-			enemy.Speed                  = 16f;
-			enemy.ContactDamage          = 35f * timeScale;
-			enemy.DamageCooldownDuration  = 2.2f;
-			enemy.XPValue                = 80;
-			enemy.EnemyColor             = Color.Magenta;
-			enemy.SizeScale              = 1.8f;
-			go.Name                      = "MiniBoss";
-		}
+		enemy.MaxHP                  = 1200f * timeScale * phaseScale;
+		enemy.Speed                  = 18f;
+		enemy.ContactDamage          = 55f * timeScale;
+		enemy.DamageCooldownDuration  = 2.0f;
+		enemy.XPValue                = 120;
+		enemy.EnemyColor             = new Color( 0.9f, 0.1f, 0.1f );
+		enemy.SizeScale              = 6f;
+		enemy.CollisionScale         = 0.3f; // Sprite-based; default formula overestimates hitbox vs visual
+		enemy.SpritePath             = "sprites/Dragon/dragonanimations.sprite";
+		enemy.DieAnimation           = "dragondeath";
+		enemy.DieAnimDuration        = 1.5f;
+		enemy.DisableMovement        = true;
+		go.Name                      = "FinalBoss";
+
+		go.Components.Create<DragonBoss>();
 
 		_spawnedEnemies.Add( go );
 		return go;
@@ -242,7 +259,7 @@ public sealed class EnemySpawner : Component
 	{
 		var (go, enemy) = CreateEnemyAtRandomOffset();
 		float timeScale = 1f + _runTimer / 120f;
-		float phaseScale = MathF.Pow( 1f + TimeScaleFactor, _miniBossesSpawned + 1 );
+		float phaseScale = MathF.Pow( 1f + TimeScaleFactor, _intensityPhase + 1 );
 
 		EnemyType type = PickType();
 		ApplyType( go, enemy, type, timeScale, phaseScale );
@@ -250,10 +267,10 @@ public sealed class EnemySpawner : Component
 		_waveEnemies.Add( go );
 	}
 
-	private (GameObject go, EnemyBase enemy) CreateEnemyAtRandomOffset()
+	private (GameObject go, EnemyBase enemy) CreateEnemyAtRandomOffset( float minDist = 380f, float maxDist = 460f )
 	{
 		float angle = (float)(_rand.NextDouble() * 360.0);
-		float dist  = 380f + (float)(_rand.NextDouble() * 80f);
+		float dist  = minDist + (float)(_rand.NextDouble() * (maxDist - minDist));
 		var offset = new Vector3(
 			MathF.Cos( angle * MathF.PI / 180f ) * dist,
 			MathF.Sin( angle * MathF.PI / 180f ) * dist,

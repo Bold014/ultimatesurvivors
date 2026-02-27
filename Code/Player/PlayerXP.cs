@@ -20,9 +20,9 @@ public sealed class PlayerXP : Component
 	private PlayerLocalState _state;
 	private bool            _initialized = false;
 
-	protected override void OnStart()
-	{
-	}
+	protected override void OnStart() { PlayerXP.LocalInstance = this; }
+	protected override void OnDestroy() { if ( LocalInstance == this ) LocalInstance = null; }
+	public static PlayerXP LocalInstance { get; private set; }
 
 	private void EnsureInitialized()
 	{
@@ -33,11 +33,18 @@ public sealed class PlayerXP : Component
 		_state         = Components.Get<PlayerLocalState>();
 	}
 
+	private bool _loggedFirstXP = false;
 	public void AddXP( int amount )
 	{
 		EnsureInitialized();
 		float mult = _state?.XPMultiplier ?? 1f;
 		int finalAmount = Math.Max( 1, (int)Math.Ceiling( amount * mult ) );
+
+		if ( !_loggedFirstXP )
+		{
+			_loggedFirstXP = true;
+			Log.Info( $"[PlayerXP] First XP received: +{finalAmount} (raw={amount})" );
+		}
 
 		CurrentXP += finalAmount;
 		while ( CurrentXP >= XPToNextLevel )
@@ -57,6 +64,7 @@ public sealed class PlayerXP : Component
 		if ( _stats != null )
 			_stats.Level = Level;
 
+		Log.Info( $"[PlayerXP] LevelUp! Level={Level}. _upgradeSystem={((_upgradeSystem != null) ? "SET" : "NULL")}. UpgradeSystem.LocalInstance={((UpgradeSystem.LocalInstance != null) ? "SET" : "NULL")}" );
 		_upgradeSystem?.ShowUpgrades();
 	}
 }

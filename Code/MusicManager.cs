@@ -20,6 +20,11 @@ public sealed class MusicManager : Component
 
 	protected override void OnStart()
 	{
+		// Singleton: only one MusicManager plays. If another is already active, don't start.
+		if ( Instance != null && Instance != this && Instance._playing )
+		{
+			Instance.Stop();
+		}
 		Instance = this;
 
 		try
@@ -33,6 +38,19 @@ public sealed class MusicManager : Component
 			Log.Error( $"[MusicManager] OnStart failed: {e.Message}\n{e.StackTrace}" );
 			_playing = false;
 		}
+	}
+
+	/// <summary>Stop this instance (used when switching to local game to avoid doubling with prefab's music).</summary>
+	public void Stop()
+	{
+		if ( !_playing ) return;
+		try
+		{
+			_handle.Stop();
+			_playing = false;
+			if ( Instance == this ) Instance = null;
+		}
+		catch { }
 	}
 
 	/// <summary>Toggle mute and persist. Call from UI.</summary>

@@ -1,0 +1,407 @@
+{
+  "Animations": [
+    {
+      "Name": "idledown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Idle/dragonidle_24.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_25.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_26.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_27.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "idleup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Idle/dragonidle_8.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_9.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_10.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_11.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "idleleft",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Idle/dragonidle_16.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_17.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_18.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_19.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "idleright",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Idle/dragonidle_0.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_1.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_2.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Idle/dragonidle_3.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "walkdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_18.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_19.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_20.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_21.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_22.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_23.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "walkup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_6.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_7.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_8.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_9.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_10.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_11.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "walkleft",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_12.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_13.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_14.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_15.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_16.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_17.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "walkright",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_0.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_1.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_2.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_3.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_4.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Walk/dragonwalk_5.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "meleedown",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Melee/melee_18.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_19.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_20.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_21.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_22.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_23.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "meleeup",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Melee/melee_6.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_7.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_8.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_9.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_10.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_11.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "meleeleft",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Melee/melee_12.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_13.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_14.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_15.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_16.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_17.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "meleeright",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Melee/melee_0.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_1.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_2.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_3.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_4.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Melee/melee_5.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "breathdown",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_54.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_55.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_56.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_57.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_58.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_59.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "breathup",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_18.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_19.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_20.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_21.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_22.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_23.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "breathleft",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_36.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_37.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_38.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_39.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_40.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_41.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "breathright",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_0.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_1.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_2.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_3.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_4.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Firebreath/firebreath_5.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "launchdown",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Launch/launch_18.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_19.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_20.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_21.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_22.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_23.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "launchup",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Launch/launch_6.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_7.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_8.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_9.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_10.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_11.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "launchleft",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Launch/launch_12.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_13.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_14.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_15.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_16.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_17.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "launchright",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Launch/launch_0.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_1.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_2.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_3.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_4.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Launch/launch_5.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "hoverdown",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Hover/hover_18.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_19.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_20.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_21.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_22.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_23.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "hoverup",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Hover/hover_6.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_7.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_8.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_9.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_10.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_11.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "hoverleft",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Hover/hover_12.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_13.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_14.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_15.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_16.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_17.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "hoverright",
+      "FrameRate": 8,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Hover/hover_0.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_1.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_2.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_3.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_4.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Hover/hover_5.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "flydown",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Fly/fly_18.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_19.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_20.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_21.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_22.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_23.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "flyup",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Fly/fly_6.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_7.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_8.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_9.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_10.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_11.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "flyleft",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Fly/fly_12.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_13.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_14.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_15.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_16.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_17.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "flyright",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "Loop",
+      "Frames": [
+        { "Texture": "sprites/Dragon/Fly/fly_0.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_1.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_2.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_3.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_4.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/Fly/fly_5.png", "BroadcastMessages": [] }
+      ]
+    },
+    {
+      "Name": "dragondeath",
+      "FrameRate": 12,
+      "Origin": "0.5,0.5",
+      "LoopMode": "None",
+      "Frames": [
+        { "Texture": "sprites/Dragon/death/dragondeath_0.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/death/dragondeath_1.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/death/dragondeath_2.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/death/dragondeath_3.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/death/dragondeath_4.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/death/dragondeath_5.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/death/dragondeath_6.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/death/dragondeath_7.png", "BroadcastMessages": [] },
+        { "Texture": "sprites/Dragon/death/dragondeath_8.png", "BroadcastMessages": [] }
+      ]
+    }
+  ],
+  "__references": [],
+  "__version": 0
+}

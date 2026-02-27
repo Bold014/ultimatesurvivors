@@ -10,7 +10,7 @@
 				@foreach ( var msg in Chat.Messages.TakeLast( 8 ) )
 				{
 					var isSystem = msg.PlayerName == "System";
-					<div style="display: flex; flex-wrap: wrap; align-items: baseline; font-size: 13px; font-family: monospace; background: @(isSystem ? "#1a1410" : "#0f0d0a"); padding: 4px 10px; border-radius: 4px; border-left: 3px solid @(isSystem ? "#c8a800" : "transparent");">
+					<div style="display: flex; flex-wrap: wrap; align-items: baseline; font-size: 13px; font-family: Minecraft; background: @(isSystem ? "#1a1410" : "#0f0d0a"); padding: 4px 10px; border-radius: 4px; border-left: 3px solid @(isSystem ? "#c8a800" : "transparent");">
 						<span style="color: @ColorToHex( msg.NameColor ); flex-shrink: 0; white-space: nowrap;">@msg.PlayerName</span>
 						<span style="color: #dddddd; margin-left: 4px;">: @msg.Text</span>
 					</div>
@@ -21,14 +21,14 @@
 		@if ( Chat?.IsChatOpen == true )
 		{
 			<div style="background: #0a0806; border: 2px solid #4a3520; border-radius: 6px; padding: 6px 10px;">
-				<TextEntry style="color: #ffffff; font-size: 13px; font-family: monospace; width: 100%;"
+				<TextEntry style="color: #ffffff; font-size: 13px; font-family: Minecraft; width: 100%;"
 					placeholder="Type a message and press Enter..."
 					onsubmit=@OnSubmit />
 			</div>
 		}
 		else
 		{
-			<div style="font-size: 11px; color: #6a5a40; font-family: monospace;">[Enter] to chat</div>
+			<div style="font-size: 11px; color: #6a5a40; font-family: Minecraft;">[Enter] to chat</div>
 		}
 	</div>
 </root>

@@ -4,6 +4,10 @@
 /// </summary>
 public sealed class PlayerPassives : Component
 {
+	public static PlayerPassives LocalInstance { get; private set; }
+	protected override void OnStart() { LocalInstance = this; }
+	protected override void OnDestroy() { if ( LocalInstance == this ) LocalInstance = null; }
+
 	public const int MaxSlots = 4;
 
 	private readonly List<string> _passives = new();

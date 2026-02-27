@@ -54,12 +54,17 @@ public class TreeManager : Component
 	TilesetComponent.Layer _layer;
 	Guid _treeGuid;
 	bool _ready;
+	System.Random _rng;
 
 	protected override void OnStart()
 	{
+		// Fallback: if TreeTileset not assigned, get from same GameObject
+		if ( !TreeTileset.IsValid() )
+			TreeTileset = GameObject.Components.Get<TilesetComponent>();
+
 		if ( !TreeTileset.IsValid() )
 		{
-			Log.Warning( "[TreeMgr] TreeTileset property not set!" );
+			Log.Warning( "[TreeMgr] TreeTileset property not set and no TilesetComponent on this GameObject!" );
 			return;
 		}
 
@@ -98,6 +103,9 @@ public class TreeManager : Component
 		// Clear any leftover tree tiles from a previous run
 		TreeTiles.Clear();
 
+		// Seed from current time so every run produces a different tree layout
+		_rng = new System.Random( (int)(System.DateTime.UtcNow.Ticks & 0x7FFFFFFF) );
+
 		_ready = true;
 	}
 
@@ -108,8 +116,12 @@ public class TreeManager : Component
 		var player = Scene.GetAllComponents<PlayerController>().FirstOrDefault();
 		var trackPos = player?.WorldPosition ?? Scene.Camera?.WorldPosition ?? Vector3.Zero;
 
-		int centerChunkX = (int)MathF.Floor( trackPos.x / ( TileWorldWidth  * ChunkSize ) );
-		int centerChunkY = (int)MathF.Floor( trackPos.y / ( TileWorldHeight * ChunkSize ) );
+		// Use tileset's actual tile size for chunk grid (matches RandomTileVariants approach)
+		var tileSizeF = _layer.TilesetResource?.GetTileSize() ?? new Vector2( TileWorldWidth, TileWorldHeight );
+		float tw = tileSizeF.x;
+		float th = tileSizeF.y;
+		int centerChunkX = (int)MathF.Floor( trackPos.x / ( tw * ChunkSize ) );
+		int centerChunkY = (int)MathF.Floor( trackPos.y / ( th * ChunkSize ) );
 
 		Vector2Int? closest = null;
 		int closestDistSq = int.MaxValue;
@@ -146,9 +158,7 @@ public class TreeManager : Component
 		{
 			for ( int y = startY; y < startY + ChunkSize; y++ )
 			{
-				// Deterministic per-tile hash so the world is consistent
-				int hash = Math.Abs( x * 92837111 ^ y * 689287499 );
-				if ( hash % 100 >= TreePercent ) continue;
+				if ( _rng.Next( 100 ) >= TreePercent ) continue;
 
 				var tilePos = new Vector2Int( x, y );
 			_layer.SetTile( tilePos, _treeGuid, Vector2Int.Zero, 0, rebuild: false );

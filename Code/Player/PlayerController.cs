@@ -375,7 +375,7 @@ public sealed class PlayerController : Component
 		cam.ZFar = 10000f;
 		cam.ZNear = 1f;
 		cam.BackgroundColor = new Color( 0.08f, 0.08f, 0.12f );
-		cam.Priority = 10; // Higher than the scene camera
+		cam.Priority = 10;
 	}
 
 	private void OnDied()

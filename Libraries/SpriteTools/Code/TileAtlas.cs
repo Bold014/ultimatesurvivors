@@ -29,6 +29,25 @@ public class TileAtlas
 		return new Vector2( cellPosition.x * TileSize.x + 1, cellPosition.y * TileSize.y + 1 ) / Texture.Size;
 	}
 
+	static Texture CreatePlaceholderTexture ( TilesetResource tilesetResource )
+	{
+		var tileSize = tilesetResource.TileSize;
+		var hTiles = tilesetResource.Tiles.Count > 0 ? tilesetResource.Tiles.Max( x => x.Position.x + x.Size.x ) : 1;
+		var vTiles = tilesetResource.Tiles.Count > 0 ? tilesetResource.Tiles.Max( x => x.Position.y + x.Size.y ) : 1;
+		var w = Math.Max( 1, hTiles * tileSize.x );
+		var h = Math.Max( 1, vTiles * tileSize.y );
+		var len = w * h * 4;
+		var data = new byte[len];
+		// Green/brown placeholder for ground, dark green for trees
+		byte r = 45; byte g = 90; byte b = 45; byte a = 255;
+		if ( tilesetResource.FilePath?.Contains( "tree" ) == true ) { r = 34; g = 68; b = 34; }
+		for ( int i = 0; i < len; i += 4 ) { data[i] = r; data[i+1] = g; data[i+2] = b; data[i+3] = a; }
+		var builder = Texture.Create( w, h );
+		builder.WithData( data );
+		builder.WithMips( 0 );
+		return builder.Finish();
+	}
+
 	public static TileAtlas FromTileset ( TilesetResource tilesetResource )
 	{
 		if ( tilesetResource is null ) return null;
@@ -49,12 +68,42 @@ public class TileAtlas
 		}
 
 		var path = tilesetResource.FilePath;
-		if ( !FileSystem.Mounted.FileExists( path ) )
+		// Try primary path, then common alternatives (S&box content root can vary; folder may be Textures vs textures)
+		var pathsToTry = new List<string> { path };
+		if ( !path.StartsWith( "assets/", System.StringComparison.OrdinalIgnoreCase ) )
 		{
-			Log.Error( $"Tileset texture file {path} does not exist." );
-			return null;
+			pathsToTry.Add( "assets/" + path );
+			pathsToTry.Add( "Assets/" + path );
+			if ( path.StartsWith( "textures/", System.StringComparison.OrdinalIgnoreCase ) )
+				pathsToTry.Add( "Textures/" + path.Substring( 9 ) );
 		}
-		var texture = Texture.LoadFromFileSystem( path, FileSystem.Mounted );
+		else
+		{
+			pathsToTry.Add( path.Substring( 7 ) ); // try without "assets/"
+		}
+
+		Texture texture = null;
+		foreach ( var p in pathsToTry )
+		{
+			if ( FileSystem.Mounted.FileExists( p ) )
+			{
+				texture = Texture.LoadFromFileSystem( p, FileSystem.Mounted );
+				if ( texture != null ) break;
+			}
+		}
+		// Fallback: Texture.Load uses content path resolution (may work when FileSystem.Mounted differs)
+		if ( texture == null )
+		{
+			texture = Texture.Load( path );
+			if ( texture == null && !path.StartsWith( "assets/", System.StringComparison.OrdinalIgnoreCase ) )
+				texture = Texture.Load( "assets/" + path );
+		}
+		if ( texture == null )
+		{
+			Log.Warning( $"Tileset texture file {path} does not exist (tried: {string.Join( ", ", pathsToTry )}). Using placeholder." );
+			texture = CreatePlaceholderTexture( tilesetResource );
+			if ( texture is null ) return null;
+		}
 		var atlas = new TileAtlas();
 
 		var tileSize = tilesetResource.TileSize;

@@ -1,3 +1,5 @@
+using SpriteTools;
+
 /// <summary>
 /// Scene singleton. Spawns the local player immediately on start (no networking).
 /// This avoids all IsProxy / [Sync] / lobby-timing issues for a singleplayer run.
@@ -19,8 +21,18 @@ public sealed class GameManager : Component
 	protected override void OnStart()
 	{
 		Instance = this;
+		Log.Info( $"[GameManager] OnStart. Scene={Scene?.Name}, IsInLocalGame={LocalGameRunner.IsInLocalGame}" );
 		PlayerProgress.Load();
+		EnsureMapExists();
 		SpawnPlayer();
+	}
+
+	/// <summary>Ensures the procedural map exists (spawns at runtime if missing).</summary>
+	private void EnsureMapExists()
+	{
+		if ( Scene.GetAllComponents<TilesetComponent>().Any() ) return;
+		var spawner = GameObject.Components.GetOrCreate<MapSpawner>();
+		// MapSpawner.OnStart will run next frame; it spawns the map. No need to call it manually.
 	}
 
 	protected override void OnUpdate()
@@ -35,7 +47,7 @@ public sealed class GameManager : Component
 				int tier = MenuManager.SelectedTier;
 				int waves = tier * 10;
 				ChatComponent.Instance?.AddMessage( "System", "Welcome to Ultimate Survivors!", Color.Yellow );
-				ChatComponent.Instance?.AddMessage( "System", "Survive 10 minutes! Beat 3 mini-bosses, then the final boss!", new Color( 1f, 0.8f, 0.2f ) );
+				ChatComponent.Instance?.AddMessage( "System", "Survive 10 minutes! Survive intense waves, then the final boss!", new Color( 1f, 0.8f, 0.2f ) );
 			}
 		}
 
@@ -47,9 +59,14 @@ public sealed class GameManager : Component
 			if ( _returnToMenuDelay <= 0f )
 			{
 				ReturnToMenuCountdown = 0f;
-				var opts = new SceneLoadOptions();
-				opts.SetScene( ResourceLibrary.Get<SceneFile>( "scenes/menu.scene" ) );
-				Game.ChangeScene( opts );
+				if ( LocalGameRunner.IsInLocalGame )
+					LocalGameRunner.Instance?.EndLocalGame();
+				else
+				{
+					var opts = new SceneLoadOptions();
+					opts.SetScene( ResourceLibrary.Get<SceneFile>( "scenes/menu.scene" ) );
+					Game.ChangeScene( opts );
+				}
 			}
 			return;
 		}
@@ -188,6 +205,8 @@ public sealed class GameManager : Component
 		go.Components.Create<EnemySpawner>();
 		go.Components.Create<WorldObjectSpawner>();
 		go.Components.Create<PlayerController>();
+		var sceneChildCount = Scene?.Children?.Count ?? 0;
+		Log.Info( $"[GameManager] Player spawned. Scene children: {sceneChildCount}. If you see blue screen, game_run prefab may be missing map/HUD - recreate from full game.scene." );
 	}
 
 	private static string CharacterNameToId( string name ) => name?.ToLower() switch

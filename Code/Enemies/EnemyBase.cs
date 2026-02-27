@@ -1,3 +1,5 @@
+using SpriteTools;
+
 /// <summary>
 /// Local-only enemy. Moves toward the player, deals contact damage, drops XP on death.
 /// Never networked — only exists on the owning player's client.
@@ -13,6 +15,8 @@ public sealed class EnemyBase : Component
 	[Property] public Color EnemyColor { get; set; } = Color.Red;
 	/// <summary>Multiplier applied to the default 0.35 base scale. Set before OnStart runs.</summary>
 	[Property] public float SizeScale { get; set; } = 1f;
+	/// <summary>Multiplier for collision/hitbox size. Use &lt; 1 for sprite-based enemies where the default formula overestimates visual size.</summary>
+	[Property] public float CollisionScale { get; set; } = 1f;
 
 	/// <summary>If set, a SpriteRenderer is used instead of the dev box model.</summary>
 	[Property] public string SpritePath { get; set; }
@@ -24,18 +28,21 @@ public sealed class EnemyBase : Component
 	[Property] public string AttackAnimationPrefix { get; set; }
 	/// <summary>Duration to play the attack animation when dealing contact damage.</summary>
 	[Property] public float AttackAnimDuration { get; set; } = 0.5f;
+	/// <summary>When true, skips movement, separation, and contact damage. Used by DragonBoss which controls its own movement.</summary>
+	public bool DisableMovement { get; set; } = false;
 
 	public float HP { get; private set; }
 	public GameObject Target { get; set; }
 
 	/// <summary>World-space half-extent on the XY plane. Dev box is 100 units; WorldScale = 0.35 × SizeScale.</summary>
-	public float HalfExtent => 17.5f * SizeScale;
+	public float HalfExtent => 17.5f * SizeScale * CollisionScale;
 	/// <summary>Radius for projectile hit detection. Tighter so projectile visually reaches sprite before destroying.</summary>
 	public float ProjectileHitRadius => HalfExtent + 12f;
 
 	private float _damageCooldown = 0f;
 	private ModelRenderer _renderer;
 	private SpriteRenderer _spriteRenderer;
+	private SpriteComponent _spriteComponent;
 	private float _flashTimer = 0f;
 	private float _dieTimer = -1f;
 	private float _attackTimer = 0f;
@@ -55,11 +62,38 @@ public sealed class EnemyBase : Component
 			// Negative Y scale flips sprites that are authored upside-down
 			spriteGo.LocalScale = new Vector3( SizeScale * 2f, -SizeScale * 2f, SizeScale * 2f );
 
+			// Try Sandbox Sprite (.sprite) first, then SpriteResource (.spr) for SpriteTools format
 			var sprite = ResourceLibrary.Get<Sprite>( SpritePath );
-			_spriteRenderer = spriteGo.Components.Create<SpriteRenderer>();
-			_spriteRenderer.Sprite = sprite;
-			_spriteRenderer.TextureFilter = Sandbox.Rendering.FilterMode.Point;
-			_spriteRenderer.PlayAnimation( _lastWalkAnim );
+			var sprPath = SpritePath.EndsWith( ".spr" ) ? SpritePath : SpritePath + ".spr";
+			var spriteResource = sprite == null ? ResourceLibrary.Get<SpriteResource>( sprPath ) : null;
+			if ( spriteResource == null && sprite == null )
+				spriteResource = ResourceLibrary.Get<SpriteResource>( "sprites/Dragon/dragon.spr" );
+
+			if ( sprite != null )
+			{
+				_spriteRenderer = spriteGo.Components.Create<SpriteRenderer>();
+				_spriteRenderer.Sprite = sprite;
+				_spriteRenderer.TextureFilter = Sandbox.Rendering.FilterMode.Point;
+				_spriteRenderer.PlayAnimation( _lastWalkAnim );
+			}
+			else if ( spriteResource != null )
+			{
+				// SpriteComponent: use positive scale (negative Y can break it), enable pixel scale for 96x96
+				spriteGo.LocalScale = new Vector3( SizeScale * 2f, SizeScale * 2f, SizeScale * 2f );
+				_spriteComponent = spriteGo.Components.Create<SpriteComponent>();
+				_spriteComponent.Sprite = spriteResource;
+				_spriteComponent.UsePixelScale = true;
+				_spriteComponent.PlayAnimation( _lastWalkAnim );
+			}
+			else
+			{
+				// Fallback: no sprite loaded — use colored box so boss is at least visible
+				_renderer = Components.Create<ModelRenderer>();
+				_renderer.Model = Model.Load( "models/dev/box.vmdl" );
+				_renderer.Tint = EnemyColor;
+				float s = 0.35f * SizeScale;
+				GameObject.WorldScale = new Vector3( s, s, 0.05f * SizeScale );
+			}
 		}
 		else
 		{
@@ -94,6 +128,8 @@ public sealed class EnemyBase : Component
 					_renderer.Tint = EnemyColor;
 				if ( _spriteRenderer != null )
 					_spriteRenderer.OverlayColor = Color.White.WithAlpha( 0 );
+				if ( _spriteComponent != null )
+					_spriteComponent.FlashTint = Color.White.WithAlpha( 0 );
 			}
 		}
 
@@ -102,6 +138,8 @@ public sealed class EnemyBase : Component
 		// Freeze while the player is choosing an upgrade — prevents dying during the selection screen
 		var upgradeSystem = Target.Components.Get<UpgradeSystem>();
 		if ( upgradeSystem?.IsShowingUpgrades == true ) return;
+
+		if ( DisableMovement ) return;
 
 		// Count down attack animation
 		if ( _attackTimer > 0f )
@@ -132,6 +170,21 @@ public sealed class EnemyBase : Component
 			else
 			{
 				_spriteRenderer.PlayAnimation( _lastWalkAnim );
+			}
+		}
+		else if ( _spriteComponent != null )
+		{
+			if ( _attackTimer > 0f && !string.IsNullOrEmpty( AttackAnimationPrefix ) )
+			{
+				float ax = MathF.Abs( dir.x ), ay = MathF.Abs( dir.y );
+				string attackDir = ax > ay
+					? (dir.x > 0 ? "right" : "left")
+					: (dir.y > 0 ? "up" : "down");
+				_spriteComponent.PlayAnimation( $"{AttackAnimationPrefix} {attackDir}" );
+			}
+			else
+			{
+				_spriteComponent.PlayAnimation( _lastWalkAnim );
 			}
 		}
 
@@ -290,6 +343,11 @@ public sealed class EnemyBase : Component
 			_spriteRenderer.OverlayColor = Color.White;
 			_flashTimer = 0.1f;
 		}
+		else if ( _spriteComponent != null )
+		{
+			_spriteComponent.FlashTint = Color.White;
+			_flashTimer = 0.1f;
+		}
 
 		SpawnDamageIndicator( amount, isCrit );
 
@@ -332,10 +390,18 @@ public sealed class EnemyBase : Component
 		Target?.Components.Get<PlayerCoins>()?.AddCoins( coins );
 		SpawnXPGem();
 
-		if ( _spriteRenderer != null && !string.IsNullOrEmpty( DieAnimation ) )
+		if ( ( _spriteRenderer != null || _spriteComponent != null ) && !string.IsNullOrEmpty( DieAnimation ) )
 		{
-			_spriteRenderer.PlayAnimation( DieAnimation );
-			_spriteRenderer.PlaybackSpeed = 1f;
+			if ( _spriteRenderer != null )
+			{
+				_spriteRenderer.PlayAnimation( DieAnimation );
+				_spriteRenderer.PlaybackSpeed = 1f;
+			}
+			else
+			{
+				_spriteComponent.PlayAnimation( DieAnimation );
+				_spriteComponent.PlaybackSpeed = 1f;
+			}
 			_dieTimer = DieAnimDuration;
 		}
 		else

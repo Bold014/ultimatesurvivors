@@ -4,6 +4,10 @@
 /// </summary>
 public sealed class PlayerLocalState : Component
 {
+	public static PlayerLocalState LocalInstance { get; private set; }
+	protected override void OnStart() { LocalInstance = this; }
+	protected override void OnDestroy() { if ( LocalInstance == this ) LocalInstance = null; }
+
 	public float HP { get; set; } = 100f;
 	public float MaxHP { get; set; } = 100f;
 	public float Speed { get; set; } = 80f;

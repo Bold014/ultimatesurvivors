@@ -150,6 +150,34 @@
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null
+        },
+        {
+          "__type": "LocalGameRunner",
+          "__guid": "3cf3cf41-3c37-46bf-9691-b05b069cadb5",
+          "__enabled": true,
+          "Flags": 0,
+          "GamePrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/game_run.prefab"
+          },
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null
+        },
+        {
+          "__type": "ChatComponent",
+          "__guid": "4df4df52-4d48-47c0-a7a2-c16c17adbec6",
+          "__enabled": true,
+          "Flags": 0,
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null
         }
       ],
       "Children": []
