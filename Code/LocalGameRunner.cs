@@ -13,6 +13,11 @@ public sealed class LocalGameRunner : Component
 
 	private GameObject _localGameRoot;
 
+	// Track objects we disabled so we can re-enable them even after they are inactive
+	// (Scene.GetAllComponents skips disabled GameObjects, so we must hold explicit refs).
+	private readonly List<GameObject> _disabledObjects = new();
+	private readonly List<MusicManager> _stoppedMusic = new();
+
 	protected override void OnStart()
 	{
 		Instance = this;
@@ -43,14 +48,21 @@ public sealed class LocalGameRunner : Component
 		Log.Info( $"[LocalGameRunner] Prefab cloned. Root={_localGameRoot?.Name}, Children={childCount}" );
 		// Do NOT call _localGameRoot.NetworkSpawn() — keeps it client-only
 
-		// Hide the menu UI immediately
+		_disabledObjects.Clear();
+		_stoppedMusic.Clear();
+
+		// Hide the menu UI immediately — store refs so EndLocalGame can find them when disabled
 		foreach ( var panel in Scene.GetAllComponents<Sandbox.UI.MainMenuPanel>().ToList() )
+		{
+			_disabledObjects.Add( panel.GameObject );
 			panel.GameObject.Enabled = false;
+		}
 
 		// Stop menu's music so we don't double with the prefab's MusicManager
 		foreach ( var music in Scene.GetAllComponents<MusicManager>().ToList() )
 		{
 			if ( IsUnder( music.GameObject, _localGameRoot ) ) continue;
+			_stoppedMusic.Add( music );
 			music.Stop();
 		}
 
@@ -58,6 +70,7 @@ public sealed class LocalGameRunner : Component
 		foreach ( var cam in Scene.GetAllComponents<CameraComponent>().ToList() )
 		{
 			if ( IsUnder( cam.GameObject, _localGameRoot ) ) continue;
+			_disabledObjects.Add( cam.GameObject );
 			cam.GameObject.Enabled = false;
 		}
 	}
@@ -67,13 +80,25 @@ public sealed class LocalGameRunner : Component
 		_localGameRoot?.Destroy();
 		_localGameRoot = null;
 
-		// Restore menu UI
-		foreach ( var panel in Scene.GetAllComponents<Sandbox.UI.MainMenuPanel>().ToList() )
-			panel.GameObject.Enabled = true;
+		// Re-enable every object we disabled — use stored refs because GetAllComponents
+		// skips disabled GameObjects and would miss them.
+		foreach ( var go in _disabledObjects )
+		{
+			if ( go.IsValid() )
+				go.Enabled = true;
+		}
+		_disabledObjects.Clear();
 
-		// Re-enable menu's camera
-		foreach ( var cam in Scene.GetAllComponents<CameraComponent>().ToList() )
-			cam.GameObject.Enabled = true;
+		// Restart menu music that was stopped when the game launched
+		foreach ( var music in _stoppedMusic )
+		{
+			if ( music.IsValid() )
+				music.Play();
+		}
+		_stoppedMusic.Clear();
+
+		// Restore the cursor — PlayerController hides it during gameplay.
+		Mouse.Visibility = MouseVisibility.Visible;
 	}
 
 	static bool IsUnder( GameObject go, GameObject root )

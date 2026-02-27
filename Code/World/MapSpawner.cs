@@ -94,7 +94,11 @@ public class MapSpawner : Component
 			// Grass col 5 — user rows 1–4 → tileset rows 3–0
 			"5,3,270", "5,2,270", "5,1,270", "5,0,270",
 		};
-		mapGen.VariantPercent = 10;
+		// Flower/grass variant patches — concentrated in noise-defined areas
+		mapGen.PatchNoiseScale = 8f;
+		mapGen.PatchThreshold = 0.58f;
+		mapGen.PatchVariantPercent = 35;
+		mapGen.SparseVariantPercent = 2;
 
 		// Trees
 		var treesGo = new GameObject( true, "Trees" );
@@ -111,7 +115,11 @@ public class MapSpawner : Component
 		var treeMgr = treesGo.Components.Create<TreeManager>();
 		treeMgr.TreeTileset = treeTileset;
 		treeMgr.LayerIndex = 0;
-		treeMgr.TreePercent = 3;
+		treeMgr.ForestNoiseScale = 10f;
+		treeMgr.ForestThreshold = 0.38f;
+		treeMgr.ForestDensity = 45;
+		treeMgr.EdgeDensity = 10;
+		treeMgr.OpenDensity = 2;
 
 		_spawned = true;
 		Log.Info( $"[MapSpawner] Map spawned at runtime. Map and Trees parented to {parent?.Name ?? "?"}." );

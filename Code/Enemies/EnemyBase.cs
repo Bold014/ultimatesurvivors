@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SpriteTools;
 
 /// <summary>
@@ -49,6 +50,15 @@ public sealed class EnemyBase : Component
 	private string _lastWalkAnim = "walkdown";
 	/// <summary>Velocity applied each frame for smooth knockback. Decays over time.</summary>
 	private Vector3 _knockbackVelocity = Vector3.Zero;
+
+	// ── Pathfinding state ─────────────────────────────────────────────────
+	private List<Vector3> _path;
+	private int _pathWaypointIdx;
+	private float _pathRecalcTimer;
+	/// <summary>How often (seconds) to recalculate the A* path when obstructed.</summary>
+	private const float PathInterval = 0.45f;
+	/// <summary>World-unit radius at which a waypoint is considered reached.</summary>
+	private const float WaypointRadius = 20f;
 
 	protected override void OnStart()
 	{
@@ -145,11 +155,10 @@ public sealed class EnemyBase : Component
 		if ( _attackTimer > 0f )
 			_attackTimer -= Time.Delta;
 
-		// Move toward player on XY plane, sliding around tree tiles
+		// Direction to player — used only for animation and as fallback movement
 		var dir = (Target.WorldPosition - WorldPosition).WithZ( 0f );
 		if ( dir.LengthSquared > 1f )
 		{
-			// Update walk direction for when we're not attacking
 			float ax = MathF.Abs( dir.x ), ay = MathF.Abs( dir.y );
 			_lastWalkAnim = ax > ay
 				? (dir.x > 0 ? "walkright" : "walkleft")
@@ -188,10 +197,56 @@ public sealed class EnemyBase : Component
 			}
 		}
 
-		var step = dir.LengthSquared > 1f ? dir.Normal * Speed * Time.Delta : Vector3.Zero;
+		// ── Path-guided movement ──────────────────────────────────────────
+		_pathRecalcTimer -= Time.Delta;
+		float distToPlayer = dir.Length;
+
+		Vector3 moveDir = Vector3.Zero;
+		if ( distToPlayer > 1f )
+		{
+			if ( !IsPathObstructed( WorldPosition, Target.WorldPosition ) )
+			{
+				// Clear line of sight — go directly, discard any stale path
+				_path = null;
+				moveDir = dir.Normal;
+			}
+			else
+			{
+				// Trees are blocking — use A* to find a way around
+				if ( _path == null || _pathWaypointIdx >= _path.Count || _pathRecalcTimer <= 0f )
+				{
+					_path = PathFinder.FindPath( WorldPosition, Target.WorldPosition );
+					_pathWaypointIdx = 0;
+					// Jitter the interval slightly so all enemies don't recalculate on the same frame
+					_pathRecalcTimer = PathInterval + System.Random.Shared.NextSingle() * 0.1f;
+				}
+
+				if ( _path != null && _pathWaypointIdx < _path.Count )
+				{
+					// Advance past waypoints we've already reached
+					while ( _pathWaypointIdx < _path.Count &&
+					        (_path[_pathWaypointIdx].WithZ( 0f ) - WorldPosition.WithZ( 0f )).LengthSquared
+					        < WaypointRadius * WaypointRadius )
+					{
+						_pathWaypointIdx++;
+					}
+
+					moveDir = _pathWaypointIdx < _path.Count
+						? (_path[_pathWaypointIdx].WithZ( 0f ) - WorldPosition.WithZ( 0f )).Normal
+						: dir.Normal;
+				}
+				else
+				{
+					// Path failed or exhausted — slide fallback so we never fully stop
+					moveDir = dir.Normal;
+				}
+			}
+		}
+
+		var step = moveDir * Speed * Time.Delta;
 		// Apply smooth knockback velocity (decays each frame, works even when stationary)
 		step += _knockbackVelocity * Time.Delta;
-		_knockbackVelocity *= MathF.Pow( 0.08f, Time.Delta ); // ~92% decay per second for smooth slide
+		_knockbackVelocity *= MathF.Pow( 0.08f, Time.Delta ); // ~92% decay per second
 
 		if ( step.LengthSquared > 0.0001f )
 		{
@@ -202,7 +257,7 @@ public sealed class EnemyBase : Component
 			}
 			else
 			{
-				// Try sliding along X only, then Y only
+				// Last-resort axis slide (handles edge cases where A* path clips a tree corner)
 				var slideX = WorldPosition + new Vector3( step.x, 0f, 0f );
 				var slideY = WorldPosition + new Vector3( 0f, step.y, 0f );
 				if ( !TreeManager.IsTreeAtWorldPos( slideX.x, slideX.y ) )
@@ -210,7 +265,7 @@ public sealed class EnemyBase : Component
 				else if ( !TreeManager.IsTreeAtWorldPos( slideY.x, slideY.y ) )
 					WorldPosition = slideY;
 				else
-					_knockbackVelocity = Vector3.Zero; // Stop knockback when fully blocked
+					_knockbackVelocity = Vector3.Zero;
 			}
 		}
 		WorldPosition = WorldPosition.WithZ( 0f );
@@ -293,6 +348,27 @@ public sealed class EnemyBase : Component
 		float enemyPush = overlap * (playerMass / totalMass);
 		pos += diff / dist * enemyPush;
 		WorldPosition = pos;
+	}
+
+	/// <summary>
+	/// Returns true if any tree tile intersects the straight line between two world positions.
+	/// Uses ray-marching at a step smaller than the narrowest tile dimension (16 units).
+	/// </summary>
+	private static bool IsPathObstructed( Vector3 from, Vector3 to )
+	{
+		var diff = (to - from).WithZ( 0f );
+		float len = diff.Length;
+		if ( len < 1f ) return false;
+		var dir = diff / len;
+		const float step = 12f;
+		int steps = (int)(len / step);
+		for ( int i = 1; i <= steps; i++ )
+		{
+			var p = from + dir * (step * i);
+			if ( TreeManager.IsTreeAtWorldPos( p.x, p.y ) ) return true;
+		}
+		// Check final point as well
+		return TreeManager.IsTreeAtWorldPos( to.x, to.y );
 	}
 
 	/// <summary>Base knockback distance (units). Multiplied by player's Knockback stat. Applied as smooth velocity over ~0.3s.</summary>

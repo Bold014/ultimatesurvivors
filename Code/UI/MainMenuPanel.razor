@@ -635,6 +635,7 @@
 		background-image: url( ui/menu_bg.png );
 		background-size: cover;
 		background-position: center;
+		font-family: Minecraft;
 	}
 	.widget-panel {
 		background-color: rgba(18, 12, 6, 0.92);
@@ -953,6 +954,12 @@
 	{
 		Panel.Style.PointerEvents = PointerEvents.All;
 		_ = RefreshLeaderboardAsync();
+	}
+
+	protected override void OnEnabled()
+	{
+		// Always return to the main page (not map/character select) when the menu re-appears after a run.
+		_view = MenuView.Main;
 	}
 
 	protected override void OnDestroy()

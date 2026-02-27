@@ -53,6 +53,23 @@ public sealed class MusicManager : Component
 		catch { }
 	}
 
+	/// <summary>Restart playback after a previous Stop() call (used when returning to the menu from a local game).</summary>
+	public void Play()
+	{
+		if ( _playing ) return;
+		try
+		{
+			Instance = this;
+			_handle = Sound.Play( SongLoop );
+			_playing = true;
+			ApplyMute();
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( $"[MusicManager] Play failed: {e.Message}" );
+		}
+	}
+
 	/// <summary>Toggle mute and persist. Call from UI.</summary>
 	public void ToggleMute()
 	{

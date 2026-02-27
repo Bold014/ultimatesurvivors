@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// Streams the ground tilemap around the camera in chunks so the map is
-/// effectively infinite with no startup cost and no FPS hit.
-/// Attach to the same GameObject as the TilesetComponent (LevelOneMap).
+/// Streams the ground tilemap around the camera in chunks.
+/// Variants (flowers, grass tufts) are placed in noise-based patches so they
+/// form natural-looking clusters instead of uniform salt-and-pepper scatter.
 /// </summary>
 [Category( "World" )]
 [Title( "Map Generator" )]
@@ -33,13 +33,22 @@ public class RandomTileVariants : Component
 	[Property] public int GroundAngle { get; set; } = 0;
 
 	/// <summary>
-	/// Variant/decoration tiles scattered randomly over the ground.
+	/// Variant/decoration tiles scattered over the ground.
 	/// Format: "col,row" or "col,row,angle" (angle = 0/90/180/270).
 	/// </summary>
 	[Property] public List<string> VariantPositions { get; set; } = new();
 
-	/// <summary>Approximate % of tiles replaced with a variant (0–100).</summary>
-	[Property, Range( 0, 100 )] public int VariantPercent { get; set; } = 4;
+	/// <summary>Scale of the variant patch noise (tiles). Larger = bigger patches.</summary>
+	[Property, Range( 4, 60 )] public float PatchNoiseScale { get; set; } = 8f;
+
+	/// <summary>Noise threshold above which a patch is "active" (0–1). Higher = fewer patches.</summary>
+	[Property, Range( 0f, 1f )] public float PatchThreshold { get; set; } = 0.58f;
+
+	/// <summary>Variant chance (%) inside an active patch.</summary>
+	[Property, Range( 0, 100 )] public int PatchVariantPercent { get; set; } = 35;
+
+	/// <summary>Variant chance (%) outside patches (sparse single tiles).</summary>
+	[Property, Range( 0, 100 )] public int SparseVariantPercent { get; set; } = 2;
 
 	// ── runtime state ─────────────────────────────────────────────────────────
 	readonly HashSet<Vector2Int> _generatedChunks = new();
@@ -48,10 +57,10 @@ public class RandomTileVariants : Component
 	List<(Guid guid, int angle)> _variants = new();
 	bool _ready;
 	System.Random _rng;
+	int _noiseSeed;
 
 	protected override void OnStart()
 	{
-		// Fallback: if Tileset not assigned (e.g. prefab serialization), get from same GameObject
 		if ( !Tileset.IsValid() )
 			Tileset = GameObject.Components.Get<TilesetComponent>();
 
@@ -82,7 +91,6 @@ public class RandomTileVariants : Component
 			return;
 		}
 
-		// Ensure tiles render behind entities
 		_layer.Height = -1f;
 
 		var posToGuid = tilesetRes.Tiles.ToDictionary( t => t.Position, t => t.Id );
@@ -111,45 +119,33 @@ public class RandomTileVariants : Component
 			}
 		}
 
-		// Seed with current time so every run produces a different map layout
 		int seed = (int)(System.DateTime.UtcNow.Ticks & 0x7FFFFFFF);
 		_rng = new System.Random( seed );
+		_noiseSeed = _rng.Next();
 
-		Log.Info( $"[MapGen] Ready. seed={seed} groundTile=({GroundColumn},{GroundRow}) guid={_groundGuid} variants={_variants.Count} variantPercent={VariantPercent}" );
-		for ( int i = 0; i < _variants.Count; i++ )
-			Log.Info( $"[MapGen] Variant[{i}] guid={_variants[i].guid} angle={_variants[i].angle}" );
-
+		Log.Info( $"[MapGen] Ready. seed={seed} groundTile=({GroundColumn},{GroundRow}) variants={_variants.Count}" );
 		_ready = true;
 	}
 
 	Vector3 GetTrackingPosition()
 	{
-		// Track the player directly by component — Scene.Camera is often fixed at (0,0,z)
 		var player = Scene.GetAllComponents<PlayerController>().FirstOrDefault();
-		if ( player is not null )
-			return player.WorldPosition;
+		if ( player is not null ) return player.WorldPosition;
 		return Scene.Camera?.WorldPosition ?? Vector3.Zero;
 	}
 
 	protected override void OnUpdate()
 	{
-		if ( !_ready || _layer == null )
-			return;
+		if ( !_ready || _layer == null ) return;
 
 		var tileSizeF = _layer.TilesetResource?.GetTileSize() ?? new Vector2( 16, 16 );
 		var tileSize = new Vector2Int( (int)tileSizeF.x, (int)tileSizeF.y );
-
-		if ( tileSize.x <= 0 || tileSize.y <= 0 )
-		{
-			Log.Warning( $"[MapGen] Invalid tileSize {tileSize}" );
-			return;
-		}
+		if ( tileSize.x <= 0 || tileSize.y <= 0 ) return;
 
 		var trackPos = GetTrackingPosition();
 		int centerChunkX = (int)MathF.Floor( trackPos.x / ( tileSize.x * ChunkSize ) );
 		int centerChunkY = (int)MathF.Floor( trackPos.y / ( tileSize.y * ChunkSize ) );
 
-		// Find the closest ungenerated chunk to the tracking position
 		Vector2Int? closest = null;
 		int closestDistSq = int.MaxValue;
 
@@ -171,33 +167,38 @@ public class RandomTileVariants : Component
 
 		if ( closest.HasValue )
 		{
-			GenerateChunk( closest.Value, tileSize );
+			GenerateChunk( closest.Value );
 			_generatedChunks.Add( closest.Value );
 		}
 	}
 
-	private int _chunksGenerated = 0;
-
-	void GenerateChunk( Vector2Int chunk, Vector2Int tileSize )
+	void GenerateChunk( Vector2Int chunk )
 	{
 		int startX = chunk.x * ChunkSize;
 		int startY = chunk.y * ChunkSize;
-		bool useVariants = _variants.Count > 0 && VariantPercent > 0;
-		int variantCount = 0;
+		bool useVariants = _variants.Count > 0;
 
 		for ( int x = startX; x < startX + ChunkSize; x++ )
 		{
 			for ( int y = startY; y < startY + ChunkSize; y++ )
 			{
-			var mapPos = new Vector2Int( x, y );
-			Guid tileGuid = _groundGuid;
-			int tileAngle = GroundAngle;
+				var mapPos = new Vector2Int( x, y );
+				Guid tileGuid = _groundGuid;
+				int tileAngle = GroundAngle;
 
-				if ( useVariants && _rng.Next( 100 ) < VariantPercent )
+				if ( useVariants )
 				{
-					int vi = (int)(Math.Abs( (long)x * 31 + (long)y * 17 ) % _variants.Count);
-					(tileGuid, tileAngle) = _variants[vi];
-					variantCount++;
+					// Noise-based patch detection
+					float patchNoise = SmoothNoise( x, y, _noiseSeed, PatchNoiseScale );
+					bool inPatch = patchNoise > PatchThreshold;
+					int chance = inPatch ? PatchVariantPercent : SparseVariantPercent;
+
+					if ( _rng.Next( 100 ) < chance )
+					{
+						// Pick variant based on position hash for determinism within a tile
+						int vi = (int)(Math.Abs( (long)x * 31 + (long)y * 17 ) % _variants.Count);
+						(tileGuid, tileAngle) = _variants[vi];
+					}
 				}
 
 				_layer.SetTile( mapPos, tileGuid, Vector2Int.Zero, tileAngle, rebuild: false );
@@ -205,10 +206,40 @@ public class RandomTileVariants : Component
 		}
 
 		Tileset.IsDirty = true;
+	}
 
-		// Log first 3 chunks so we can verify variants are actually being placed
-		if ( _chunksGenerated < 3 )
-			Log.Info( $"[MapGen] Chunk {_chunksGenerated} @ ({chunk.x},{chunk.y}): {variantCount} variants placed out of {ChunkSize * ChunkSize} tiles (useVariants={useVariants})" );
-		_chunksGenerated++;
+	// ── Smooth value noise ────────────────────────────────────────────────
+
+	static float SmoothNoise( int px, int py, int seed, float scale )
+	{
+		float x = px / scale;
+		float y = py / scale;
+		int ix = (int)MathF.Floor( x );
+		int iy = (int)MathF.Floor( y );
+		float fx = x - ix;
+		float fy = y - iy;
+
+		fx = fx * fx * (3f - 2f * fx);
+		fy = fy * fy * (3f - 2f * fy);
+
+		float v00 = HashFloat( ix,     iy,     seed );
+		float v10 = HashFloat( ix + 1, iy,     seed );
+		float v01 = HashFloat( ix,     iy + 1, seed );
+		float v11 = HashFloat( ix + 1, iy + 1, seed );
+
+		return v00 + (v10 - v00) * fx
+		           + (v01 - v00) * fy
+		           + (v00 - v10 - v01 + v11) * fx * fy;
+	}
+
+	static float HashFloat( int x, int y, int seed )
+	{
+		unchecked
+		{
+			int h = seed + x * 374761393 + y * 668265263;
+			h = (h ^ (h >> 13)) * 1274126177;
+			h ^= h >> 16;
+			return (float)(uint)h / (float)uint.MaxValue;
+		}
 	}
 }
