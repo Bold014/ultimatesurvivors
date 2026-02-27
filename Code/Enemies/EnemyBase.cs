@@ -58,11 +58,22 @@ public sealed class EnemyBase : Component
 	/// <summary>How often (seconds) to recalculate the A* path when obstructed.</summary>
 	private const float PathInterval = 0.45f;
 	/// <summary>World-unit radius at which a waypoint is considered reached.</summary>
-	private const float WaypointRadius = 20f;
+	private const float WaypointRadius = 16f;
+
+	// ── Stuck detection ───────────────────────────────────────────────────
+	private Vector3 _lastStuckPos;
+	private float _stuckCheckTimer;
+	private const float StuckCheckInterval = 0.4f;
+	/// <summary>Minimum world-unit movement over StuckCheckInterval before we consider the enemy stuck.</summary>
+	private const float StuckMoveThreshold = 3f;
 
 	protected override void OnStart()
 	{
 		HP = MaxHP;
+		// Stagger first path recalc so enemies spawned together don't all run A* on frame 1
+		_pathRecalcTimer = System.Random.Shared.NextSingle() * PathInterval;
+		_lastStuckPos = WorldPosition;
+		_stuckCheckTimer = StuckCheckInterval;
 
 		if ( !string.IsNullOrEmpty( SpritePath ) )
 		{
@@ -272,6 +283,22 @@ public sealed class EnemyBase : Component
 
 		SeparateFromOtherEnemies();
 		SeparateFromPlayer();
+		// If separation or knockback pushed us into a tree, immediately nudge out
+		EscapeFromTree();
+
+		// Stuck detection: if we've barely moved over the last interval, invalidate the cached
+		// path so A* gets a fresh chance from the current (possibly adjusted) position
+		_stuckCheckTimer -= Time.Delta;
+		if ( _stuckCheckTimer <= 0f )
+		{
+			if ( (WorldPosition - _lastStuckPos).WithZ( 0f ).Length < StuckMoveThreshold )
+			{
+				_path = null;
+				_pathRecalcTimer = 0f;
+			}
+			_lastStuckPos = WorldPosition;
+			_stuckCheckTimer = StuckCheckInterval;
+		}
 
 		// Contact damage with cooldown
 		_damageCooldown -= Time.Delta;
@@ -314,8 +341,10 @@ public sealed class EnemyBase : Component
 			if ( distSq < minDist * minDist && distSq > 0.001f )
 			{
 				float dist = MathF.Sqrt( distSq );
-				// Push this enemy halfway out (the other will push the other half on its own turn)
-				pos += diff / dist * (minDist - dist) * 0.5f;
+				var pushed = pos + diff / dist * (minDist - dist) * 0.5f;
+				// Only apply the push if it doesn't move us into a tree
+				if ( !TreeManager.IsTreeAtWorldPos( pushed.x, pushed.y ) )
+					pos = pushed;
 			}
 		}
 
@@ -346,9 +375,43 @@ public sealed class EnemyBase : Component
 		float dist = MathF.Sqrt( distSq );
 		float overlap = minDist - dist;
 		float enemyPush = overlap * (playerMass / totalMass);
-		pos += diff / dist * enemyPush;
-		WorldPosition = pos;
+		var pushed = pos + diff / dist * enemyPush;
+		// Only apply the push if it doesn't move us into a tree
+		if ( !TreeManager.IsTreeAtWorldPos( pushed.x, pushed.y ) )
+			WorldPosition = pushed;
 	}
+
+	/// <summary>
+	/// If the enemy's center is currently inside a tree tile (e.g. pushed there by separation),
+	/// find the nearest open position and teleport there. Also invalidates the cached path so
+	/// A* replans from the corrected position.
+	/// </summary>
+	private void EscapeFromTree()
+	{
+		if ( !TreeManager.IsTreeAtWorldPos( WorldPosition.x, WorldPosition.y ) ) return;
+
+		// Sample 8 compass directions at increasing distances until we find open ground
+		const float step = TreeManager.TileWorldHeight * 0.6f; // ~9.6 units per ring
+		for ( float dist = step; dist <= TreeManager.TileWorldHeight * 4f; dist += step )
+		{
+			foreach ( var (dx, dy) in EscapeDirs )
+			{
+				var candidate = WorldPosition + new Vector3( dx * dist, dy * dist, 0f );
+				if ( !TreeManager.IsTreeAtWorldPos( candidate.x, candidate.y ) )
+				{
+					WorldPosition = candidate.WithZ( 0f );
+					_path = null; // replan from the new position
+					return;
+				}
+			}
+		}
+	}
+
+	private static readonly (float dx, float dy)[] EscapeDirs =
+	{
+		( 1f,  0f), (-1f,  0f), ( 0f,  1f), ( 0f, -1f),
+		( 1f,  1f), (-1f,  1f), ( 1f, -1f), (-1f, -1f),
+	};
 
 	/// <summary>
 	/// Returns true if any tree tile intersects the straight line between two world positions.

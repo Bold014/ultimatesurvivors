@@ -34,7 +34,7 @@ public class UnlockDefinition
 		new() { Id = "weapon_magicwand",     Name = "Magic Wand",     Category = UnlockCategory.Weapons, CoinCost = 0,   PrerequisiteQuestId = null,               Description = "Fires seeking projectiles at the nearest enemy." },
 		new() { Id = "weapon_axe",           Name = "Throwing Axe",   Category = UnlockCategory.Weapons, CoinCost = 150, PrerequisiteQuestId = "kills_sword_300",  Description = "Hurls spinning axes that arc through enemies." },
 		new() { Id = "weapon_aura",          Name = "Aura Blast",     Category = UnlockCategory.Weapons, CoinCost = 200, PrerequisiteQuestId = "complete_1",       Description = "Emits a damage pulse around the player." },
-		new() { Id = "weapon_stormrod",      Name = "Storm Rod",      Category = UnlockCategory.Weapons, CoinCost = 200, PrerequisiteQuestId = "kills_magicwand_500", Description = "Fires lightning bolts at up to 3 nearby enemies at once." },
+		new() { Id = "weapon_stormrod",      Name = "Storm Rod",      Category = UnlockCategory.Weapons, CoinCost = 200, PrerequisiteQuestId = "kills_magicwand_500", Description = "Calls down lightning strikes on nearby enemies. Hits additional targets at higher levels." },
 		new() { Id = "weapon_orbitalshards", Name = "Orbital Shards", Category = UnlockCategory.Weapons, CoinCost = 250, PrerequisiteQuestId = "kills_bow_500",    Description = "Rock shards orbit you, crushing enemies they pass through." },
 		new() { Id = "weapon_embertrail",    Name = "Ember Trail",    Category = UnlockCategory.Weapons, CoinCost = 200, PrerequisiteQuestId = "kills_aura_300",   Description = "Drops lingering fire zones that burn enemies standing in them." },
 

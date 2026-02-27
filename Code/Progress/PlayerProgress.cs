@@ -36,10 +36,6 @@ public static class PlayerProgress
 			Data = new SaveData();
 		}
 
-		// Auto-enable dev unlocks when running inside the editor
-		if ( Game.IsEditor )
-			DevUnlockAll = true;
-
 		// Ensure new fields exist (migration for old saves)
 		Data.HighestTierCompletedByMap ??= new Dictionary<string, int>();
 

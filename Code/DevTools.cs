@@ -3,18 +3,29 @@ using System.Linq;
 /// <summary>
 /// Developer console commands for testing without grinding through progression.
 /// None of these mutate save data; they only affect the current session.
+/// Restricted to the developer's Steam account only.
 /// </summary>
 public static class DevTools
 {
+	private const ulong DevSteamId = 76561198165180167UL;
+
+	private static bool IsDev()
+	{
+		return Connection.Local?.SteamId == DevSteamId;
+	}
+
 	[ConCmd( "dev_unlockall" )]
 	public static void ToggleDevUnlocks()
 	{
+		if ( !IsDev() ) return;
 		PlayerProgress.DevUnlockAll = !PlayerProgress.DevUnlockAll;
+		Log.Info( $"[DevTools] DevUnlockAll = {PlayerProgress.DevUnlockAll}" );
 	}
 
 	[ConCmd( "dev_spawndragon" )]
 	public static void SpawnDragonBoss()
 	{
+		if ( !IsDev() ) return;
 		var scene = GameManager.Instance?.Scene;
 		if ( scene == null )
 		{

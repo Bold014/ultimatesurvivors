@@ -95,11 +95,6 @@ public sealed class PlayerController : Component
 	{
 		if ( IsProxy ) return;
 
-		// Show cursor only when the upgrade panel is open, hide it during normal play
-		Mouse.Visibility = (UpgradeSystem.LocalInstance?.IsShowingUpgrades == true)
-			? MouseVisibility.Visible
-			: MouseVisibility.Hidden;
-
 		if ( !_isDead && (_state?.IsDead == true) )
 		{
 			_isDead = true;
@@ -108,6 +103,11 @@ public sealed class PlayerController : Component
 		}
 
 		if ( _isDead ) return;
+
+		// Show cursor only when the upgrade panel is open, hide it during normal play
+		Mouse.Visibility = (UpgradeSystem.LocalInstance?.IsShowingUpgrades == true)
+			? MouseVisibility.Visible
+			: MouseVisibility.Hidden;
 
 		bool uiOpen = UpgradeSystem.LocalInstance?.IsShowingUpgrades == true;
 		if ( uiOpen )
