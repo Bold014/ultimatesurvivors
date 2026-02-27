@@ -15,7 +15,7 @@ public sealed class BurnZone : Component
 	/// <summary>When set, damages this GameObject (e.g. player) instead of enemies. Used by DragonBoss fire attacks.</summary>
 	public GameObject DamageTarget { get; set; } = null;
 
-	private const string FlameSpritePath = "textures/flame/flameanimation.sprite";
+	private const string FlameSpritePath = "Textures/flame/flameanimation.sprite";
 	/// <summary>Base radius for damage — scaled by SizeScale. Enemies within this distance are "touching".</summary>
 	private const float BaseFlameHitRadius = 18f;
 	/// <summary>Duration of rise animation (4 frames @ 8 fps).</summary>

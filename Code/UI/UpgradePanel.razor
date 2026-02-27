@@ -34,24 +34,28 @@
 				<div style="width: 200px; background: @cardBg; border: 2px solid @cardBorder; border-radius: 4px; padding: 16px 14px 20px 14px; display: flex; flex-direction: column; gap: 10px; pointer-events: all; cursor: pointer; box-shadow: 0 0 0 1px rgba(0,0,0,0.2);"
 					 onclick=@(() => SelectUpgrade( idx ))>
 
-					@* ── Thumbnail (tomes & weapons only) ── *@
-					@{
-						var iconPath = isWeapon ? WeaponIconPath( upgrade.WeaponName ) : TomeIconPath( upgrade.Name );
-					}
-					@if ( iconPath != null )
-					{
-						var isEmberTrail = isWeapon && upgrade.WeaponName?.Contains( "Ember Trail" ) == true;
-						<div style="width: 96px; height: 96px; align-self: center; background: #0d0805; border: 1px solid @cardBorder; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-							@if ( isEmberTrail )
-							{
-								<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
-							}
-							else
-							{
-								<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
-							}
-						</div>
-					}
+				@* ── Thumbnail (weapons, tomes & items) ── *@
+				@{
+					var (iconPath, iconIsDirect) = GetIconInfo( upgrade, isWeapon );
+				}
+				@if ( iconPath != null )
+				{
+					var isEmberTrail = isWeapon && upgrade.WeaponName?.Contains( "Ember Trail" ) == true;
+					<div style="width: 96px; height: 96px; align-self: center; background: #0d0805; border: 1px solid @cardBorder; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+						@if ( iconIsDirect )
+						{
+							<img src="@iconPath" style="width: 80px; height: 80px; image-rendering: pixelated;" />
+						}
+						else if ( isEmberTrail )
+						{
+							<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+						}
+						else
+						{
+							<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+						}
+					</div>
+				}
 
 					@* ── Rarity / type badge ── *@
 					@if ( source == UpgradeSystem.RewardSource.Shrine )
@@ -262,6 +266,68 @@
 			_ => null
 		};
 	}
+
+	static (string path, bool isDirect) GetIconInfo( UpgradeDefinition upgrade, bool isWeapon )
+	{
+		if ( isWeapon )
+			return (WeaponIconPath( upgrade.WeaponName ), false);
+
+		// Unlockable items — custom pixel icons (direct image)
+		if ( upgrade.UnlockId?.StartsWith( "item_" ) == true )
+		{
+			var p = ItemIconPath( upgrade.UnlockId );
+			if ( p != null ) return (p, true);
+		}
+
+		// Base chest items — map by name to custom icons (direct) or thematic tome icons (sprite sheet)
+		var directPath = BaseChestItemDirectIcon( upgrade.Name );
+		if ( directPath != null ) return (directPath, true);
+
+		var tomePath = BaseChestItemTomeIcon( upgrade.Name );
+		if ( tomePath != null ) return (tomePath, false);
+
+		// Tomes
+		return (TomeIconPath( upgrade.Name ), false);
+	}
+
+	static string ItemIconPath( string itemId )
+	{
+		return itemId switch
+		{
+			"item_revival"       => "ui/items/revivalstone.png",
+			"item_luckcharm"     => "ui/items/luckcharm.png",
+			"item_pendant"       => "ui/items/wardingpendant.png",
+			"item_ironrations"   => "ui/items/ironrations.png",
+			"item_cursedamulet"  => "ui/items/cursedamulet.png",
+			"item_merchantbadge" => "ui/items/merchantbadge.png",
+			_                    => null
+		};
+	}
+
+	// Base chest items that share a custom pixel icon
+	static string BaseChestItemDirectIcon( string name ) => name switch
+	{
+		"Lucky Charm"         => "ui/items/luckcharm.png",
+		"Fortune Crystal"     => "ui/items/luckcharm.png",
+		"Resurrection Charm"  => "ui/items/revivalstone.png",
+		"Iron Skin"           => "ui/items/wardingpendant.png",
+		"Vampiric Charm"      => "ui/items/cursedamulet.png",
+		_                     => null
+	};
+
+	// Base chest items mapped to thematic tome sprite sheets
+	static string BaseChestItemTomeIcon( string name ) => name switch
+	{
+		"Berserker Brew"      => "ui/tomes/damage.png",
+		"Warlord's Banner"    => "ui/tomes/damage.png",
+		"Ancient Tome"        => "ui/tomes/hp.png",
+		"Clockwork Gear"      => "ui/tomes/cooldown.png",
+		"Swift Boots"         => "ui/tomes/agility.png",
+		"Sorcerer's Handbook" => "ui/tomes/size.png",
+		"Lodestone Ring"      => "ui/tomes/xp.png",
+		"Quick Heal Potion"   => "ui/tomes/regen.png",
+		_                     => null
+	};
 
 	static string TomeIconPath( string tomeName )
 	{

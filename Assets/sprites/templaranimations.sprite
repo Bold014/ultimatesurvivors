@@ -7,19 +7,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/paladin_non-combat_animations_4.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_4.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_5.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_5.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_6.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_6.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_7.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_7.png",
           "BroadcastMessages": []
         }
       ]
@@ -31,19 +31,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/paladin_non-combat_animations_12.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_12.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_13.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_13.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_14.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_14.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_15.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_15.png",
           "BroadcastMessages": []
         }
       ]
@@ -55,19 +55,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/paladin_non-combat_animations_8.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_8.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_9.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_9.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_10.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_10.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_11.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_11.png",
           "BroadcastMessages": []
         }
       ]
@@ -79,19 +79,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/paladin_non-combat_animations_0.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_0.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_1.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_1.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_2.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_2.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/paladin_non-combat_animations_3.png",
+          "Texture": "sprites/Paladin_Non-Combat_Animations_3.png",
           "BroadcastMessages": []
         }
       ]

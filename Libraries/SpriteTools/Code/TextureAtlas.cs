@@ -115,6 +115,14 @@ public class TextureAtlas
 	public static TextureAtlas FromAnimation ( SpriteAnimation animation )
 	{
 		if ( animation is null ) return null;
+		// #region agent log
+		if ( animation.Frames.Count > 0 )
+		{
+			var fp = animation.Frames[0].FilePath;
+			var exists = FileSystem.Mounted.FileExists( fp );
+			Log.Info( $"[DBG-296e46] TextureAtlas.FromAnimation anim={animation.Name} firstFrame={fp} exists={exists}" );
+		}
+		// #endregion
 		var key = "anim." + animation.Name + ".";
 		foreach ( var frame in animation.Frames )
 		{

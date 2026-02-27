@@ -322,7 +322,7 @@ public class UpgradeDefinition
 	public static IReadOnlyList<UpgradeDefinition> ItemPool { get; } = new UpgradeDefinition[]
 	{
 		// Base items — always in the chest pool
-		new() { Name = "Lucky Charm",          Description = "+3 Luck — better upgrade rolls",         Type = UpgradeType.LuckUp,       Value = 3f    },
+		new() { Name = "Luck Charm",           Description = "+3 Luck — better upgrade rolls",         Type = UpgradeType.LuckUp,       Value = 3f    },
 		new() { Name = "Iron Skin",            Description = "+15 flat damage reduction",              Type = UpgradeType.ArmorUp,      Value = 15f   },
 		new() { Name = "Berserker Brew",       Description = "+30% weapon damage",                    Type = UpgradeType.DamageUp,     Value = 0.30f },
 		new() { Name = "Sorcerer's Handbook",  Description = "+25% attack area",                      Type = UpgradeType.AreaUp,       Value = 0.25f },

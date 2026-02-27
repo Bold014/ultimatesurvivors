@@ -56,9 +56,9 @@ public sealed class SwordWeapon : WeaponBase
 	{
 		if ( _state == null ) return;
 
-		float arcDeg = GetArcDegrees();
-		float range = GetRange() * (_state?.Area ?? 1f);
-		float damage = _state.Damage * GetDamageMultiplier();
+		float arcDeg   = GetArcDegrees();
+		float range    = GetRange() * (_state?.Area ?? 1f);
+		float damage   = _state.Damage * GetDamageMultiplier();
 
 		SpawnSlashVisual( direction, arcDeg, range );
 
@@ -78,34 +78,31 @@ public sealed class SwordWeapon : WeaponBase
 
 	private void SpawnSlashVisual( Vector3 direction, float arcDeg, float range )
 	{
-		// Animation is 2 frames @ 4 fps = 0.5s total
-		const float animDuration = 0.5f;
+		// Animation is 2 frames @ 8 fps = 0.25s total
+		const float animDuration = 0.25f;
 		float lifetime = animDuration * (_state?.DurationMultiplier ?? 1f);
 
 		var go = new GameObject( true, "SwordSlash" );
-		go.WorldPosition = WorldPosition + direction * (range * 0.4f);
+		go.SetParent( GameObject );
 
-		// Lay flat on the XY ground plane oriented along the attack direction.
-		// Pitch 90° = flat, then yaw from the direction vector.
-		var yaw = MathF.Atan2( direction.y, direction.x ) * (180f / MathF.PI);
-		go.WorldRotation = Rotation.From( new Angles( 90f, yaw, 0f ) );
+		// Center the sprite at the midpoint of the attack range so it aligns with the hitbox.
+		go.LocalPosition = direction * (range * 0.5f);
 
-		// Scale to visually fill the hit cone:
-		//   X = depth along attack direction  (≈ range)
-		//   Y = width across the arc           (2 * range * sin(arcDeg/2))
-		float halfArcRad = arcDeg * 0.5f * (MathF.PI / 180f);
-		float arcWidth = 2f * range * MathF.Sin( halfArcRad );
-		// Sprite images are small (the SpriteComponent pixel-scale maps 1 px → 1 world unit at scale 1).
-		// Divide by a base resolution assumption (64 px) to normalise, then multiply by desired world size.
-		const float basePixels = 64f;
-		go.WorldScale = new Vector3( range / basePixels, arcWidth / basePixels, 1f );
+		// Rotate only around the up (Z) axis so the sprite stays camera-facing
+		// but is oriented along the attack direction.
+		float angleDeg = MathF.Atan2( direction.y, direction.x ) * (180f / MathF.PI);
+		go.LocalRotation = Rotation.FromAxis( Vector3.Up, angleDeg );
+
+		// Scale: range / 150 so the sprite visually covers the full hitbox extent.
+		float scale = range / 150f * (_state?.Area ?? 1f);
+		go.WorldScale = new Vector3( scale, scale, scale );
 
 		var spriteRes = ResourceLibrary.Get<SpriteResource>( "ui/weapons/sword/swordeffect.spr" );
 		if ( spriteRes != null )
 		{
 			var sc = go.Components.Create<SpriteComponent>();
 			sc.Sprite = spriteRes;
-			sc.UsePixelScale = true;
+			sc.UsePixelScale = false;
 			sc.PlayAnimation( "slash" );
 		}
 
@@ -122,9 +119,9 @@ public sealed class SwordWeapon : WeaponBase
 
 	private float GetRange() => WeaponLevel switch
 	{
-		>= 4 => 130f,
-		>= 3 => 110f,
-		_    => 100f,
+		>= 4 => 90f,
+		>= 3 => 75f,
+		_    => 65f,
 	};
 
 	private float GetDamageMultiplier() => WeaponLevel switch

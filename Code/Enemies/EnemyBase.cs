@@ -317,7 +317,19 @@ public sealed class EnemyBase : Component
 					_damageCooldown = DamageCooldownDuration;
 					_attackTimer = AttackAnimDuration;
 					if ( died )
+					{
 						Target.Components.Get<PlayerStats>()?.Die();
+					}
+					else
+					{
+						// Knock the player away from this enemy
+						var knockDir = (Target.WorldPosition - WorldPosition).WithZ( 0f );
+						if ( knockDir.LengthSquared > 0.01f )
+						{
+							knockDir = knockDir.Normal;
+							Target.Components.Get<PlayerController>()?.ApplyKnockback( knockDir * 120f );
+						}
+					}
 				}
 			}
 		}

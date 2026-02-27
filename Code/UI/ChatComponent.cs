@@ -1,7 +1,6 @@
 /// <summary>
 /// Manages the shared lobby chat message history and open/close state.
-/// The actual [Rpc.Broadcast] for sending messages lives on PlayerController
-/// (which is on a networked object). This component just stores and exposes messages.
+/// Lives on the networked "Menu" scene object so BroadcastMenuMessage can reach all clients.
 /// </summary>
 public sealed class ChatComponent : Component
 {
@@ -25,22 +24,16 @@ public sealed class ChatComponent : Component
 		Instance = this;
 	}
 
-	protected override void OnUpdate()
-	{
-		if ( IsChatOpen )
-		{
-			if ( Input.Pressed( "menu" ) )
-				CloseChat();
-		}
-		else
-		{
-			if ( Input.Pressed( "chat" ) )
-				OpenChat();
-		}
-	}
-
 	public void AddMessage( string playerName, string text, Color? nameColor = null )
 	{
+		// Avoid duplicate when optimistic add + RPC both run on sender
+		if ( Messages.Count > 0 )
+		{
+			var last = Messages[^1];
+			if ( last.PlayerName == playerName && last.Text == text )
+				return;
+		}
+
 		Messages.Add( new ChatMessage
 		{
 			PlayerName = playerName,
@@ -69,23 +62,31 @@ public sealed class ChatComponent : Component
 	public void Submit()
 	{
 		var msg = CurrentInput?.Trim() ?? "";
+		if ( string.IsNullOrEmpty( msg ) ) { CloseChat(); return; }
+
+		var name = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "Unknown";
+
+		// Add message first so UI shows it before chat closes (no frame gap)
+		AddMessage( name, msg );
 		CloseChat();
 
-		if ( string.IsNullOrEmpty( msg ) ) return;
-
-		var localPlayer = Scene.GetAllComponents<PlayerController>()
-			.FirstOrDefault( p => !p.IsProxy );
-
-		if ( localPlayer != null )
+		// Only route through PlayerController when the game objects are truly networked.
+		// In LocalGame mode the player prefab is client-only (no NetworkSpawn), so its
+		// [Rpc.Broadcast] never reaches other clients. Use BroadcastMenuMessage instead,
+		// which lives on this component — a networked scene object in the menu scene.
+		if ( LocalGameRunner.IsNetworked )
 		{
-			localPlayer.BroadcastChat( msg );
+			var localPlayer = Scene.GetAllComponents<PlayerController>()
+				.FirstOrDefault( p => !p.IsProxy );
+
+			if ( localPlayer != null )
+			{
+				localPlayer.BroadcastChat( msg );
+				return;
+			}
 		}
-		else
-		{
-			// In menu scene there is no PlayerController — broadcast directly.
-			var name = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "Unknown";
-			BroadcastMenuMessage( name, msg );
-		}
+
+		BroadcastMenuMessage( name, msg );
 	}
 
 	/// <summary>Used to send chat from the menu where no PlayerController exists.</summary>
@@ -93,6 +94,13 @@ public sealed class ChatComponent : Component
 	public void BroadcastMenuMessage( string playerName, string message )
 	{
 		AddMessage( playerName, message );
+	}
+
+	/// <summary>Broadcasts a server-style announcement with a custom color (r/g/b 0-1).</summary>
+	[Rpc.Broadcast]
+	public void BroadcastServerMessage( string message, float r, float g, float b )
+	{
+		AddMessage( "Server", message, new Color( r, g, b ) );
 	}
 
 	protected override void OnDestroy()

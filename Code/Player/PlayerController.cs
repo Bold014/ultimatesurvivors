@@ -21,6 +21,15 @@ public sealed class PlayerController : Component
 	private Vector3 _dashDir = Vector3.Forward;
 	private float _dashTime = 0f;
 
+	// Knockback state — applied when an enemy deals contact damage
+	private Vector3 _knockbackVelocity = Vector3.Zero;
+
+	/// <summary>Applies an impulse that slides the player away from an attacker over ~0.3s.</summary>
+	public void ApplyKnockback( Vector3 velocity )
+	{
+		_knockbackVelocity = velocity;
+	}
+
 	/// <summary>The last non-zero movement direction pressed by the player. Used by directional weapons like the Sword.</summary>
 	public Vector3 LastMoveDirection { get; private set; } = Vector3.Forward;
 
@@ -115,6 +124,15 @@ public sealed class PlayerController : Component
 			|| GameManager.EscapeMenuOpen;
 		Mouse.Visibility = uiOpen ? MouseVisibility.Visible : MouseVisibility.Hidden;
 
+		// Red sprite tint while hit flash is active
+		if ( _spriteRenderer != null )
+		{
+			if ( _state?.HitFlashTimer > 0f )
+				_spriteRenderer.OverlayColor = new Color( 1f, 0.1f, 0.1f, 0.7f );
+			else
+				_spriteRenderer.OverlayColor = Color.White.WithAlpha( 0f );
+		}
+
 		if ( uiOpen )
 		{
 			UpdateSpriteAnimation( Vector3.Zero );
@@ -157,6 +175,13 @@ public sealed class PlayerController : Component
 		{
 			LastMoveDirection = dir.Normal;
 			WorldPosition += LastMoveDirection * (_state?.Speed ?? 160f) * Time.Delta;
+		}
+
+		// Apply smooth knockback velocity (decays each frame)
+		if ( _knockbackVelocity.LengthSquared > 0.01f )
+		{
+			WorldPosition += _knockbackVelocity * Time.Delta;
+			_knockbackVelocity *= MathF.Pow( 0.05f, Time.Delta );
 		}
 
 		WorldPosition = WorldPosition.WithZ( 0f );

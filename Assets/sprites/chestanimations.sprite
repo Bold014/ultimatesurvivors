@@ -7,19 +7,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/lonesome_forest_anim_chest_[frame]1.png",
+          "Texture": "sprites/Lonesome_Forest_ANIM_chest_[frame]1.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/lonesome_forest_anim_chest_[frame]2.png",
+          "Texture": "sprites/Lonesome_Forest_ANIM_chest_[frame]2.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/lonesome_forest_anim_chest_[frame]3.png",
+          "Texture": "sprites/Lonesome_Forest_ANIM_chest_[frame]3.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/lonesome_forest_anim_chest_[frame]4.png",
+          "Texture": "sprites/Lonesome_Forest_ANIM_chest_[frame]4.png",
           "BroadcastMessages": []
         }
       ]

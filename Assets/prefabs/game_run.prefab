@@ -216,51 +216,8 @@
             "OnComponentUpdate": null
           },
           {
-            "__type": "Sandbox.UI.ChatPanel",
-            "__guid": "3b3d924c-12dc-4bb9-b6eb-b0c5a184e24b",
-            "__enabled": true,
-            "Flags": 0,
-            "OnComponentDestroy": null,
-            "OnComponentDisabled": null,
-            "OnComponentEnabled": null,
-            "OnComponentFixedUpdate": null,
-            "OnComponentStart": null,
-            "OnComponentUpdate": null
-          },
-          {
             "__type": "Sandbox.UI.UpgradePanel",
             "__guid": "c7d8e9f0-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-            "__enabled": true,
-            "Flags": 0,
-            "OnComponentDestroy": null,
-            "OnComponentDisabled": null,
-            "OnComponentEnabled": null,
-            "OnComponentFixedUpdate": null,
-            "OnComponentStart": null,
-            "OnComponentUpdate": null
-          }
-        ],
-        "Children": []
-      },
-      {
-        "__guid": "748f1838-281b-4840-96f3-1ec1d48d3d07",
-        "__version": 2,
-        "Flags": 0,
-        "Name": "Chat",
-        "Position": "0,0,0",
-        "Rotation": "0,0,0,1",
-        "Scale": "1,1,1",
-        "Tags": "",
-        "Enabled": true,
-        "NetworkMode": 2,
-        "NetworkFlags": 0,
-        "NetworkOrphaned": 0,
-        "NetworkTransmit": true,
-        "OwnerTransfer": 1,
-        "Components": [
-          {
-            "__type": "ChatComponent",
-            "__guid": "7d586e6c-af51-4226-9df6-bf1258756d53",
             "__enabled": true,
             "Flags": 0,
             "OnComponentDestroy": null,

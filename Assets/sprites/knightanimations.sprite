@@ -7,19 +7,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/heavy_knight_4.png",
+          "Texture": "sprites/Heavy_Knight_4.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_5.png",
+          "Texture": "sprites/Heavy_Knight_5.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_6.png",
+          "Texture": "sprites/Heavy_Knight_6.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_7.png",
+          "Texture": "sprites/Heavy_Knight_7.png",
           "BroadcastMessages": []
         }
       ]
@@ -31,19 +31,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/heavy_knight_12.png",
+          "Texture": "sprites/Heavy_Knight_12.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_13.png",
+          "Texture": "sprites/Heavy_Knight_13.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_14.png",
+          "Texture": "sprites/Heavy_Knight_14.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_15.png",
+          "Texture": "sprites/Heavy_Knight_15.png",
           "BroadcastMessages": []
         }
       ]
@@ -55,19 +55,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/heavy_knight_8.png",
+          "Texture": "sprites/Heavy_Knight_8.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_9.png",
+          "Texture": "sprites/Heavy_Knight_9.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_10.png",
+          "Texture": "sprites/Heavy_Knight_10.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_11.png",
+          "Texture": "sprites/Heavy_Knight_11.png",
           "BroadcastMessages": []
         }
       ]
@@ -79,19 +79,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/heavy_knight_0.png",
+          "Texture": "sprites/Heavy_Knight_0.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_1.png",
+          "Texture": "sprites/Heavy_Knight_1.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_2.png",
+          "Texture": "sprites/Heavy_Knight_2.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/heavy_knight_3.png",
+          "Texture": "sprites/Heavy_Knight_3.png",
           "BroadcastMessages": []
         }
       ]

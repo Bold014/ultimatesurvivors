@@ -115,6 +115,10 @@ public static class PlayerProgress
 		Data.Coins += def.CoinReward;
 		Data.QuestClaimed[questId] = true;
 		Save();
+
+		// TODO: Unlock S&box achievement when API is available. AchievementCollection.Unlock/ManualUnlock
+		// are not exposed in current build, and reflection is disallowed by S&box whitelist.
+
 		return true;
 	}
 
@@ -193,6 +197,17 @@ public static class PlayerProgress
 			Sandbox.Services.Stats.SetValue( "longest_survival", Data.LongestSurvivalMinutes );
 		}
 		catch { /* Stats may fail in editor or offline */ }
+	}
+
+	/// <summary>Resets leaderboard stats to 0 and syncs to Steam. For dev use only.</summary>
+	public static void ResetLeaderboardStats()
+	{
+		Data.TotalKills = 0;
+		Data.TotalRunsCompleted = 0;
+		Data.LongestSurvivalMinutes = 0;
+		SyncQuestProgress();
+		Save();
+		SyncStatsToBackend();
 	}
 
 	private static void SyncQuestProgress()

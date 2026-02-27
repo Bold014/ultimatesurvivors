@@ -46,11 +46,8 @@ public sealed class GameManager : Component
 			_welcomeDelay -= Time.Delta;
 			if ( _welcomeDelay <= 0f )
 			{
-				_welcomeSent = true;
-				int tier = MenuManager.SelectedTier;
-				int waves = tier * 10;
-				ChatComponent.Instance?.AddMessage( "System", "Welcome to Ultimate Survivors!", Color.Yellow );
-				ChatComponent.Instance?.AddMessage( "System", "Survive 10 minutes! Survive intense waves, then the final boss!", new Color( 1f, 0.8f, 0.2f ) );
+			_welcomeSent = true;
+			GameNotification.Show( "Survive 10 minutes and defeat the final boss!", new Color( 1f, 0.8f, 0.2f ), 4f );
 			}
 		}
 
@@ -113,13 +110,18 @@ public sealed class GameManager : Component
 		_tierCompleteGoldAwarded = true;
 		spawner.ClearTierJustCompleted();
 
-		ChatComponent.Instance?.AddMessage( "System", $"+{gold} gold for defeating the final boss!", new Color( 1f, 0.85f, 0.2f ) );
+		GameNotification.Show( $"+{gold} gold for defeating the final boss!", new Color( 1f, 0.85f, 0.2f ), 4f );
+
+		// Broadcast victory to lobby chat so all players see it
+		var victoryName  = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "A player";
+		var victoryStats = Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
+		int victoryKills = victoryStats?.Kills ?? 0;
+		ChatComponent.Instance?.BroadcastServerMessage( $"{victoryName} defeated the final boss with {victoryKills} kills!", 1f, 0.85f, 0.2f );
 
 		// Victory — return to menu
 		EscapeMenuOpen     = false;
 		_runEnded          = true;
 		_returnToMenuDelay = 8f;
-		ChatComponent.Instance?.AddMessage( "System", "Victory! Returning to menu...", new Color( 0.4f, 1f, 0.4f ) );
 	}
 
 	// ── End-of-run check ──────────────────────────────────────────────────────
@@ -177,10 +179,17 @@ public sealed class GameManager : Component
 			PlayerProgress.RecordRunResult( result );
 		}
 
+		// Broadcast death stats to lobby chat so all players see it
+		var deathName  = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "A player";
+		var spawner    = Scene.GetAllComponents<EnemySpawner>().FirstOrDefault();
+		int wave       = spawner?.WaveNumber ?? 0;
+		var deathStats = Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
+		int kills      = deathStats?.Kills ?? 0;
+		ChatComponent.Instance?.BroadcastServerMessage( $"{deathName} died and survived Wave {wave} with {kills} kills", 1f, 0.4f, 0.3f );
+
 		EscapeMenuOpen     = false;
 		_runEnded          = true;
 		_returnToMenuDelay = 8f;
-		ChatComponent.Instance?.AddMessage( "System", "All players defeated. Returning to menu...", new Color( 1f, 0.4f, 0.4f ) );
 	}
 
 	// ── Player spawning ───────────────────────────────────────────────────────

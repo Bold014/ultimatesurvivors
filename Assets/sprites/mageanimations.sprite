@@ -7,19 +7,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/mage_masc_dkgrey_4.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_4.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_5.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_5.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_6.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_6.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_7.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_7.png",
           "BroadcastMessages": []
         }
       ]
@@ -31,19 +31,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/mage_masc_dkgrey_12.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_12.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_13.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_13.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_14.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_14.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_15.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_15.png",
           "BroadcastMessages": []
         }
       ]
@@ -55,19 +55,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/mage_masc_dkgrey_8.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_8.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_9.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_9.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_10.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_10.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_11.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_11.png",
           "BroadcastMessages": []
         }
       ]
@@ -79,19 +79,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/mage_masc_dkgrey_0.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_0.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_1.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_1.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_2.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_2.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_masc_dkgrey_3.png",
+          "Texture": "sprites/Mage_Masc_DKGREY_3.png",
           "BroadcastMessages": []
         }
       ]

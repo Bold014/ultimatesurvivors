@@ -72,6 +72,9 @@ public sealed class PlayerLocalState : Component
 	/// <summary>Longest consecutive seconds without taking damage this run (for NoDamageSeconds quests).</summary>
 	public int LongestNoDamageSeconds { get; private set; } = 0;
 
+	/// <summary>Counts down from 0.25s after taking HP damage. Used by PlayerController and GameHUD for hit flash.</summary>
+	public float HitFlashTimer { get; private set; } = 0f;
+
 	// Merchant's Badge — makes the first chest per run free
 	private bool _hasMerchantBadge = false;
 	private bool _firstChestFreed = false;
@@ -133,6 +136,9 @@ public sealed class PlayerLocalState : Component
 		if ( _iFrameTimer > 0f )
 			_iFrameTimer -= Time.Delta;
 
+		if ( HitFlashTimer > 0f )
+			HitFlashTimer -= Time.Delta;
+
 		if ( !IsDead )
 		{
 			_noDamageTimer += Time.Delta;
@@ -188,6 +194,9 @@ public sealed class PlayerLocalState : Component
 		}
 
 		HP -= actualDamage;
+
+		HitFlashTimer = 0.25f;
+		DamageIndicatorWorld.SpawnPlayerDamage( this.GameObject, new Vector3( 0f, 0f, 14f ), actualDamage );
 
 		// Start iframes after taking damage if pendant is equipped
 		if ( _hasPendant )

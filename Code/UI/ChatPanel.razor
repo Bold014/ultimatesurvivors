@@ -43,6 +43,7 @@
 		if ( e.Target is TextEntry te )
 			Chat.CurrentInput = te.Text ?? "";
 		Chat.Submit();
+		StateHasChanged();
 	}
 
 	string ColorToHex( Color c )

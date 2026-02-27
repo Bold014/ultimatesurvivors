@@ -22,6 +22,14 @@ public static class DevTools
 		Log.Info( $"[DevTools] DevUnlockAll = {PlayerProgress.DevUnlockAll}" );
 	}
 
+	[ConCmd( "dev_wipleaderboard" )]
+	public static void WipeLeaderboard()
+	{
+		if ( !IsDev() ) return;
+		PlayerProgress.ResetLeaderboardStats();
+		Log.Info( "[DevTools] Leaderboard stats reset to 0 (total_kills, runs_completed, longest_survival)" );
+	}
+
 	[ConCmd( "dev_spawndragon" )]
 	public static void SpawnDragonBoss()
 	{

@@ -89,7 +89,7 @@ public sealed class EnemySpawner : Component
 		{
 			_finalBossObject = null;
 			_tierJustCompleted = true;
-			ChatComponent.Instance?.AddMessage( "System", "FINAL BOSS DEFEATED! Victory!", new Color( 0.4f, 1f, 0.4f ) );
+			GameNotification.Show( "FINAL BOSS DEFEATED! Victory!", new Color( 0.4f, 1f, 0.4f ), 5f );
 		}
 
 		// Past 10 min: only final boss phase (no more waves)
@@ -110,7 +110,7 @@ public sealed class EnemySpawner : Component
 			if ( _runTimer >= IntensityPhaseTimes[i] )
 			{
 				_intensityPhase = i + 1;
-				ChatComponent.Instance?.AddMessage( "Wave", $"INTENSITY SURGE! Phase {_intensityPhase}!", Color.Magenta );
+				GameNotification.Show( $"INTENSITY SURGE! Phase {_intensityPhase}!", Color.Magenta );
 			}
 		}
 
@@ -134,7 +134,7 @@ public sealed class EnemySpawner : Component
 			if ( secs <= 3 && secs > 0 && secs != _lastCountdownSecond )
 			{
 				_lastCountdownSecond = secs;
-				ChatComponent.Instance?.AddMessage( "Wave", $"Wave {nextWave} — {secs}…", new Color( 1f, 0.85f, 0.2f ) );
+				GameNotification.Show( $"Wave {nextWave} in {secs}…", new Color( 1f, 0.85f, 0.2f ), 1.2f );
 			}
 		}
 
@@ -185,7 +185,7 @@ public sealed class EnemySpawner : Component
 		_lastCountdownSecond = -1;
 		_waveEnemies.Clear();
 
-		ChatComponent.Instance?.AddMessage( "Wave", $"Wave {_waveNumber}!", new Color( 0.4f, 0.9f, 0.4f ) );
+		GameNotification.Show( $"Wave {_waveNumber}!", new Color( 0.4f, 0.9f, 0.4f ) );
 	}
 
 	private void EndWave()
@@ -196,7 +196,7 @@ public sealed class EnemySpawner : Component
 
 		int next = _waveNumber + 1;
 		if ( next <= Waves.Length )
-			ChatComponent.Instance?.AddMessage( "Wave", $"Wave {_waveNumber} cleared. Next: Wave {next}", new Color( 0.7f, 0.9f, 1f ) );
+			GameNotification.Show( $"Wave {_waveNumber} cleared!", new Color( 0.7f, 0.9f, 1f ) );
 	}
 
 	private WaveDef? GetWaveDef( int w )
@@ -208,7 +208,7 @@ public sealed class EnemySpawner : Component
 
 	private void SpawnFinalBoss()
 	{
-		ChatComponent.Instance?.AddMessage( "Boss", "FINAL BOSS INCOMING!", new Color( 1f, 0.2f, 0.2f ) );
+		GameNotification.Show( "FINAL BOSS INCOMING!", new Color( 1f, 0.2f, 0.2f ), 5f );
 		_finalBossObject = SpawnFinalBossEntity();
 	}
 
@@ -217,14 +217,14 @@ public sealed class EnemySpawner : Component
 	{
 		if ( _finalBossObject != null && _finalBossObject.IsValid() )
 		{
-			ChatComponent.Instance?.AddMessage( "Dev", "Dragon boss already spawned.", Color.Yellow );
+			GameNotification.Show( "Dragon boss already spawned.", Color.Yellow, 2f );
 			return;
 		}
 		_finalBossSpawned = true;
 		_finalBossPhase   = true;
-		ChatComponent.Instance?.AddMessage( "Boss", "FINAL BOSS INCOMING!", new Color( 1f, 0.2f, 0.2f ) );
+		GameNotification.Show( "FINAL BOSS INCOMING!", new Color( 1f, 0.2f, 0.2f ), 5f );
 		_finalBossObject = SpawnFinalBossEntity();
-		ChatComponent.Instance?.AddMessage( "Dev", "Dragon boss spawned — watch it fly in!", new Color( 0.4f, 1f, 0.4f ) );
+		GameNotification.Show( "Dragon boss spawned — watch it fly in!", new Color( 0.4f, 1f, 0.4f ), 3f );
 	}
 
 	private GameObject SpawnFinalBossEntity( float? spawnMinDist = null, float? spawnMaxDist = null )
@@ -310,7 +310,7 @@ public sealed class EnemySpawner : Component
 				enemy.Speed                  = (20.8f + (float)(_rand.NextDouble() * 6f)) * speedScale;
 				enemy.ContactDamage          = 22f * dmgScale;
 				enemy.DamageCooldownDuration  = 1.4f;
-				enemy.XPValue                = 22;
+				enemy.XPValue                = 38;
 				enemy.EnemyColor             = new Color( 0.5f, 0.5f, 1f );
 				enemy.SizeScale              = 1.2f;
 				enemy.SpritePath             = "sprites/bear/bearanimations.sprite";
@@ -326,7 +326,7 @@ public sealed class EnemySpawner : Component
 				enemy.Speed                  = 44f * speedScale;
 				enemy.ContactDamage          = 12f * dmgScale;
 				enemy.DamageCooldownDuration  = 0.6f;
-				enemy.XPValue                = 12;
+				enemy.XPValue                = 20;
 				enemy.EnemyColor             = new Color( 0.85f, 0.45f, 0.1f );
 				enemy.SizeScale              = 0.65f;
 				enemy.SpritePath             = "sprites/wraith/wraithanimations.sprite";
@@ -340,7 +340,7 @@ public sealed class EnemySpawner : Component
 				enemy.Speed                  = (20f + (float)(_rand.NextDouble() * 8f)) * speedScale;
 				enemy.ContactDamage          = 14f * dmgScale;
 				enemy.DamageCooldownDuration  = 1.0f;
-				enemy.XPValue                = 8;
+				enemy.XPValue                = 14;
 				enemy.EnemyColor             = new Color( 0.85f, 0.15f, 0.15f );
 				enemy.SpritePath             = "sprites/orcanimations.sprite";
 				enemy.DieAnimation           = "die";

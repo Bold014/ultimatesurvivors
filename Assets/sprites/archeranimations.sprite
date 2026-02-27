@@ -7,19 +7,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_4.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_4.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_5.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_5.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_6.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_6.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_7.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_7.png",
           "BroadcastMessages": []
         }
       ]
@@ -31,19 +31,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_12.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_12.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_13.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_13.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_14.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_14.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_15.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_15.png",
           "BroadcastMessages": []
         }
       ]
@@ -55,19 +55,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_8.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_8.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_9.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_9.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_10.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_10.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_11.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_11.png",
           "BroadcastMessages": []
         }
       ]
@@ -79,19 +79,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_0.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_0.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_1.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_1.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_2.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_2.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/rogue_non-combat_bow_equipped_3.png",
+          "Texture": "sprites/Rogue_Non-Combat_Bow_Equipped_3.png",
           "BroadcastMessages": []
         }
       ]

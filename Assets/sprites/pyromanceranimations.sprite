@@ -7,19 +7,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/mage_fem_red_0.png",
+          "Texture": "sprites/Mage_Fem_Red_0.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_1.png",
+          "Texture": "sprites/Mage_Fem_Red_1.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_2.png",
+          "Texture": "sprites/Mage_Fem_Red_2.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_3.png",
+          "Texture": "sprites/Mage_Fem_Red_3.png",
           "BroadcastMessages": []
         }
       ]
@@ -31,19 +31,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/mage_fem_red_4.png",
+          "Texture": "sprites/Mage_Fem_Red_4.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_5.png",
+          "Texture": "sprites/Mage_Fem_Red_5.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_6.png",
+          "Texture": "sprites/Mage_Fem_Red_6.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_7.png",
+          "Texture": "sprites/Mage_Fem_Red_7.png",
           "BroadcastMessages": []
         }
       ]
@@ -55,19 +55,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/mage_fem_red_8.png",
+          "Texture": "sprites/Mage_Fem_Red_8.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_9.png",
+          "Texture": "sprites/Mage_Fem_Red_9.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_10.png",
+          "Texture": "sprites/Mage_Fem_Red_10.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_11.png",
+          "Texture": "sprites/Mage_Fem_Red_11.png",
           "BroadcastMessages": []
         }
       ]
@@ -79,19 +79,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "sprites/mage_fem_red_12.png",
+          "Texture": "sprites/Mage_Fem_Red_12.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_13.png",
+          "Texture": "sprites/Mage_Fem_Red_13.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_14.png",
+          "Texture": "sprites/Mage_Fem_Red_14.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "sprites/mage_fem_red_15.png",
+          "Texture": "sprites/Mage_Fem_Red_15.png",
           "BroadcastMessages": []
         }
       ]

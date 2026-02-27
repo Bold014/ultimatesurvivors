@@ -7,19 +7,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "textures/flame/flame_0.png",
+          "Texture": "Textures/flame/flame_0.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "textures/flame/flame_1.png",
+          "Texture": "Textures/flame/flame_1.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "textures/flame/flame_3.png",
+          "Texture": "Textures/flame/flame_3.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "textures/flame/flame_4.png",
+          "Texture": "Textures/flame/flame_4.png",
           "BroadcastMessages": []
         }
       ]
@@ -31,19 +31,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "textures/flame/flame_4.png",
+          "Texture": "Textures/flame/flame_4.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "textures/flame/flame_5.png",
+          "Texture": "Textures/flame/flame_5.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "textures/flame/flame_6.png",
+          "Texture": "Textures/flame/flame_6.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "textures/flame/flame_7.png",
+          "Texture": "Textures/flame/flame_7.png",
           "BroadcastMessages": []
         }
       ]
@@ -55,19 +55,19 @@
       "LoopMode": "Loop",
       "Frames": [
         {
-          "Texture": "textures/flame/flame_8.png",
+          "Texture": "Textures/flame/flame_8.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "textures/flame/flame_9.png",
+          "Texture": "Textures/flame/flame_9.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "textures/flame/flame_10.png",
+          "Texture": "Textures/flame/flame_10.png",
           "BroadcastMessages": []
         },
         {
-          "Texture": "textures/flame/flame_11.png",
+          "Texture": "Textures/flame/flame_11.png",
           "BroadcastMessages": []
         }
       ]

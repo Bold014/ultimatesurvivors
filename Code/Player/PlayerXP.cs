@@ -11,7 +11,7 @@ public sealed class PlayerXP : Component
 	public int Level         { get; private set; } = 1;
 
 	/// <summary>XP required to reach next level. Early levels are fast; later levels scale exponentially.</summary>
-	private static int GetXPForLevel( int level ) => (int)(25 * System.Math.Pow( level, 1.25 ));
+	private static int GetXPForLevel( int level ) => (int)(20 * System.Math.Pow( level, 1.18 ));
 
 	public float XPPercent => XPToNextLevel > 0 ? (float)CurrentXP / XPToNextLevel : 0f;
 

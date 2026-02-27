@@ -2,7 +2,7 @@
   "ResourceVersion": 1,
   "Animations": [
     {
-      "FrameRate": 4,
+      "FrameRate": 8,
       "Origin": "0.5,0.5",
       "Looping": false,
       "LoopModeVal": 1,

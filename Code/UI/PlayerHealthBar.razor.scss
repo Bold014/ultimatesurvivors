@@ -26,14 +26,13 @@ PlayerHealthBar
 		border-radius: 3px;
 		overflow: hidden;
 		border: 1px solid rgba( 100, 30, 30, 0.6 );
-		box-sizing: border-box;
 	}
 
 	.hp-fill
 	{
 		height: 100%;
 		background-color: rgba( 217, 31, 31, 1 );
-		transition-duration: 0.1s;
+		transition: width 0.1s ease;
 		box-shadow: 0 0 6px rgba( 217, 31, 31, 0.4 );
 	}
 
@@ -45,7 +44,6 @@ PlayerHealthBar
 		border-radius: 3px;
 		overflow: hidden;
 		border: 1px solid rgba( 50, 80, 150, 0.5 );
-		box-sizing: border-box;
 		flex-shrink: 0;
 	}
 
@@ -53,6 +51,6 @@ PlayerHealthBar
 	{
 		height: 100%;
 		background-color: rgba( 58, 111, 255, 1 );
-		transition-duration: 0.1s;
+		transition: width 0.1s ease;
 	}
 }
