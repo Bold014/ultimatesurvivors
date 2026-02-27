@@ -1,13 +1,15 @@
+using SpriteTools;
+using System.Collections.Generic;
+
 /// <summary>
-/// Swings a wide arc in front of the player, hitting all enemies inside it.
-/// Level 2+: increased damage. Level 3+: double slash (second hit after 0.2s).
+/// Swings a wide arc in the player's last-pressed movement direction, hitting all enemies inside it.
+/// Level 2+: increased damage. Level 3+: double slash (strikes twice per attack).
 /// Level 4+: wider arc and longer range. Level 5+: knockback on every hit.
+/// Quantity Tome (ProjectileCount) adds extra slashes, each staggered 0.15s apart.
 /// </summary>
 public sealed class SwordWeapon : WeaponBase
 {
-	private bool _pendingSecondSlash = false;
-	private float _secondSlashTimer = 0f;
-	private Vector3 _pendingSlashDir;
+	private readonly List<(float TimeLeft, Vector3 Dir)> _pendingSlashes = new();
 
 	protected override void OnStart()
 	{
@@ -17,32 +19,35 @@ public sealed class SwordWeapon : WeaponBase
 
 	protected override void OnFire()
 	{
-		var target = FindNearestEnemy();
-		var dir = target != null
-			? (target.WorldPosition - WorldPosition).WithZ( 0f ).Normal
-			: Vector3.Forward;
+		var controller = Components.Get<PlayerController>();
+		var dir = (controller != null) ? controller.LastMoveDirection : Vector3.Forward;
+
+		int baseCount = WeaponLevel >= 3 ? 2 : 1;
+		int totalCount = baseCount + (_state?.ProjectileCount ?? 0);
 
 		PerformSlash( dir );
 
-		if ( WeaponLevel >= 3 )
-		{
-			_pendingSlashDir = dir;
-			_pendingSecondSlash = true;
-			_secondSlashTimer = 0.2f;
-		}
+		for ( int i = 1; i < totalCount; i++ )
+			_pendingSlashes.Add( (i * 0.15f, dir) );
 	}
 
 	protected override void OnUpdate()
 	{
 		base.OnUpdate();
 
-		if ( _pendingSecondSlash )
+		for ( int i = _pendingSlashes.Count - 1; i >= 0; i-- )
 		{
-			_secondSlashTimer -= Time.Delta;
-			if ( _secondSlashTimer <= 0f )
+			var (timeLeft, dir) = _pendingSlashes[i];
+			timeLeft -= Time.Delta;
+
+			if ( timeLeft <= 0f )
 			{
-				PerformSlash( _pendingSlashDir );
-				_pendingSecondSlash = false;
+				PerformSlash( dir );
+				_pendingSlashes.RemoveAt( i );
+			}
+			else
+			{
+				_pendingSlashes[i] = (timeLeft, dir);
 			}
 		}
 	}
@@ -66,26 +71,46 @@ public sealed class SwordWeapon : WeaponBase
 			float angle = Vector3.GetAngle( direction, toEnemy.Normal );
 			if ( angle > arcDeg * 0.5f ) continue;
 
-			enemy.TakeDamage( damage, WeaponId, WorldPosition );
+			float knockbackMult = WeaponLevel >= 5 ? 3f : 1f;
+			enemy.TakeDamage( damage, WeaponId, WorldPosition, knockbackMult );
 		}
 	}
 
 	private void SpawnSlashVisual( Vector3 direction, float arcDeg, float range )
 	{
+		// Animation is 2 frames @ 4 fps = 0.5s total
+		const float animDuration = 0.5f;
+		float lifetime = animDuration * (_state?.DurationMultiplier ?? 1f);
+
 		var go = new GameObject( true, "SwordSlash" );
-		go.WorldPosition = WorldPosition + direction * (range * 0.5f);
-		go.WorldRotation = Rotation.LookAt( direction, Vector3.Up );
+		go.WorldPosition = WorldPosition + direction * (range * 0.4f);
 
-		var r = go.Components.Create<ModelRenderer>();
-		r.Model = Model.Load( "models/dev/box.vmdl" );
-		r.Tint = new Color( 1f, 0.92f, 0.25f, 0.65f );
+		// Lay flat on the XY ground plane oriented along the attack direction.
+		// Pitch 90° = flat, then yaw from the direction vector.
+		var yaw = MathF.Atan2( direction.y, direction.x ) * (180f / MathF.PI);
+		go.WorldRotation = Rotation.From( new Angles( 90f, yaw, 0f ) );
 
-		float widthScale = (arcDeg / 180f) * (range / 50f) / 5f;
-		float lengthScale = (range / 50f) / 5f;
-		go.WorldScale = new Vector3( lengthScale, widthScale, 0.02f );
+		// Scale to visually fill the hit cone:
+		//   X = depth along attack direction  (≈ range)
+		//   Y = width across the arc           (2 * range * sin(arcDeg/2))
+		float halfArcRad = arcDeg * 0.5f * (MathF.PI / 180f);
+		float arcWidth = 2f * range * MathF.Sin( halfArcRad );
+		// Sprite images are small (the SpriteComponent pixel-scale maps 1 px → 1 world unit at scale 1).
+		// Divide by a base resolution assumption (64 px) to normalise, then multiply by desired world size.
+		const float basePixels = 64f;
+		go.WorldScale = new Vector3( range / basePixels, arcWidth / basePixels, 1f );
+
+		var spriteRes = ResourceLibrary.Get<SpriteResource>( "ui/weapons/sword/swordeffect.spr" );
+		if ( spriteRes != null )
+		{
+			var sc = go.Components.Create<SpriteComponent>();
+			sc.Sprite = spriteRes;
+			sc.UsePixelScale = true;
+			sc.PlayAnimation( "slash" );
+		}
 
 		var effect = go.Components.Create<SwordSlashEffect>();
-		effect.Lifetime = 0.2f * (_state?.DurationMultiplier ?? 1f);
+		effect.Lifetime = lifetime;
 	}
 
 	private float GetArcDegrees() => WeaponLevel switch
@@ -122,31 +147,22 @@ public sealed class SwordWeapon : WeaponBase
 }
 
 /// <summary>
-/// Short-lived visual effect for a sword slash. Fades out and self-destructs.
+/// Short-lived effect on a sword slash visual. Waits for the sprite animation to finish, then destroys itself.
 /// </summary>
 public sealed class SwordSlashEffect : Component
 {
-	public float Lifetime { get; set; } = 0.2f;
+	public float Lifetime { get; set; } = 0.5f;
 
 	private float _timer;
-	private ModelRenderer _renderer;
 
 	protected override void OnStart()
 	{
 		_timer = Lifetime;
-		_renderer = Components.Get<ModelRenderer>();
 	}
 
 	protected override void OnUpdate()
 	{
 		_timer -= Time.Delta;
-
-		if ( _renderer != null )
-		{
-			float alpha = Math.Max( 0f, _timer / Lifetime ) * 0.65f;
-			_renderer.Tint = _renderer.Tint.WithAlpha( alpha );
-		}
-
 		if ( _timer <= 0f )
 			GameObject.Destroy();
 	}

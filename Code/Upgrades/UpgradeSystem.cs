@@ -166,6 +166,9 @@ public sealed class UpgradeSystem : Component
 		bool weaponSlotsFull = _weapons?.IsFull ?? false;
 		foreach ( var name in UpgradeDefinition.AllWeaponDisplayNames )
 		{
+			if ( UpgradeDefinition.WeaponUnlockIds.TryGetValue( name, out var weaponUnlockId )
+				&& !PlayerProgress.IsUnlocked( weaponUnlockId ) )
+				continue;
 			if ( _weapons != null && _weapons.HasWeapon( name ) )
 			{
 				var existing = _weapons.Weapons.FirstOrDefault( w => w.WeaponDisplayName == name );

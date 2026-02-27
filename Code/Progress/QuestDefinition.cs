@@ -69,9 +69,10 @@ public class QuestDefinition
 		new() { Id = "kills_sword_300",     Description = "Kill 300 enemies with the Sword",   GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Sword",      Target = 300,  CoinReward = 20 },
 		new() { Id = "kills_magicwand_500", Description = "Kill 500 enemies with Magic Wand",  GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Magic Wand", Target = 500,  CoinReward = 30 },
 		new() { Id = "kills_bow_500",       Description = "Kill 500 enemies with the Bow",     GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Bow",        Target = 500,  CoinReward = 30 },
-		new() { Id = "kills_aura_300",      Description = "Kill 300 enemies with Aura Blast",  GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Aura",       Target = 300,  CoinReward = 20 },
-		new() { Id = "kills_axe_500",       Description = "Kill 500 enemies with Throwing Axe", GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Axe",       Target = 500,  CoinReward = 30 },
-		new() { Id = "kills_stormrod_300",  Description = "Kill 300 enemies with Storm Rod",   GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Storm Rod",  Target = 300,  CoinReward = 25 },
+		new() { Id = "kills_aura_300",           Description = "Kill 300 enemies with Aura Blast",      GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Aura",           Target = 300, CoinReward = 20 },
+		new() { Id = "kills_axe_500",            Description = "Kill 500 enemies with Throwing Axe",   GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Axe",            Target = 500, CoinReward = 30 },
+		new() { Id = "kills_stormrod_300",       Description = "Kill 300 enemies with Storm Rod",       GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Storm Rod",      Target = 300, CoinReward = 25 },
+		new() { Id = "kills_orbitalshards_300",  Description = "Kill 300 enemies with Orbital Shards",  GoalType = QuestGoalType.KillsWithWeapon, WeaponName = "Orbital Shards", Target = 300, CoinReward = 25 },
 
 		// --- Tome level quests ---
 		new() { Id = "tome_damage_lvl3",  Description = "Upgrade Damage Tome to Level 3 in a single run",  GoalType = QuestGoalType.TomeReachLevel, TomeName = "Damage Tome",  Target = 3, CoinReward = 20 },
@@ -87,7 +88,7 @@ public class QuestDefinition
 		new() { Id = "chests_10", Description = "Purchase 10 chests total", GoalType = QuestGoalType.ChestsPurchased, Target = 10, CoinReward = 20 },
 
 		// --- Projectiles fired quests ---
-		new() { Id = "projectiles_5000", Description = "Fire 1,000 projectiles", GoalType = QuestGoalType.ProjectilesFired, Target = 1000, CoinReward = 25 },
+		new() { Id = "projectiles_5000", Description = "Fire 5,000 projectiles", GoalType = QuestGoalType.ProjectilesFired, Target = 5000, CoinReward = 25 },
 
 		// --- Weapon level quests ---
 		new() { Id = "axe_level_10", Description = "Upgrade Axe to Level 10 in a single run", GoalType = QuestGoalType.WeaponReachLevel, WeaponName = "Axe", Target = 10, CoinReward = 20 },

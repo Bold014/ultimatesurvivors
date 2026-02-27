@@ -7,6 +7,7 @@ using SpriteTools;
 /// </summary>
 public sealed class EnemyBase : Component
 {
+	static SoundEvent HitSound = new( "sounds/enemy_hit.mp3" );
 	[Property] public float MaxHP { get; set; } = 30f;
 	[Property] public float Speed { get; set; } = 24f;
 	[Property] public float ContactDamage { get; set; } = 10f;
@@ -439,7 +440,7 @@ public sealed class EnemyBase : Component
 	/// <summary>Converts desired total distance to initial velocity (units/sec). Based on decay rate.</summary>
 	private const float KnockbackVelocityFactor = 2.5f;
 
-	public void TakeDamage( float amount, string weaponId = null, Vector3? knockbackFrom = null )
+	public void TakeDamage( float amount, string weaponId = null, Vector3? knockbackFrom = null, float knockbackMultiplier = 1f )
 	{
 		if ( _dieTimer >= 0f ) return;
 
@@ -470,7 +471,11 @@ public sealed class EnemyBase : Component
 
 		// Lifesteal: heal player for a fraction of damage dealt
 		if ( playerState != null && playerState.Lifesteal > 0f )
-			playerState.Heal( amount * playerState.Lifesteal );
+		{
+			float healAmount = amount * playerState.Lifesteal;
+			playerState.Heal( healAmount );
+			DamageIndicatorWorld.SpawnHeal( Target, new Vector3( 0f, 0f, 14f ), healAmount );
+		}
 
 		if ( _renderer != null )
 		{
@@ -488,6 +493,7 @@ public sealed class EnemyBase : Component
 			_flashTimer = 0.1f;
 		}
 
+		try { Sound.Play( HitSound ); } catch { }
 		SpawnDamageIndicator( amount, isCrit );
 
 		// Apply knockback: add velocity to push enemy away from damage source (smooth slide over time)
@@ -502,7 +508,7 @@ public sealed class EnemyBase : Component
 				if ( dir.LengthSquared > 0.01f )
 				{
 					dir = dir.Normal;
-					float totalDist = BaseKnockbackDistance * knockbackMult;
+					float totalDist = BaseKnockbackDistance * knockbackMult * knockbackMultiplier;
 					float initialSpeed = totalDist * KnockbackVelocityFactor; // units/sec for smooth slide
 					_knockbackVelocity = dir * initialSpeed;
 				}

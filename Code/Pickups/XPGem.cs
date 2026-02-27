@@ -13,13 +13,14 @@ public sealed class XPGem : Component
 	private float _lifetime = 25f;
 	private bool _attracted = false;
 	private const float MoveSpeed = 220f;
+	private const float GemSize = 6f;
 
 	protected override void OnStart()
 	{
-		var renderer = Components.Create<ModelRenderer>();
-		renderer.Model = Model.Load( "models/dev/box.vmdl" );
-		renderer.Tint = new Color( 0.1f, 0.9f, 0.3f );
-		GameObject.WorldScale = new Vector3( 0.15f, 0.15f, 0.04f );
+		var renderer = Components.Create<SpriteRenderer>();
+		renderer.Sprite = ResourceLibrary.Get<Sprite>( "ui/weapons/xp.sprite" );
+		renderer.Size = new Vector2( GemSize, GemSize );
+		renderer.TextureFilter = Sandbox.Rendering.FilterMode.Point;
 	}
 
 	protected override void OnUpdate()

@@ -22,10 +22,10 @@
 	@if ( _view == MenuView.Main )
 	{
 		<!-- Top-right stats — coin counter -->
-		<div style="position: absolute; top: 20px; right: 24px; display: flex; align-items: center; gap: 10px;">
-			<div style="display: flex; align-items: center; gap: 8px; background: #0d1117; border: 2px solid #5a4a00; padding: 6px 14px; border-radius: 4px;">
-				<img src="ui/coin.png" style="width: 32px; height: 32px;" />
-				<span style="font-size: 18px; color: #f5c518; font-weight: bold;">@PlayerProgress.Data.Coins</span>
+		<div style="position: absolute; top: 20px; right: 24px;">
+			<div style="display: flex; align-items: center; background: #0d1117; border: 2px solid #5a4a00; padding: 4px 10px 4px 0px; border-radius: 4px; overflow: hidden;">
+				<img src="ui/coin.png" style="width: 56px; height: 56px; margin-left: -6px; margin-right: 2px; flex-shrink: 0;" />
+				<span style="font-size: 18px; color: #f5c518; font-weight: bold; letter-spacing: 0;">@PlayerProgress.Data.Coins</span>
 			</div>
 		</div>
 
@@ -241,11 +241,11 @@
 					}
 				</div>
 
-				<!-- RIGHT: detail panel -->
-				<div style="flex: 1; padding: 24px 32px; display: flex; flex-direction: column; gap: 20px;">
+			<!-- RIGHT: detail panel -->
+			<div style="flex: 1; padding: 24px 32px; display: flex; flex-direction: column; gap: 20px; overflow: visible;">
 
-			<!-- Portrait row: icon + name side by side -->
-				<div style="display: flex; flex-direction: row; align-items: center; gap: 18px; flex-shrink: 0;">
+		<!-- Portrait row: icon + name side by side -->
+			<div style="display: flex; flex-direction: row; align-items: center; gap: 18px; flex-shrink: 0; overflow: visible;">
 					<div style="width: 90px; height: 90px; flex-shrink: 0; border-radius: 10px; background-color: @CharColor(selDef.Name); border: 3px solid @(selUnlocked ? "#f5c518" : "#5a3a10"); display: flex; align-items: center; justify-content: center; font-size: 42px;">
 						@if ( selUnlocked )
 						{
@@ -253,13 +253,13 @@
 						}
 						else
 						{
-							<text>🔒</text>
+							<img src="ui/locked.png" style="width: 48px; height: 48px; image-rendering: pixelated;" />
 						}
 					</div>
 						<div style="font-size: 28px; font-weight: 900; color: @(selUnlocked ? "#f5c518" : "#666"); letter-spacing: 2px; text-shadow: 2px 2px 0 #000;">@selDef.Name.ToUpper()</div>
 					</div>
-					<!-- Description — full width below portrait row -->
-					<div style="font-size: 13px; color: @(selUnlocked ? "#a08050" : "#4a3020"); line-height: 1.6;">@selDef.Description</div>
+				<!-- Description — full width below portrait row -->
+				<div style="font-size: 13px; color: @(selUnlocked ? "#a08050" : "#4a3020"); padding-top: 6px; overflow: visible;">@selDef.Description</div>
 
 					<!-- Stats -->
 					<div style="flex-shrink: 0; background-color: #120c04; border: 2px solid #3a2510; border-radius: 8px; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
@@ -313,15 +313,15 @@
 					@if ( !selUnlocked )
 					{
 						<div style="flex-shrink: 0; padding: 16px 20px; background-color: #1a1008; border: 2px solid #5a3a10; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-							<img src="ui/coin.png" style="width: 24px; height: 24px;" />
+							<img src="ui/coin.png" style="width: 36px; height: 36px;" />
 							<span style="font-size: 16px; font-weight: bold; color: #6a4a1a; letter-spacing: 1px;">@(selUnlockDef?.CoinCost ?? 0) COINS TO UNLOCK</span>
 						</div>
 					}
 					else
 					{
-						<div class="confirm-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.MapSelect; })>
-							PLAY AS @confirmLabel →
-						</div>
+					<div class="confirm-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.MapSelect; })>
+						PLAY AS @confirmLabel  >>
+					</div>
 					}
 
 				</div>
@@ -383,14 +383,14 @@
 
 				<!-- Map 2 — locked -->
 				<div style="flex: 1; min-width: 200px; background-color: #120c04; border: 2px solid #3a2510; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0.6;">
-					<div style="font-size: 24px;">🔒</div>
+					<img src="ui/locked.png" style="width: 32px; height: 32px; image-rendering: pixelated;" />
 					<div style="font-size: 18px; font-weight: bold; color: #666; letter-spacing: 2px;">???</div>
 					<div style="font-size: 12px; color: #5a4a1a; letter-spacing: 1px;">COMING SOON</div>
 				</div>
 
 				<!-- Map 3 — locked -->
 				<div style="flex: 1; min-width: 200px; background-color: #120c04; border: 2px solid #3a2510; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0.6;">
-					<div style="font-size: 24px;">🔒</div>
+					<img src="ui/locked.png" style="width: 32px; height: 32px; image-rendering: pixelated;" />
 					<div style="font-size: 18px; font-weight: bold; color: #666; letter-spacing: 2px;">???</div>
 					<div style="font-size: 12px; color: #5a4a1a; letter-spacing: 1px;">COMING SOON</div>
 				</div>
@@ -399,7 +399,7 @@
 			<!-- Start button -->
 			<div style="padding: 0 28px 24px 28px;">
 				<div class="confirm-btn" onclick=@(() => { PlayClickSound(); MenuManager.StartGame( _selectedCharName ?? "Archer", _selectedMapId ?? "dark_forest", _selectedTier ); })>
-					START RUN →
+					START RUN  >>
 				</div>
 			</div>
 		</div>
@@ -420,7 +420,7 @@
 			<div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 28px 0 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a;">
 				<div style="font-size: 32px; font-weight: 900; color: #f5c518; letter-spacing: 4px; text-shadow: 2px 2px 0 #000;">UNLOCKS</div>
 				<div style="display: flex; align-items: center; gap: 8px; background-color: #120c04; border: 2px solid #6a4a1a; padding: 6px 14px; border-radius: 6px;">
-					<img src="ui/coin.png" style="width: 28px; height: 28px;" />
+					<img src="ui/coin.png" style="width: 42px; height: 42px;" />
 					<span style="font-size: 16px; color: #f5c518; font-weight: bold;">@PlayerProgress.Data.Coins</span>
 				</div>
 			</div>
@@ -473,7 +473,7 @@
 					: "unlock-locked";
 
 			<div class="unlock-card @cardClass">
-				<div style="width: 72px; height: 72px; flex-shrink: 0; background-color: @cardIconBg; border: 2px solid @cardBorder; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; opacity: @(meetsPrereq || isOwned ? "1" : "0.5");">
+			<div style="width: 72px; height: 72px; flex-shrink: 0; background-color: @cardIconBg; border: 2px solid @cardBorder; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; opacity: @(meetsPrereq || isOwned ? "1" : "0.4");">
 					@if ( charName != null )
 					{
 						<img src="@CharIconPath( charName )" style="width: 56px; height: 56px; image-rendering: pixelated;" />
@@ -499,15 +499,15 @@
 						<text>@cardIcon</text>
 					}
 				</div>
-				<div style="flex: 1; padding: 0 12px; display: flex; flex-direction: column; justify-content: center;">
-					<div style="font-size: 15px; font-weight: bold; color: @(isOwned ? "#f5c518" : (meetsPrereq ? "#eee" : "#999")); text-shadow: 1px 1px 0 #000;">@item.Name</div>
-					<div style="font-size: 12px; color: @(meetsPrereq || isOwned ? "#c8a478" : "#7a5a38"); margin-top: 3px; text-shadow: 1px 1px 0 #000;">@item.Description</div>
+				<div style="flex: 1; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; overflow: visible;">
+					<div style="font-size: 15px; font-weight: bold; color: @(isOwned ? "#f5c518" : (meetsPrereq ? "#ffffff" : "#cccccc")); text-shadow: 1px 1px 2px #000, 0 0 4px #000;">@item.Name</div>
+					<div style="font-size: 12px; color: @(meetsPrereq || isOwned ? "#e8d8b0" : "#b89870"); margin-top: 3px; text-shadow: 1px 1px 2px #000, 0 0 4px #000;">@item.Description</div>
 					@if ( !isOwned && !meetsPrereq && prereqQuest != null )
 					{
-						<div style="font-size: 11px; color: #a07840; margin-top: 5px; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">🔒 Complete: @prereqQuest.Description</div>
+						<div style="font-size: 11px; color: #d4aa60; margin-top: 5px; letter-spacing: 1px; text-shadow: 1px 1px 2px #000; display: flex; align-items: center; gap: 4px; overflow: visible; padding-bottom: 2px;"><img src="ui/locked.png" style="width: 10px; height: 10px; flex-shrink: 0; image-rendering: pixelated;" /> Complete: @prereqQuest.Description</div>
 					}
 				</div>
-					<div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding-left: 8px; min-width: 64px;">
+					<div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 4px 0 4px 8px; min-width: 64px; overflow: visible;">
 						@if ( item.IsFree || isOwned )
 						{
 							<div style="font-size: 20px; color: #f5c518;">✓</div>
@@ -515,12 +515,12 @@
 						}
 						else if ( !meetsPrereq )
 						{
-							<div style="font-size: 20px; color: #4a3020;">🔒</div>
+							<img src="ui/locked.png" style="width: 28px; height: 28px; image-rendering: pixelated; opacity: 0.5;" />
 						}
 						else
 						{
 							<div class="buy-btn @(canAfford ? "buy-btn-ok" : "buy-btn-no")" onclick=@(() => { PlayClickSound(); UnlockTryBuy( item.Id ); })>
-								<img src="ui/coin.png" style="width: 22px; height: 22px;" />
+								<img src="ui/coin.png" style="width: 32px; height: 32px;" />
 								<span style="font-size: 13px; font-weight: bold; color: @(canAfford ? "#f5c518" : "#6a4a1a");">@item.CoinCost</span>
 							</div>
 						}
@@ -559,7 +559,7 @@
 					<div style="font-size: 12px; color: #a08050; letter-spacing: 2px; margin-top: 3px;">@completedQuests / @totalQuests COMPLETED</div>
 				</div>
 				<div style="display: flex; align-items: center; gap: 8px; background-color: #120c04; border: 2px solid #6a4a1a; padding: 6px 14px; border-radius: 6px;">
-					<img src="ui/coin.png" style="width: 28px; height: 28px;" />
+					<img src="ui/coin.png" style="width: 42px; height: 42px;" />
 					<span style="font-size: 16px; color: #f5c518; font-weight: bold;">@PlayerProgress.Data.Coins</span>
 				</div>
 			</div>
@@ -586,18 +586,18 @@
 						<div style="width: 52px; height: 52px; flex-shrink: 0; background-color: @(qclaimed ? "#2a1e08" : (qclaim ? "#2a1e00" : "#1a1008")); border: 2px solid @(qclaimed ? "#c8a800" : (qclaim ? "#c8a800" : "#6a4a1a")); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 26px;">
 							@QuestIcon( quest.GoalType )
 						</div>
-						<div style="flex: 1; overflow: hidden;">
-							<div style="font-size: 15px; font-weight: bold; color: @(qclaimed ? "#f5c518" : "#eee");">@quest.Description</div>
+					<div style="flex: 1; min-width: 0;">
+						<div style="font-size: 15px; font-weight: bold; color: @(qclaimed ? "#f5c518" : "#eee");">@quest.Description</div>
 							<div style="background-color: #120c04; height: 12px; width: 100%; border: 1px solid #5a3a10; border-radius: 4px; margin-top: 8px;">
 								<div style="background-color: @(qclaimed ? "#c8a800" : (qclaim ? "#e8b800" : "#8a5a20")); height: 100%; width: @qpct%; border-radius: 4px;"></div>
 							</div>
-							<div style="font-size: 12px; color: #a08050; margin-top: 6px;">
+							<div style="font-size: 12px; color: #a08050; margin-top: 6px; white-space: nowrap;">
 								@(qclaimed ? $"{quest.Target:N0} / {quest.Target:N0}" : $"{System.Math.Min(qprog,quest.Target):N0} / {quest.Target:N0}")
 							</div>
 						</div>
 						<div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-width: 80px;">
 							<div style="display: flex; align-items: center; gap: 5px;">
-								<img src="ui/coin.png" style="width: 24px; height: 24px;" />
+								<img src="ui/coin.png" style="width: 36px; height: 36px;" />
 								<span style="font-size: 15px; font-weight: bold; color: #f5c518;">@quest.CoinReward</span>
 							</div>
 							@if ( qclaimed )   { <div style="font-size: 22px; color: #f5c518;">✓</div> }
@@ -732,12 +732,12 @@
 		display: flex; align-items: center;
 		width: 100%; padding: 14px 16px;
 		background-color: #221508; border: 2px solid #5a3a10; border-radius: 6px;
-		flex-shrink: 0;
+		flex-shrink: 0; overflow: visible;
 	}
 	.unlock-owned      { border-color: #c8a800; background-color: #2a1e08; }
 	.unlock-affordable { border-color: #8a5a20; }
 	.unlock-affordable:hover { border-color: #c8a800; }
-	.unlock-locked     { opacity: 0.5; }
+	.unlock-locked     { opacity: 0.6; }
 	.buy-btn {
 		display: flex; align-items: center; gap: 6px; padding: 6px 12px;
 		border-radius: 5px; border: 2px solid #8a5a20; background-color: #1a1008;
@@ -910,7 +910,7 @@
 		var name = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "Player";
 
 		// Show message immediately (optimistic), then broadcast.
-		_chatMessages.Add( new ChatEntry { Name = name, Text = msg, ColorHex = "#4ae8ff" } );
+		_chatMessages.Add( new ChatEntry { Name = name, Text = msg, ColorHex = "#ffffff" } );
 		if ( _chatMessages.Count > 8 ) _chatMessages.RemoveAt( 0 );
 
 		var chat = ChatComponent.Instance;

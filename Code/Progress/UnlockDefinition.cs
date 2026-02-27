@@ -23,19 +23,21 @@ public class UnlockDefinition
 	{
 		// ── Characters ─────────────────────────────────────────────────────────
 		new() { Id = "char_archer",      Name = "Archer",      Category = UnlockCategory.Characters, CoinCost = 0,   PrerequisiteQuestId = null,           Description = "A nimble ranger. Fast and precise." },
-		new() { Id = "char_warrior",     Name = "Warrior",     Category = UnlockCategory.Characters, CoinCost = 200, PrerequisiteQuestId = "complete_1",   Description = "A resilient fighter with high HP." },
-		new() { Id = "char_mage",        Name = "Mage",        Category = UnlockCategory.Characters, CoinCost = 300, PrerequisiteQuestId = "survive_5",    Description = "A powerful spellcaster. High damage, low health." },
-		new() { Id = "char_knight",      Name = "Knight",      Category = UnlockCategory.Characters, CoinCost = 150, PrerequisiteQuestId = "kill_100",     Description = "An armoured melee fighter. High HP, slow but deadly." },
-		new() { Id = "char_templar",     Name = "Templar",     Category = UnlockCategory.Characters, CoinCost = 250, PrerequisiteQuestId = "kills_magicwand_500", Description = "A swift lightning striker. Chains bolts between enemies." },
-		new() { Id = "char_druid",       Name = "Druid",       Category = UnlockCategory.Characters, CoinCost = 300, PrerequisiteQuestId = "kills_bow_500",Description = "A nature guardian. Orbiting shards defend and destroy." },
+		new() { Id = "char_warrior",     Name = "Warrior",     Category = UnlockCategory.Characters, CoinCost = 200, PrerequisiteQuestId = "kills_aura_300",       Description = "A resilient fighter with high HP." },
+		new() { Id = "char_mage",        Name = "Mage",        Category = UnlockCategory.Characters, CoinCost = 250, PrerequisiteQuestId = "kills_magicwand_500",  Description = "A powerful spellcaster. High damage, low health." },
+		new() { Id = "char_knight",      Name = "Knight",      Category = UnlockCategory.Characters, CoinCost = 150, PrerequisiteQuestId = "kill_100",             Description = "An armoured melee fighter. High HP, slow but deadly." },
+		new() { Id = "char_templar",     Name = "Templar",     Category = UnlockCategory.Characters, CoinCost = 250, PrerequisiteQuestId = "kills_stormrod_300",   Description = "A swift lightning striker. Chains bolts between enemies." },
+		new() { Id = "char_druid",       Name = "Druid",       Category = UnlockCategory.Characters, CoinCost = 300, PrerequisiteQuestId = "kills_orbitalshards_300", Description = "A nature guardian. Orbiting shards defend and destroy." },
 		new() { Id = "char_pyromancer",  Name = "Pyromancer",  Category = UnlockCategory.Characters, CoinCost = 350, PrerequisiteQuestId = "survive_15",   Description = "A glass-cannon fire mage. Highest damage, lowest HP." },
 
 		// ── Weapons ────────────────────────────────────────────────────────────
+		new() { Id = "weapon_bow",           Name = "Bow",            Category = UnlockCategory.Weapons, CoinCost = 0,   PrerequisiteQuestId = null,               Description = "Shoots arrows that pierce through enemies." },
+		new() { Id = "weapon_sword",         Name = "Sword",          Category = UnlockCategory.Weapons, CoinCost = 0,   PrerequisiteQuestId = null,               Description = "Slashes nearby enemies in a wide arc." },
 		new() { Id = "weapon_magicwand",     Name = "Magic Wand",     Category = UnlockCategory.Weapons, CoinCost = 0,   PrerequisiteQuestId = null,               Description = "Fires seeking projectiles at the nearest enemy." },
 		new() { Id = "weapon_axe",           Name = "Throwing Axe",   Category = UnlockCategory.Weapons, CoinCost = 150, PrerequisiteQuestId = "kills_sword_300",  Description = "Hurls spinning axes that arc through enemies." },
-		new() { Id = "weapon_aura",          Name = "Aura Blast",     Category = UnlockCategory.Weapons, CoinCost = 200, PrerequisiteQuestId = "complete_1",       Description = "Emits a damage pulse around the player." },
+		new() { Id = "weapon_aura",          Name = "Aura Blast",     Category = UnlockCategory.Weapons, CoinCost = 150, PrerequisiteQuestId = "complete_1",       Description = "Emits a damage pulse around the player." },
 		new() { Id = "weapon_stormrod",      Name = "Storm Rod",      Category = UnlockCategory.Weapons, CoinCost = 200, PrerequisiteQuestId = "kills_magicwand_500", Description = "Calls down lightning strikes on nearby enemies. Hits additional targets at higher levels." },
-		new() { Id = "weapon_orbitalshards", Name = "Orbital Shards", Category = UnlockCategory.Weapons, CoinCost = 250, PrerequisiteQuestId = "kills_bow_500",    Description = "Rock shards orbit you, crushing enemies they pass through." },
+		new() { Id = "weapon_orbitalshards", Name = "Orbital Shards", Category = UnlockCategory.Weapons, CoinCost = 200, PrerequisiteQuestId = "kills_bow_500",    Description = "Rock shards orbit you, crushing enemies they pass through." },
 		new() { Id = "weapon_embertrail",    Name = "Ember Trail",    Category = UnlockCategory.Weapons, CoinCost = 200, PrerequisiteQuestId = "kills_aura_300",   Description = "Drops lingering fire zones that burn enemies standing in them." },
 
 		// ── Tomes ──────────────────────────────────────────────────────────────
@@ -54,7 +56,7 @@ public class UnlockDefinition
 		new() { Id = "tome_knockback",       Name = "Knockback Tome",        Category = UnlockCategory.Tomes, CoinCost = 150, PrerequisiteQuestId = "kill_500",        Description = "Increases knockback, pushing enemies further when you hit them." },
 		new() { Id = "tome_quantity",        Name = "Quantity Tome",         Category = UnlockCategory.Tomes, CoinCost = 200, PrerequisiteQuestId = "projectiles_5000",Description = "Increases the number of attacks and projectiles." },
 		new() { Id = "tome_xp",             Name = "XP Tome",               Category = UnlockCategory.Tomes, CoinCost = 150, PrerequisiteQuestId = "complete_5",      Description = "Increases XP gained from all sources." },
-		new() { Id = "tome_duration",       Name = "Duration Tome",          Category = UnlockCategory.Tomes, CoinCost = 9,   PrerequisiteQuestId = "axe_level_10",   Description = "Increases the duration of attacks and projectiles." },
+		new() { Id = "tome_duration",       Name = "Duration Tome",          Category = UnlockCategory.Tomes, CoinCost = 150, PrerequisiteQuestId = "axe_level_10",   Description = "Increases the duration of attacks and projectiles." },
 
 		// ── Items ──────────────────────────────────────────────────────────────
 		// Unlocking an item adds it to the chest reward pool so it can appear when you open a chest.

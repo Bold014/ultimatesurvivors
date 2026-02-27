@@ -163,6 +163,23 @@ public class UpgradeDefinition
 		"Magic Wand", "Bow", "Axe", "Aura", "Storm Rod", "Orbital Shards", "Ember Trail", "Sword"
 	};
 
+	/// <summary>
+	/// Maps a weapon display name to its UnlockDefinition ID.
+	/// Weapons absent from this dictionary are always available (no unlock required).
+	/// </summary>
+	public static readonly IReadOnlyDictionary<string, string> WeaponUnlockIds =
+		new Dictionary<string, string>
+		{
+			{ "Magic Wand",     "weapon_magicwand"     },
+			{ "Sword",          "weapon_sword"         },
+			{ "Bow",            "weapon_bow"           },
+			{ "Axe",            "weapon_axe"           },
+			{ "Aura",           "weapon_aura"          },
+			{ "Storm Rod",      "weapon_stormrod"      },
+			{ "Orbital Shards", "weapon_orbitalshards" },
+			{ "Ember Trail",    "weapon_embertrail"    },
+		};
+
 	// ── Level-up: TOME pool ───────────────────────────────────────────────────
 	// Shown alongside weapon choices when the player gains a level from XP.
 	// Tomes with no UnlockId are always available. Others require a meta-shop unlock.

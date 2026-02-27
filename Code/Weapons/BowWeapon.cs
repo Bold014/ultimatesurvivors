@@ -39,7 +39,7 @@ public sealed class BowWeapon : WeaponBase
 
 		var proj = go.Components.Create<Projectile>();
 		proj.Direction = dir;
-		proj.Speed = WeaponLevel >= 4 ? 320f : 260f;
+		proj.Speed = (WeaponLevel >= 4 ? 320f : 260f) * _state.ProjectileSpeedMultiplier;
 		proj.Damage = _state.Damage * GetDamageMultiplier();
 		proj.Lifetime = 2.0f * _state.DurationMultiplier;
 		proj.Piercing = WeaponLevel >= 4;

@@ -114,8 +114,8 @@
 					@for ( int i = 0; i < 4; i++ )
 					{
 						var w = (weapons?.Weapons != null && i < weapons.Weapons.Count) ? weapons.Weapons[i] : null;
-						<div style="width: 52px; height: 52px; background: @(w != null ? "linear-gradient(180deg, #2a1a04 0%, #1a1004 100%)" : "#0a0804"); border: 2px solid @(w != null ? "#c8a800" : "#2a2010"); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; overflow: hidden; box-shadow: @(w != null ? "0 0 8px rgba(200,168,0,0.1)" : "none"); ">
-							@if ( w != null )
+						<div style="width: 60px; height: 72px; background: @(w != null ? "linear-gradient(180deg, #2a1a04 0%, #1a1004 100%)" : "#0a0804"); border: 2px solid @(w != null ? "#c8a800" : "#2a2010"); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: @(w != null ? "0 0 8px rgba(200,168,0,0.1)" : "none"); ">
+						@if ( w != null )
 							{
 								var wIcon = WeaponIconPath( w.WeaponDisplayName );
 								var wName = w.WeaponDisplayName ?? "";
@@ -125,11 +125,11 @@
 								{
 									@if ( isStormRod || isEmberTrail )
 									{
-										<div style="width: 44px; height: 44px; background-image: url('@wIcon'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated; flex-shrink: 0;"></div>
+										<div style="width: 52px; height: 52px; background-image: url('@wIcon'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated; flex-shrink: 0;"></div>
 									}
 									else
 									{
-										<img src="@wIcon" style="width: 40px; height: 40px; image-rendering: pixelated; flex-shrink: 0;" />
+										<img src="@wIcon" style="width: 48px; height: 48px; image-rendering: pixelated; flex-shrink: 0;" />
 									}
 								}
 								else
@@ -154,14 +154,14 @@
 					@for ( int i = 0; i < 4; i++ )
 					{
 						var p = (passives?.Passives != null && i < passives.Passives.Count) ? passives.Passives[i] : null;
-						<div style="width: 52px; height: 52px; background: @(p != null ? "linear-gradient(180deg, #1a0c20 0%, #120818 100%)" : "#0a0804"); border: 2px solid @(p != null ? "#8a5a20" : "#2a2010"); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; overflow: hidden;">
-							@if ( p != null )
+						<div style="width: 60px; height: 72px; background: @(p != null ? "linear-gradient(180deg, #1a0c20 0%, #120818 100%)" : "#0a0804"); border: 2px solid @(p != null ? "#8a5a20" : "#2a2010"); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
+						@if ( p != null )
 							{
 								var tIcon = TomeIconPath( p );
 								var tLevel = tomes?.GetLevel( p ) ?? 0;
 								@if ( tIcon != null )
 								{
-									<div style="width: 40px; height: 40px; background-image: url('@tIcon'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+									<div style="width: 48px; height: 48px; background-image: url('@tIcon'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
 								}
 								else
 								{
@@ -190,15 +190,15 @@
 			var canAfford = (coins?.Coins ?? 0) >= nearChest.Cost;
 			var isFree = player?.IsNextChestFree ?? false;
 			var canOpen = canAfford || isFree;
-			<div style="position: absolute; bottom: @(chestBottom)px; left: 50%; transform: translateX(-50%); background: #1a1008ee; border: 2px solid @(canOpen ? "#c8a800" : "#883322"); border-radius: 10px; padding: 10px 24px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
-				<div style="font-size: 16px; font-family: Minecraft; color: @(canOpen ? "#f5c518" : "#cc6666"); font-weight: bold;">
-					[E] Open Chest — @(isFree ? "FREE" : $"{nearChest.Cost} coins")
-				</div>
-				@if ( !canOpen )
-				{
-					<div style="font-size: 11px; font-family: Minecraft; color: #cc6666; margin-top: 2px;">Not enough coins</div>
-				}
+		<div style="position: absolute; bottom: @(chestBottom)px; left: 50%; transform: translateX(-50%); background: #1a1008ee; border: 2px solid @(canOpen ? "#c8a800" : "#883322"); border-radius: 10px; padding: 10px 24px; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
+			<div style="font-size: 16px; font-family: Minecraft; color: @(canOpen ? "#f5c518" : "#cc6666"); font-weight: bold; white-space: nowrap;">
+				[E] Open Chest - @(isFree ? "FREE" : $"{nearChest.Cost} coins")
 			</div>
+			@if ( !canOpen )
+			{
+				<div style="font-size: 11px; font-family: Minecraft; color: #cc6666;">Not enough coins</div>
+			}
+		</div>
 		}
 
 		<!-- ── Beacon charging prompt ─────────────────────────────────────────── -->
@@ -327,18 +327,51 @@
 			</div>
 		}
 
-		<!-- Boss HP bar — centered at bottom, visible during final boss phase -->
-		@if ( spawner?.IsFinalBossPhase == true && DragonBoss.Instance != null )
-		{
-			var bossPct = (int)(DragonBoss.Instance.HPPercent * 100);
-			<div style="position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); width: 400px; background: linear-gradient(180deg, #1a0808 0%, #0f0404 100%); border: 2px solid #8a2020; border-radius: 12px; padding: 12px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
-				<div style="font-size: 12px; color: #e84444; font-family: Minecraft; letter-spacing: 3px; margin-bottom: 6px;">DRAGON BOSS</div>
-				<div style="background: #0a0404; border: 1px solid #4a1010; border-radius: 8px; height: 24px; position: relative; overflow: hidden;">
-					<div style="background: linear-gradient(90deg, #cc2222 0%, #e84444 100%); height: 100%; width: @bossPct%; transition: width 0.15s ease-out; box-shadow: 0 0 8px rgba(204,34,34,0.5);"></div>
-				</div>
+	<!-- Boss HP bar — centered at bottom, visible during final boss phase -->
+	@if ( spawner?.IsFinalBossPhase == true && DragonBoss.Instance != null )
+	{
+		var bossPct = (int)(DragonBoss.Instance.HPPercent * 100);
+		<div style="position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); width: 400px; background: linear-gradient(180deg, #1a0808 0%, #0f0404 100%); border: 2px solid #8a2020; border-radius: 12px; padding: 12px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
+			<div style="font-size: 12px; color: #e84444; font-family: Minecraft; letter-spacing: 3px; margin-bottom: 6px;">DRAGON BOSS</div>
+			<div style="background: #0a0404; border: 1px solid #4a1010; border-radius: 8px; height: 24px; position: relative; overflow: hidden;">
+				<div style="background: linear-gradient(90deg, #cc2222 0%, #e84444 100%); height: 100%; width: @bossPct%; transition: width 0.15s ease-out; box-shadow: 0 0 8px rgba(204,34,34,0.5);"></div>
 			</div>
-		}
+		</div>
 	}
+
+	<!-- ── Escape / Pause menu ────────────────────────────────────────────── -->
+	@if ( GameManager.EscapeMenuOpen && (stats?.IsAlive ?? true) && GameManager.ReturnToMenuCountdown <= 0f )
+	{
+		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.72); display: flex; align-items: center; justify-content: center; pointer-events: all;">
+			<div style="background: linear-gradient(180deg, #1a1208 0%, #100c06 100%); border: 2px solid #6a4a1a; border-radius: 16px; padding: 48px 56px; display: flex; flex-direction: column; align-items: center; gap: 20px; box-shadow: 0 12px 48px rgba(0,0,0,0.8); min-width: 340px; font-family: Minecraft;">
+
+				<!-- Title -->
+				<div style="font-size: 36px; font-weight: bold; color: #f5c518; letter-spacing: 10px; text-shadow: 0 0 20px rgba(245,197,24,0.35); margin-bottom: 12px;">PAUSED</div>
+
+				<!-- Divider -->
+				<div style="width: 100%; height: 1px; background: linear-gradient(90deg, transparent, #6a4a1a, transparent); margin-bottom: 8px;"></div>
+
+				<!-- Resume -->
+				<div onclick=@(() => ResumeGame()) style="width: 100%; padding: 14px 0; text-align: center; font-size: 18px; font-family: Minecraft; color: #f5c518; background: linear-gradient(180deg, #2a1e06 0%, #1a1204 100%); border: 2px solid #c8a800; border-radius: 10px; cursor: pointer; letter-spacing: 3px; transition: background 0.1s; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+					RESUME
+				</div>
+
+				<!-- Restart Run -->
+				<div onclick=@(() => RestartRun()) style="width: 100%; padding: 14px 0; text-align: center; font-size: 18px; font-family: Minecraft; color: #e8c080; background: linear-gradient(180deg, #201408 0%, #140e04 100%); border: 2px solid #8a5a20; border-radius: 10px; cursor: pointer; letter-spacing: 3px; transition: background 0.1s; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+					RESTART RUN
+				</div>
+
+				<!-- Back to Lobby -->
+				<div onclick=@(() => BackToLobby()) style="width: 100%; padding: 14px 0; text-align: center; font-size: 18px; font-family: Minecraft; color: #cc6666; background: linear-gradient(180deg, #1a0808 0%, #100404 100%); border: 2px solid #6a2020; border-radius: 10px; cursor: pointer; letter-spacing: 3px; transition: background 0.1s; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+					BACK TO LOBBY
+				</div>
+
+				<!-- Hint -->
+				<div style="font-size: 11px; color: #5a4a30; margin-top: 8px; letter-spacing: 2px;">PRESS ESC TO RESUME</div>
+			</div>
+		</div>
+	}
+}
 </root>
 
 @code
@@ -353,6 +386,45 @@
 	PlayerCoins      LocalCoins    => PlayerCoins.LocalInstance;
 	Chest            NearbyChest   => Scene?.GetAllComponents<Chest>().FirstOrDefault( c => c.IsPlayerNearby );
 	LevelUpBeacon    NearbyBeacon  => Scene?.GetAllComponents<LevelUpBeacon>().FirstOrDefault( b => b.IsPlayerNearby );
+
+	protected override void OnUpdate()
+	{
+		if ( Input.EscapePressed )
+		{
+			var stats = LocalStats;
+			if ( stats?.IsAlive == true && GameManager.ReturnToMenuCountdown <= 0f )
+			{
+				// Consume the escape press so s&box doesn't open its own overlay
+				Input.EscapePressed = false;
+				GameManager.EscapeMenuOpen = !GameManager.EscapeMenuOpen;
+				StateHasChanged();
+			}
+		}
+	}
+
+	static SoundEvent UiClick = new( "sounds/ui_click.mp3" );
+	void PlayClickSound() { try { Sound.Play( UiClick ); } catch { } }
+
+	void ResumeGame()
+	{
+		PlayClickSound();
+		GameManager.EscapeMenuOpen = false;
+	}
+
+	void RestartRun()
+	{
+		PlayClickSound();
+		GameManager.EscapeMenuOpen = false;
+		MenuManager.StartGame( MenuManager.SelectedCharacter, MenuManager.SelectedMap, MenuManager.SelectedTier );
+		LocalGameRunner.Instance?.EndLocalGame();
+	}
+
+	void BackToLobby()
+	{
+		PlayClickSound();
+		GameManager.EscapeMenuOpen = false;
+		LocalGameRunner.Instance?.EndLocalGame();
+	}
 
 	protected override int BuildHash()
 	{
@@ -379,7 +451,8 @@
 			(int)((DragonBoss.Instance?.HPPercent ?? 0f) * 100),
 			w?.Weapons?.Count ?? 0,
 			s?.IsAlive ?? true,
-			(int)GameManager.ReturnToMenuCountdown
+			(int)GameManager.ReturnToMenuCountdown,
+			GameManager.EscapeMenuOpen ? 1 : 0
 		);
 		var tl = LocalTomes;
 		int tomeLevelSum = tl != null ? tl.GetAllLevels().Values.Sum() : 0;

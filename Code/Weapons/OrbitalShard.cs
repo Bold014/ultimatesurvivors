@@ -9,6 +9,8 @@ public sealed class OrbitalShard : Component
 	public float OrbitRadius { get; set; } = 80f;
 	public float OrbitSpeed { get; set; } = 180f;
 	public float Damage { get; set; } = 12f;
+	/// <summary>World-space size of the shard sprite. Hit radius is derived from this.</summary>
+	public float ShardSize { get; set; } = 10f;
 	/// <summary>Weapon that spawned this shard — used to attribute kills for quest tracking.</summary>
 	public string SourceWeaponId { get; set; } = null;
 
@@ -16,13 +18,13 @@ public sealed class OrbitalShard : Component
 	private readonly HashSet<EnemyBase> _hitCooldowns = new();
 	private float _hitResetTimer = 0f;
 	private const float HitCooldown = 0.5f;
+	private SpriteRenderer _renderer;
 
 	protected override void OnStart()
 	{
-		var renderer = Components.Create<ModelRenderer>();
-		renderer.Model = Model.Load( "models/dev/box.vmdl" );
-		renderer.Tint = new Color( 0.7f, 0.55f, 0.3f );
-		GameObject.WorldScale = new Vector3( 0.16f, 0.16f, 0.06f );
+		_renderer = Components.Create<SpriteRenderer>();
+		_renderer.Sprite = ResourceLibrary.Get<Sprite>( "ui/weapons/orbitalshards.sprite" );
+		_renderer.Size = new Vector2( ShardSize, ShardSize );
 	}
 
 	protected override void OnUpdate()
@@ -35,6 +37,9 @@ public sealed class OrbitalShard : Component
 			MathF.Sin( rad ) * OrbitRadius,
 			0f
 		);
+
+		if ( _renderer != null )
+			_renderer.Size = new Vector2( ShardSize, ShardSize );
 
 		// Reset hit cooldowns periodically so the same enemy can be hit again
 		_hitResetTimer += Time.Delta;
@@ -49,14 +54,15 @@ public sealed class OrbitalShard : Component
 
 	private void CheckEnemyHits()
 	{
+		float hitRadius = ShardSize * 0.5f;
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
 			if ( _hitCooldowns.Contains( enemy ) ) continue;
 
 			var dist = (enemy.WorldPosition - WorldPosition).WithZ( 0f ).Length;
-			if ( dist < 20f )
+			if ( dist < hitRadius )
 			{
-				enemy.TakeDamage( Damage, SourceWeaponId, WorldPosition );
+				enemy.TakeDamage( Damage, SourceWeaponId, WorldPosition, knockbackMultiplier: 5f );
 				_hitCooldowns.Add( enemy );
 			}
 		}

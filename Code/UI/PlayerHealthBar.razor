@@ -7,9 +7,12 @@
 		<div class="hp-bg">
 			<div class="hp-fill" style="width: @FillPct%;"></div>
 		</div>
-		<div class="shield-bg">
-			<div class="shield-fill" style="width: @ShieldFillPct%;"></div>
-		</div>
+		@if ( MaxShield > 0f )
+		{
+			<div class="shield-bg">
+				<div class="shield-fill" style="width: @ShieldFillPct%;"></div>
+			</div>
+		}
 	</div>
 </root>
 
@@ -17,9 +20,10 @@
 {
 	public float HPPercent { get; set; } = 1f;
 	public float ShieldPercent { get; set; } = 0f;
+	public float MaxShield { get; set; } = 0f;
 
 	int FillPct => (int)(Math.Clamp( HPPercent, 0f, 1f ) * 100);
 	int ShieldFillPct => (int)(Math.Clamp( ShieldPercent, 0f, 1f ) * 100);
 
-	protected override int BuildHash() => System.HashCode.Combine( FillPct, ShieldFillPct );
+	protected override int BuildHash() => System.HashCode.Combine( FillPct, ShieldFillPct, MaxShield > 0f ? 1 : 0 );
 }

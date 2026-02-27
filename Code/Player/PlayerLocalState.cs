@@ -99,7 +99,7 @@ public sealed class PlayerLocalState : Component
 		Damage = def.BaseDamage;
 		Area = def.BaseArea;
 		CooldownMultiplier = 1f;
-		MagnetRadius = 80f;
+		MagnetRadius = 16f;
 		Luck = 0f;
 		Armor = 0f;
 		HasRevival = false;

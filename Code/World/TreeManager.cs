@@ -38,6 +38,13 @@ public class TreeManager : Component
 	/// <summary>Tree fill % in open fields (sparse stragglers only).</summary>
 	[Property, Range( 0, 100 )] public int OpenDensity { get; set; } = 2;
 
+	/// <summary>
+	/// Chebyshev tile radius around the player spawn tile (0,0) that is guaranteed
+	/// to be free of trees. A value of 3 clears a 7×7-tile area (~224×112 world units)
+	/// so the player can never be boxed in at the start of the run.
+	/// </summary>
+	[Property, Range( 1, 10 )] public int SpawnClearRadius { get; set; } = 3;
+
 	// ── public static state ───────────────────────────────────────────────
 	/// <summary>Tile positions (in tile coordinates) that contain a tree.</summary>
 	public static readonly HashSet<Vector2Int> TreeTiles = new();
@@ -154,6 +161,10 @@ public class TreeManager : Component
 		{
 			for ( int y = startY; y < startY + ChunkSize; y++ )
 			{
+				// Keep a clear area around the player spawn point (tile 0,0 = world origin)
+				if ( Math.Abs( x ) <= SpawnClearRadius && Math.Abs( y ) <= SpawnClearRadius )
+					continue;
+
 				// Two noise octaves: large shape + fine detail
 				float clusterNoise = SmoothNoise( x, y, _noiseSeed, ForestNoiseScale );
 				float detailNoise  = SmoothNoise( x, y, _noiseSeed + 7919, ForestNoiseScale * 0.35f );

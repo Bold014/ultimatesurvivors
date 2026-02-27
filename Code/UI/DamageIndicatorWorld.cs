@@ -13,6 +13,16 @@ public sealed class DamageIndicatorWorld : Component
 
 	public static void Spawn( GameObject trackTarget, Vector3 offset, float amount, bool isCritical )
 	{
+		SpawnInternal( trackTarget, offset, amount, isCritical, false );
+	}
+
+	public static void SpawnHeal( GameObject trackTarget, Vector3 offset, float amount )
+	{
+		SpawnInternal( trackTarget, offset, amount, false, true );
+	}
+
+	private static void SpawnInternal( GameObject trackTarget, Vector3 offset, float amount, bool isCritical, bool isHeal )
+	{
 		var pos = (trackTarget != null && trackTarget.IsValid ? trackTarget.WorldPosition : Vector3.Zero) + offset;
 		// Small Z jitter so overlapping indicators don't occlude each other
 		pos += new Vector3( 0f, 0f, System.Random.Shared.NextSingle() * 6f );
@@ -27,6 +37,7 @@ public sealed class DamageIndicatorWorld : Component
 		var ind = go.Components.Create<DamageIndicator>();
 		ind.Damage = amount;
 		ind.IsCritical = isCritical;
+		ind.IsHeal = isHeal;
 		ind.ManagedExternally = true;
 
 		var tracker = go.Components.Create<DamageIndicatorWorld>();

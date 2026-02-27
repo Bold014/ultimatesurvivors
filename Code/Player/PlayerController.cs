@@ -21,6 +21,9 @@ public sealed class PlayerController : Component
 	private Vector3 _dashDir = Vector3.Forward;
 	private float _dashTime = 0f;
 
+	/// <summary>The last non-zero movement direction pressed by the player. Used by directional weapons like the Sword.</summary>
+	public Vector3 LastMoveDirection { get; private set; } = Vector3.Forward;
+
 	// Sprite animation state
 	private SpriteRenderer _spriteRenderer;
 	private bool _facingRight = true;
@@ -104,12 +107,14 @@ public sealed class PlayerController : Component
 
 		if ( _isDead ) return;
 
-		// Show cursor only when the upgrade panel is open, hide it during normal play
-		Mouse.Visibility = (UpgradeSystem.LocalInstance?.IsShowingUpgrades == true)
-			? MouseVisibility.Visible
-			: MouseVisibility.Hidden;
+		// If the local game is being torn down, stop interfering with cursor/input
+		if ( !LocalGameRunner.IsInLocalGame ) return;
 
-		bool uiOpen = UpgradeSystem.LocalInstance?.IsShowingUpgrades == true;
+		// Show cursor when any UI panel is open, hide it during normal play
+		bool uiOpen = UpgradeSystem.LocalInstance?.IsShowingUpgrades == true
+			|| GameManager.EscapeMenuOpen;
+		Mouse.Visibility = uiOpen ? MouseVisibility.Visible : MouseVisibility.Hidden;
+
 		if ( uiOpen )
 		{
 			UpdateSpriteAnimation( Vector3.Zero );
@@ -149,7 +154,10 @@ public sealed class PlayerController : Component
 		}
 
 		if ( dir.LengthSquared > 0.01f )
-			WorldPosition += dir.Normal * (_state?.Speed ?? 160f) * Time.Delta;
+		{
+			LastMoveDirection = dir.Normal;
+			WorldPosition += LastMoveDirection * (_state?.Speed ?? 160f) * Time.Delta;
+		}
 
 		WorldPosition = WorldPosition.WithZ( 0f );
 
@@ -404,7 +412,7 @@ public sealed class PlayerController : Component
 		_hpBarGo.WorldScale    = new Vector3( 1f, 1f, 1f );
 
 		var wp = _hpBarGo.Components.Create<Sandbox.WorldPanel>();
-		wp.PanelSize = new Vector2( 240f, 44f );
+		wp.PanelSize = new Vector2( 240f, 58f );
 
 		// The Razor PanelComponent renders automatically into the WorldPanel on the same GameObject
 		_hpBar = _hpBarGo.Components.Create<PlayerHealthBar>();
@@ -417,6 +425,7 @@ public sealed class PlayerController : Component
 		// Follow player every frame — 20 units below in screen space (-X = screen-down)
 		_hpBarGo.WorldPosition = WorldPosition + new Vector3( -14f, 0f, 1f );
 		_hpBar.HPPercent = Math.Clamp( _state.HPPercent, 0f, 1f );
+		_hpBar.MaxShield = _state.MaxShield;
 		_hpBar.ShieldPercent = _state.MaxShield > 0f
 			? Math.Clamp( _state.Shield / _state.MaxShield, 0f, 1f )
 			: 0f;

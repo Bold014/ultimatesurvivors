@@ -10,6 +10,7 @@
 {
 	public float Damage { get; set; }
 	public bool IsCritical { get; set; } = false;
+	public bool IsHeal { get; set; } = false;
 	/// <summary>When true, position and lifetime are managed by DamageIndicatorWorld.</summary>
 	public bool ManagedExternally { get; set; }
 
@@ -18,13 +19,17 @@
 
 	// Full opacity for 70% of lifetime, then fade out over the last 30%
 	private float Opacity => Elapsed < Lifetime * 0.7f ? 1f : Math.Clamp( 1f - (Elapsed - Lifetime * 0.7f) / (Lifetime * 0.3f), 0f, 1f );
-	private string DisplayText => IsCritical
-		? $"CRIT {(int)MathF.Ceiling( Damage )}!"
-		: ((int)MathF.Ceiling( Damage )).ToString();
+	private string DisplayText => IsHeal
+		? $"+{(int)MathF.Ceiling( Damage )}"
+		: (IsCritical
+			? $"CRIT {(int)MathF.Ceiling( Damage )}!"
+			: ((int)MathF.Ceiling( Damage )).ToString());
 	private string SizeClass => (IsCritical || Damage >= 30f) ? "big" : "normal";
-	private string TextColor => IsCritical
-		? "rgb(255, 50, 50)"
-		: (Damage >= 50f ? "rgb(255,110,20)" : "rgb(255,220,55)");
+	private string TextColor => IsHeal
+		? "rgb(80, 220, 80)"
+		: (IsCritical
+			? "rgb(255, 50, 50)"
+			: (Damage >= 50f ? "rgb(255,110,20)" : "rgb(255,220,55)"));
 
 	protected override void OnUpdate()
 	{
@@ -36,5 +41,5 @@
 			GameObject.Destroy();
 	}
 
-	protected override int BuildHash() => System.HashCode.Combine( (int)(Elapsed * 15), IsCritical, (int)Damage );
+	protected override int BuildHash() => System.HashCode.Combine( (int)(Elapsed * 15), IsCritical, IsHeal, (int)Damage );
 }

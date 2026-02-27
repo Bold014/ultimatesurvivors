@@ -34,13 +34,12 @@ public sealed class AxeWeapon : WeaponBase
 		var go = new GameObject( true, "Projectile_Axe" );
 		go.WorldPosition = WorldPosition;
 
-		var proj = go.Components.Create<Projectile>();
-		proj.Direction = dir;
-		proj.Speed = 230f;
+		var proj = go.Components.Create<AxeProjectile>();
+		proj.ThrowDirection = dir;
+		proj.Speed = 280f * _state.ProjectileSpeedMultiplier;
 		proj.Damage = _state.Damage * GetDamageMultiplier();
-		proj.Lifetime = 3.2f * _state.DurationMultiplier;
+		proj.TravelTime = 1.6f * _state.DurationMultiplier;
 		proj.Piercing = WeaponLevel >= 4;
-		proj.TintColor = new Color( 1f, 0.55f, 0.1f );
 		proj.SourceWeaponId = WeaponId;
 	}
 

@@ -20,6 +20,10 @@ public sealed class LevelUpBeacon : Component
 	private static readonly Color BaseColor    = new Color( 0.3f, 0.5f, 1f );
 	private static readonly Color ChargingColor = new Color( 0.6f, 0.8f, 1f );
 
+	static SoundEvent ChargeSound = new( "sounds/beacon_charge.mp3" );
+	private SoundHandle _chargeHandle;
+	private bool _wasPlayerNearby = false;
+
 	protected override void OnStart()
 	{
 		var spriteGo = new GameObject( true, "ShrineSprite" );
@@ -57,6 +61,18 @@ public sealed class LevelUpBeacon : Component
 		float dist = (player.WorldPosition - WorldPosition).WithZ( 0f ).Length;
 		IsPlayerNearby = dist < ChargeRadius;
 
+		if ( IsPlayerNearby && !_wasPlayerNearby )
+		{
+			// Player just entered — start charge sound
+			try { _chargeHandle = Sound.Play( ChargeSound ); } catch { }
+		}
+		else if ( !IsPlayerNearby && _wasPlayerNearby )
+		{
+			// Player just left — stop and reset charge sound
+			try { _chargeHandle.Stop(); } catch { }
+		}
+		_wasPlayerNearby = IsPlayerNearby;
+
 		float chargeRate = 1f / ChargeTime;
 
 		if ( IsPlayerNearby )
@@ -81,10 +97,17 @@ public sealed class LevelUpBeacon : Component
 		IsActive = false;
 		IsPlayerNearby = false;
 
+		try { _chargeHandle.Stop(); } catch { }
+
 		var upgradeSystem = playerGo.Components.Get<UpgradeSystem>();
 		upgradeSystem?.TriggerShrineReward();
 
 		GameObject.Destroy();
+	}
+
+	protected override void OnDestroy()
+	{
+		try { _chargeHandle.Stop(); } catch { }
 	}
 
 	private void UpdateVisuals()

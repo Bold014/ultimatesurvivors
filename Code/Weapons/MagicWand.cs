@@ -39,7 +39,7 @@ public sealed class MagicWand : WeaponBase
 
 		var proj = go.Components.Create<Projectile>();
 		proj.Direction = dir;
-		proj.Speed = WeaponLevel >= 4 ? 204f : 170f;
+		proj.Speed = (WeaponLevel >= 4 ? 204f : 170f) * _state.ProjectileSpeedMultiplier;
 		proj.Damage = _state.Damage * GetDamageMultiplier();
 		proj.Lifetime = 2.5f * _state.DurationMultiplier;
 		proj.Piercing = WeaponLevel >= 5;

@@ -13,6 +13,14 @@ public sealed class LocalGameRunner : Component
 
 	private GameObject _localGameRoot;
 
+	// Snapshot of scene-root objects taken just before cloning the game prefab.
+	// Anything NOT in this set that appears at the scene root during gameplay was
+	// spawned by game code (enemies, player, gems, map, projectiles, etc.) and must
+	// be explicitly destroyed when the game ends, because those objects are created
+	// with plain `new GameObject(...)` which parents them to the scene root rather
+	// than to _localGameRoot.
+	private HashSet<GameObject> _preGameRootObjects;
+
 	// Track objects we disabled so we can re-enable them even after they are inactive
 	// (Scene.GetAllComponents skips disabled GameObjects, so we must hold explicit refs).
 	private readonly List<GameObject> _disabledObjects = new();
@@ -42,6 +50,10 @@ public sealed class LocalGameRunner : Component
 			Log.Warning( "LocalGameRunner: GamePrefab not set. Assign prefabs/game_run in the inspector, then save the scene (Ctrl+S)." );
 			return;
 		}
+
+		// Snapshot scene-root objects before cloning so we can clean up orphans on end.
+		_preGameRootObjects = new HashSet<GameObject>(
+			Scene.Children.OfType<GameObject>().Where( g => g.IsValid() ) );
 
 		_localGameRoot = GamePrefab.Clone( Vector3.Zero );
 		int childCount = _localGameRoot?.Children?.Count ?? 0;
@@ -77,8 +89,30 @@ public sealed class LocalGameRunner : Component
 
 	public void EndLocalGame()
 	{
+		// Stop game audio explicitly before destroy — deferred destruction would otherwise
+		// let the game's MusicManager keep playing until end-of-frame.
+		if ( _localGameRoot != null )
+		{
+			foreach ( var music in _localGameRoot.Components.GetAll<MusicManager>( FindMode.EverythingInDescendants ).ToList() )
+				music.Stop();
+		}
+
 		_localGameRoot?.Destroy();
 		_localGameRoot = null;
+
+		// Destroy every scene-root object that wasn't there before the game started.
+		// This catches all runtime-spawned objects (player, enemies, gems, map tiles,
+		// projectiles, chests, damage indicators, etc.) that use `new GameObject()`
+		// without setting a parent and therefore land at the scene root.
+		if ( _preGameRootObjects != null )
+		{
+			foreach ( var go in Scene.Children.OfType<GameObject>().ToList() )
+			{
+				if ( go.IsValid() && !_preGameRootObjects.Contains( go ) )
+					go.Destroy();
+			}
+			_preGameRootObjects = null;
+		}
 
 		// Re-enable every object we disabled — use stored refs because GetAllComponents
 		// skips disabled GameObjects and would miss them.

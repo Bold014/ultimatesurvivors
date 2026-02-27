@@ -11,7 +11,7 @@ public sealed class ChatComponent : Component
 	{
 		public string PlayerName { get; set; }
 		public string Text { get; set; }
-		public Color NameColor { get; set; } = new Color( 0.2f, 0.9f, 1f );
+		public Color NameColor { get; set; } = Color.White;
 	}
 
 	public List<ChatMessage> Messages { get; } = new();
@@ -45,7 +45,7 @@ public sealed class ChatComponent : Component
 		{
 			PlayerName = playerName,
 			Text = text,
-			NameColor = nameColor ?? new Color( 0.2f, 0.9f, 1f )
+			NameColor = nameColor ?? Color.White
 		} );
 
 		if ( Messages.Count > 50 )

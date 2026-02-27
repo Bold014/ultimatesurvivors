@@ -12,6 +12,9 @@ public sealed class GameManager : Component
 	/// <summary>Seconds until return to menu (for death screen countdown). 0 when not returning.</summary>
 	public static float ReturnToMenuCountdown { get; private set; } = 0f;
 
+	/// <summary>True while the in-game escape/pause menu is open.</summary>
+	public static bool EscapeMenuOpen { get; set; } = false;
+
 	private bool _welcomeSent           = false;
 	private float _welcomeDelay         = 1.5f;
 	private bool _runEnded              = false;
@@ -113,6 +116,7 @@ public sealed class GameManager : Component
 		ChatComponent.Instance?.AddMessage( "System", $"+{gold} gold for defeating the final boss!", new Color( 1f, 0.85f, 0.2f ) );
 
 		// Victory — return to menu
+		EscapeMenuOpen     = false;
 		_runEnded          = true;
 		_returnToMenuDelay = 8f;
 		ChatComponent.Instance?.AddMessage( "System", "Victory! Returning to menu...", new Color( 0.4f, 1f, 0.4f ) );
@@ -173,6 +177,7 @@ public sealed class GameManager : Component
 			PlayerProgress.RecordRunResult( result );
 		}
 
+		EscapeMenuOpen     = false;
 		_runEnded          = true;
 		_returnToMenuDelay = 8f;
 		ChatComponent.Instance?.AddMessage( "System", "All players defeated. Returning to menu...", new Color( 1f, 0.4f, 0.4f ) );
