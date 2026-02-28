@@ -1,15 +1,15 @@
 /// <summary>
 /// Spawns Chests and LevelUpBeacons throughout the run.
-/// On start: spawns 2 chests + 1 beacon.
-/// Every 2 minutes: spawns 1 more chest.
-/// Every 3 minutes: spawns 1 more beacon.
+/// On start: spawns 3 chests + 2 beacons.
+/// Every 1 minute: spawns 1 more chest.
+/// Every 1.5 minutes: spawns 1 more beacon.
 /// </summary>
 public sealed class WorldObjectSpawner : Component
 {
 	private EnemySpawner _spawner;
 	private Random       _rand;
-	private int          _chestsSpawned  = 2;   // 2 spawned in OnStart
-	private int          _beaconsSpawned = 1;   // 1 spawned in OnStart
+	private int          _chestsSpawned  = 3;   // 3 spawned in OnStart
+	private int          _beaconsSpawned = 2;   // 2 spawned in OnStart
 
 	private const float SpawnMinDist = 200f;
 	private const float SpawnMaxDist = 400f;
@@ -25,9 +25,10 @@ public sealed class WorldObjectSpawner : Component
 		foreach ( var beacon in Scene.GetAllComponents<LevelUpBeacon>().ToList() )
 			beacon.GameObject.Destroy();
 
-		for ( int i = 0; i < 2; i++ )
+		for ( int i = 0; i < 3; i++ )
 			SpawnChest();
-		SpawnBeacon();
+		for ( int i = 0; i < 2; i++ )
+			SpawnBeacon();
 	}
 
 	protected override void OnUpdate()
@@ -35,8 +36,8 @@ public sealed class WorldObjectSpawner : Component
 		if ( _spawner == null ) return;
 
 		float runMinutes = _spawner.RunTime / 60f;
-		int targetChests  = 2 + (int)(runMinutes / 2f);   // 2 initial + 1 per 2 min
-		int targetBeacons = 1 + (int)(runMinutes / 3f);   // 1 initial + 1 per 3 min
+		int targetChests  = 3 + (int)(runMinutes / 1f);    // 3 initial + 1 per 1 min
+		int targetBeacons = 2 + (int)(runMinutes / 1.5f); // 2 initial + 1 per 1.5 min
 
 		while ( _chestsSpawned < targetChests )
 		{
@@ -68,15 +69,23 @@ public sealed class WorldObjectSpawner : Component
 		go.Components.Create<LevelUpBeacon>();
 	}
 
+	private Vector3 PlayerPosition()
+	{
+		var player = Scene.GetAllComponents<PlayerController>().FirstOrDefault();
+		return player?.WorldPosition ?? Vector3.Zero;
+	}
+
 	private Vector3 RandomSpawnPosition()
 	{
+		var center = PlayerPosition();
+
 		for ( int attempt = 0; attempt < 10; attempt++ )
 		{
 			float angle = (float)(_rand.NextDouble() * 360.0);
 			float dist  = SpawnMinDist + (float)(_rand.NextDouble() * (SpawnMaxDist - SpawnMinDist));
 			var pos = new Vector3(
-				MathF.Cos( angle * MathF.PI / 180f ) * dist,
-				MathF.Sin( angle * MathF.PI / 180f ) * dist,
+				center.x + MathF.Cos( angle * MathF.PI / 180f ) * dist,
+				center.y + MathF.Sin( angle * MathF.PI / 180f ) * dist,
 				0f );
 
 			if ( !TreeManager.IsTreeAtWorldPos( pos.x, pos.y ) &&
@@ -89,8 +98,8 @@ public sealed class WorldObjectSpawner : Component
 		float a = (float)(_rand.NextDouble() * 360.0);
 		float d = SpawnMinDist + (float)(_rand.NextDouble() * (SpawnMaxDist - SpawnMinDist));
 		return new Vector3(
-			MathF.Cos( a * MathF.PI / 180f ) * d,
-			MathF.Sin( a * MathF.PI / 180f ) * d,
+			center.x + MathF.Cos( a * MathF.PI / 180f ) * d,
+			center.y + MathF.Sin( a * MathF.PI / 180f ) * d,
 			0f );
 	}
 }
