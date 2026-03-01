@@ -70,12 +70,12 @@
 							NEW WEAPON
 						</div>
 					}
-					else if ( isWeapon )
-					{
-						<div style="background: #1a1400; border: 1px solid #c8a800; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #f5c518; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
-							WEAPON
-						</div>
-					}
+				else if ( isWeapon )
+				{
+					<div style="background: #1a1400; border: 1px solid #c8a800; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #f5c518; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+						WEAPON LVL @(upgrade.NextLevel - 1) > @upgrade.NextLevel / @WeaponBase.MaxWeaponLevel
+					</div>
+				}
 					else if ( source == UpgradeSystem.RewardSource.Chest )
 					{
 						<div style="background: #0d0d20; border: 1px solid #7755cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #aa88ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
@@ -86,7 +86,7 @@
 					{
 						var prevLevel = upgrade.NextLevel - 1;
 						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
-							TOME  LVL @prevLevel → @upgrade.NextLevel / @upgrade.MaxLevel
+							TOME LVL @prevLevel > @upgrade.NextLevel / @upgrade.MaxLevel
 						</div>
 					}
 					else

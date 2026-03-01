@@ -14,7 +14,7 @@ using System.Linq;
 public class MapSpawner : Component
 {
 	[Property] public string GroundTilesetPath { get; set; } = "scenes/forestlevelone.tileset";
-	[Property] public string TreeTilesetPath { get; set; } = "scenes/trees.tileset";
+	[Property] public string DetailsTilesetPath { get; set; } = "scenes/details.tileset";
 
 	int _framesWaited;
 	bool _spawned;
@@ -45,24 +45,28 @@ public class MapSpawner : Component
 		}
 
 		var groundRes = ResourceLibrary.Get<TilesetResource>( GroundTilesetPath );
-		var treeRes = ResourceLibrary.Get<TilesetResource>( TreeTilesetPath );
+		var detailsRes = ResourceLibrary.Get<TilesetResource>( DetailsTilesetPath );
 
 		if ( groundRes == null )
 		{
 			Log.Warning( $"[MapSpawner] Ground tileset not found: {GroundTilesetPath}" );
 			return;
 		}
-		if ( treeRes == null )
+		if ( detailsRes == null )
 		{
-			Log.Warning( $"[MapSpawner] Tree tileset not found: {TreeTilesetPath}" );
+			Log.Warning( $"[MapSpawner] Details tileset not found: {DetailsTilesetPath}" );
 			return;
 		}
 
-		// Parent to prefab/scene root so Map and Trees are in the same scene as the player.
-		// GameObject.Parent = inner game_run's parent = prefab root (when loaded from game.scene).
-		var parent = GameObject.Parent as GameObject;
+		// Prefer the local run container so map/details are scoped to the active local game instance.
+		// Fall back to current object hierarchy for non-local/editor contexts.
+		var parent = LocalGameRunner.GetRuntimeParent();
 		if ( parent == null || !parent.IsValid() )
-			parent = GameObject;
+		{
+			parent = GameObject.Parent as GameObject;
+			if ( parent == null || !parent.IsValid() )
+				parent = GameObject;
+		}
 
 		// Ground map
 		var mapGo = new GameObject( true, "Map" );
@@ -82,17 +86,16 @@ public class MapSpawner : Component
 		// Ground tile: user (4,4) → tileset (4,0) = plain dirt/ground
 		mapGen.GroundColumn = 4;
 		mapGen.GroundRow = 0;
-		mapGen.GroundAngle = 270;
-		// Variants: user (col, row) → tileset (col, 4-row), angle=90 to correct orientation
+		// Variants: user (col, row) → tileset (col, 4-row)
 		// Flowers: (1,0-4), (2,1-4)   Grass: (5,1-4)
 		mapGen.VariantPositions = new List<string>
 		{
 			// Flowers col 1 — user rows 0–4 → tileset rows 4–0
-			"1,4,270", "1,3,270", "1,2,270", "1,1,270", "1,0,270",
+			"1,4", "1,3", "1,2", "1,1", "1,0",
 			// Flowers col 2 — user rows 1–4 → tileset rows 3–0
-			"2,3,270", "2,2,270", "2,1,270", "2,0,270",
+			"2,3", "2,2", "2,1", "2,0",
 			// Grass col 5 — user rows 1–4 → tileset rows 3–0
-			"5,3,270", "5,2,270", "5,1,270", "5,0,270",
+			"5,3", "5,2", "5,1", "5,0",
 		};
 		// Flower/grass variant patches — concentrated in noise-defined areas
 		mapGen.PatchNoiseScale = 8f;
@@ -100,26 +103,34 @@ public class MapSpawner : Component
 		mapGen.PatchVariantPercent = 35;
 		mapGen.SparseVariantPercent = 2;
 
-		// Trees
-		var treesGo = new GameObject( true, "Trees" );
-		treesGo.SetParent( parent );
-		treesGo.WorldPosition = Vector3.Zero;
+		// Details (trees) — slight Z offset so trees render on top of ground
+		var detailsGo = new GameObject( true, "Details" );
+		detailsGo.SetParent( parent );
+		detailsGo.WorldPosition = new Vector3( 0, 0, 1 );
 
-		var treeTileset = treesGo.Components.Create<TilesetComponent>();
-		treeTileset.Layers = new List<TilesetComponent.Layer>
+		var detailsTileset = detailsGo.Components.Create<TilesetComponent>();
+		detailsTileset.Layers = new List<TilesetComponent.Layer>
 		{
-			new TilesetComponent.Layer( "Trees" ) { TilesetResource = treeRes }
+			new TilesetComponent.Layer( "Details" ) { TilesetResource = detailsRes },
+			new TilesetComponent.Layer( "DetailsTop" ) { TilesetResource = detailsRes }
 		};
-		treeTileset.Layers[0].TilesetComponent = treeTileset;
+		detailsTileset.Layers[0].TilesetComponent = detailsTileset;
+		detailsTileset.Layers[1].TilesetComponent = detailsTileset;
 
-		var treeMgr = treesGo.Components.Create<TreeManager>();
-		treeMgr.TreeTileset = treeTileset;
-		treeMgr.LayerIndex = 0;
-		treeMgr.ForestNoiseScale = 10f;
-		treeMgr.ForestThreshold = 0.38f;
-		treeMgr.ForestDensity = 45;
-		treeMgr.EdgeDensity = 10;
-		treeMgr.OpenDensity = 2;
+		var detailsMgr = detailsGo.Components.Create<DetailsManager>();
+		detailsMgr.DetailsTileset = detailsTileset;
+		detailsMgr.LayerIndex = 0;
+		detailsMgr.ForestNoiseScale = 16f;    // medium forest structures
+		detailsMgr.ForestThreshold = 0.45f;   // ~50% higher cluster activation rate
+		detailsMgr.ForestCoreDensity = 28;    // 50% lower core fill
+		detailsMgr.ForestEdgeDensity = 12;    // 50% lower edge fill
+		detailsMgr.OpenFieldDensity = 1;      // very sparse stragglers
+		detailsMgr.ForestSmoothingPasses = 1; // smooth tiny artifacts from breakup
+		detailsMgr.BreakupNoiseScale = 10f;   // broader breakup, less speckle
+		detailsMgr.BreakupThreshold = 0.66f;  // breakup only in high breakup-noise zones
+		detailsMgr.BreakupPercent = 22;       // light breakup to keep natural clusters
+		detailsMgr.SingleTreeDensity = 5;     // ~60% higher individual-tree spawn rate (from default 3)
+		detailsMgr.InvertY = true;            // S&box Z-up: tile y+1 = above on screen
 
 		_spawned = true;
 		Log.Info( $"[MapSpawner] Map spawned at runtime. Map and Trees parented to {parent?.Name ?? "?"}." );

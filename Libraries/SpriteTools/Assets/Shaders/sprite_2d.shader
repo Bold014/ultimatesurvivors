@@ -140,7 +140,8 @@ PS
 		float l_20 = smoothstep( l_18, l_19, l_6.a );
 		float l_21 = saturate( l_20 );
 		
-		m.Albedo = l_17;
+		m.Albedo = float3( 0, 0, 0 );
+		m.Emission = l_17;
 		m.Opacity = l_21;
 		m.Roughness = 1;
 		m.Metalness = 0;

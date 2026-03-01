@@ -26,7 +26,8 @@ public sealed class PlayerStats : Component
 
 	protected override void OnStart()
 	{
-		LocalInstance = this;
+		if ( !IsProxy )
+			LocalInstance = this;
 	}
 
 	protected override void OnDestroy()

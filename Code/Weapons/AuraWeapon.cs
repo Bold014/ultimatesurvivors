@@ -27,8 +27,8 @@ public sealed class AuraWeapon : WeaponBase
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
 			var dist = (enemy.WorldPosition - WorldPosition).WithZ( 0f ).Length;
-			// Damage if touching the circle (enemy bounds overlap with circle edge)
-			if ( dist <= radius + enemy.HalfExtent )
+			// Use projectile hit radius so damage matches visible sprite bounds.
+			if ( dist <= radius + enemy.ProjectileHitRadius )
 				enemy.TakeDamage( damage, WeaponId, WorldPosition );
 		}
 	}

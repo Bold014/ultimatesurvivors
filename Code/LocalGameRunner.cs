@@ -12,6 +12,7 @@ public sealed class LocalGameRunner : Component
 	[Property] public GameObject GamePrefab { get; set; }
 
 	private GameObject _localGameRoot;
+	private GameObject _runtimeEntitiesRoot;
 
 	// Snapshot of scene-root objects taken just before cloning the game prefab.
 	// Anything NOT in this set that appears at the scene root during gameplay was
@@ -37,6 +38,57 @@ public sealed class LocalGameRunner : Component
 			Instance = null;
 	}
 
+	/// <summary>
+	/// Returns the cloned local game root for this client's active run, if any.
+	/// </summary>
+	public static GameObject GetLocalGameRoot()
+	{
+		var instance = Instance;
+		if ( instance == null ) return null;
+		if ( instance._localGameRoot != null && instance._localGameRoot.IsValid() )
+			return instance._localGameRoot;
+		return null;
+	}
+
+	/// <summary>
+	/// Returns the active runtime parent for dynamically spawned gameplay entities.
+	/// In local runs this is the RuntimeEntities container under the cloned game root.
+	/// Returns null when no local run is active so callers can safely fall back.
+	/// </summary>
+	public static GameObject GetRuntimeParent()
+	{
+		var instance = Instance;
+		if ( instance == null ) return null;
+
+		if ( instance._runtimeEntitiesRoot != null && instance._runtimeEntitiesRoot.IsValid() )
+			return instance._runtimeEntitiesRoot;
+
+		if ( instance._localGameRoot != null && instance._localGameRoot.IsValid() )
+			return instance._localGameRoot;
+
+		return null;
+	}
+
+	/// <summary>
+	/// Parents a runtime-spawned object under the local run hierarchy, preserving world transform.
+	/// No-op when no local run is active.
+	/// </summary>
+	public static void ParentRuntimeObject( GameObject go )
+	{
+		if ( go == null || !go.IsValid() ) return;
+
+		var parent = GetRuntimeParent();
+		if ( parent == null || !parent.IsValid() ) return;
+
+		var worldPosition = go.WorldPosition;
+		var worldRotation = go.WorldRotation;
+		var worldScale = go.WorldScale;
+		go.SetParent( parent );
+		go.WorldPosition = worldPosition;
+		go.WorldRotation = worldRotation;
+		go.WorldScale = worldScale;
+	}
+
 	public void StartLocalGame()
 	{
 		if ( _localGameRoot != null )
@@ -56,6 +108,9 @@ public sealed class LocalGameRunner : Component
 			Scene.Children.OfType<GameObject>().Where( g => g.IsValid() ) );
 
 		_localGameRoot = GamePrefab.Clone( Vector3.Zero );
+		_runtimeEntitiesRoot = new GameObject( true, "RuntimeEntities" );
+		_runtimeEntitiesRoot.SetParent( _localGameRoot );
+		_runtimeEntitiesRoot.LocalPosition = Vector3.Zero;
 		int childCount = _localGameRoot?.Children?.Count ?? 0;
 		Log.Info( $"[LocalGameRunner] Prefab cloned. Root={_localGameRoot?.Name}, Children={childCount}" );
 		// Do NOT call _localGameRoot.NetworkSpawn() — keeps it client-only
@@ -99,6 +154,7 @@ public sealed class LocalGameRunner : Component
 
 		_localGameRoot?.Destroy();
 		_localGameRoot = null;
+		_runtimeEntitiesRoot = null;
 
 		// Destroy every scene-root object that wasn't there before the game started.
 		// This catches all runtime-spawned objects (player, enemies, gems, map tiles,

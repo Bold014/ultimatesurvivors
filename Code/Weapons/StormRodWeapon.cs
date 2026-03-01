@@ -28,7 +28,11 @@ public sealed class StormRodWeapon : WeaponBase
 		var myPos = WorldPosition.WithZ( 0f );
 		var nearbyEnemies = Scene.GetAllComponents<EnemyBase>()
 			.Where( e => e.HP > 0f )
-			.Where( e => (e.WorldPosition.WithZ( 0f ) - myPos).LengthSquared <= MaxTargetRange * MaxTargetRange )
+			.Where( e =>
+			{
+				float targetRange = MaxTargetRange + e.ProjectileHitRadius;
+				return (e.WorldPosition.WithZ( 0f ) - myPos).LengthSquared <= targetRange * targetRange;
+			} )
 			.ToList();
 
 		if ( nearbyEnemies.Count == 0 ) return;
@@ -50,6 +54,7 @@ public sealed class StormRodWeapon : WeaponBase
 	{
 		var go = new GameObject( true, "Lightning_StormRod" );
 		go.WorldPosition = position;
+		LocalGameRunner.ParentRuntimeObject( go );
 
 		var strike = go.Components.Create<LightningStrike>();
 		strike.Damage = damage;

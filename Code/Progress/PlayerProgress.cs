@@ -129,6 +129,7 @@ public static class PlayerProgress
 		Data.Coins += result.GoldEarned;
 
 		Data.TotalKills += result.Kills;
+		Data.TotalRunsPlayed += 1;
 		Data.TotalRunsCompleted += result.Completed ? 1 : 0;
 		Data.TotalDeaths += result.Died ? 1 : 0;
 		Data.TotalChestsPurchased += result.ChestsOpenedThisRun;
@@ -184,30 +185,45 @@ public static class PlayerProgress
 		// Sync quest progress from cumulative stats
 		SyncQuestProgress();
 		Save();
-		SyncStatsToBackend();
+		SyncStatsToBackend( result.Kills, Data.LongestSurvivalMinutes );
+		Data.SurvivalStatSynced = Data.LongestSurvivalMinutes;
 	}
 
-	private static void SyncStatsToBackend()
+	// Pulled from SaveData on first use so the delta is correct across game sessions.
+	// Without persistence, every new session would re-submit the full personal best,
+	// inflating the stat by the full amount on every run.
+	private static int _lastSyncedLongestSurvival => Data.SurvivalStatSynced;
+
+	private static void TrySetStat( string name, long value )
+	{
+		try { Sandbox.Services.Stats.SetValue( name, value ); }
+		catch { /* stat may not be registered in editor/offline builds */ }
+	}
+
+	private static void SyncStatsToBackend( int killsDelta = 0, int currentBestSurvival = 0 )
 	{
 		if ( Connection.Local == null ) return;
-		try
-		{
-			Sandbox.Services.Stats.SetValue( "total_kills", Data.TotalKills );
-			Sandbox.Services.Stats.SetValue( "runs_completed", Data.TotalRunsCompleted );
-			Sandbox.Services.Stats.SetValue( "longest_survival", Data.LongestSurvivalMinutes );
-		}
-		catch { /* Stats may fail in editor or offline */ }
+		TrySetStat( "total_kills",    Data.TotalKills );
+		TrySetStat( "runs_played",    Data.TotalRunsPlayed );
+		TrySetStat( "runs_completed", Data.TotalRunsCompleted );
+		// Send only the improvement delta so Sum-type stats accumulate to the exact personal best.
+		// e.g. previous best 4m → new best 10m → submit 6, stat goes 4→10 correctly.
+		int survivalDelta = currentBestSurvival - _lastSyncedLongestSurvival;
+		if ( survivalDelta > 0 )
+			TrySetStat( "best_survival", survivalDelta );
 	}
 
 	/// <summary>Resets leaderboard stats to 0 and syncs to Steam. For dev use only.</summary>
 	public static void ResetLeaderboardStats()
 	{
 		Data.TotalKills = 0;
+		Data.TotalRunsPlayed = 0;
 		Data.TotalRunsCompleted = 0;
 		Data.LongestSurvivalMinutes = 0;
+		Data.SurvivalStatSynced = 0;
 		SyncQuestProgress();
 		Save();
-		SyncStatsToBackend();
+		SyncStatsToBackend( killsDelta: 0, currentBestSurvival: 0 );
 	}
 
 	private static void SyncQuestProgress()
@@ -256,9 +272,13 @@ public class SaveData
 
 	// Cumulative stats for quest tracking
 	public int TotalKills { get; set; } = 0;
+	public int TotalRunsPlayed { get; set; } = 0;
 	public int TotalRunsCompleted { get; set; } = 0;
 	public int HighestLevelReached { get; set; } = 0;
 	public int LongestSurvivalMinutes { get; set; } = 0;
+	/// <summary>The value last submitted to the best_survival stat. Persisted so the
+	/// delta calculation stays correct across game sessions.</summary>
+	public int SurvivalStatSynced { get; set; } = 0;
 	public Dictionary<string, int> KillsByCharacter { get; set; } = new();
 
 	// New stats for Megabonk-style unlock conditions

@@ -4,8 +4,10 @@
 /// </summary>
 public sealed class CameraSetup : Component
 {
+	[Property] public float CameraYaw { get; set; } = 90f;
+
 	protected override void OnStart()
 	{
-		WorldRotation = Rotation.From( new Angles( 90f, 0f, 0f ) );
+		WorldRotation = Rotation.From( new Angles( 90f, CameraYaw, 0f ) );
 	}
 }

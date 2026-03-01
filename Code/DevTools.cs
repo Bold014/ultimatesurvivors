@@ -27,7 +27,36 @@ public static class DevTools
 	{
 		if ( !IsDev() ) return;
 		PlayerProgress.ResetLeaderboardStats();
-		Log.Info( "[DevTools] Leaderboard stats reset to 0 (total_kills, runs_completed, longest_survival)" );
+		Log.Info( "[DevTools] Leaderboard stats reset to 0 (total_kills, runs_played, best_survival)" );
+	}
+
+	[ConCmd( "dev_debugtrees" )]
+	public static void ToggleTreeDebug()
+	{
+		if ( !IsDev() ) return;
+		var mgr = GameManager.Instance?.Scene?.GetAllComponents<DetailsManager>().FirstOrDefault();
+		if ( mgr == null )
+		{
+			Log.Warning( "dev_debugtrees: No DetailsManager found." );
+			return;
+		}
+		mgr.DebugEdgeOverflow = !mgr.DebugEdgeOverflow;
+		Log.Info( $"[DevTools] DetailsManager.DebugEdgeOverflow = {mgr.DebugEdgeOverflow}" );
+	}
+
+	[ConCmd( "dev_inverty" )]
+	public static void ToggleInvertY()
+	{
+		if ( !IsDev() ) return;
+		var mgr = GameManager.Instance?.Scene?.GetAllComponents<DetailsManager>().FirstOrDefault();
+		if ( mgr == null )
+		{
+			Log.Warning( "dev_inverty: No DetailsManager found." );
+			return;
+		}
+		mgr.InvertY = !mgr.InvertY;
+		mgr.ForceRegenerateChunks();
+		Log.Info( $"[DevTools] DetailsManager.InvertY = {mgr.InvertY} — trees regenerating." );
 	}
 
 	[ConCmd( "dev_spawndragon" )]

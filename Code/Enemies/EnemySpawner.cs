@@ -267,7 +267,7 @@ public sealed class EnemySpawner : Component
 		_waveEnemies.Add( go );
 	}
 
-	private (GameObject go, EnemyBase enemy) CreateEnemyAtRandomOffset( float minDist = 380f, float maxDist = 460f )
+	private (GameObject go, EnemyBase enemy) CreateEnemyAtRandomOffset( float minDist = 200f, float maxDist = 280f )
 	{
 		float angle = (float)(_rand.NextDouble() * 360.0);
 		float dist  = minDist + (float)(_rand.NextDouble() * (maxDist - minDist));
@@ -278,6 +278,7 @@ public sealed class EnemySpawner : Component
 
 		var go = new GameObject( true, "Enemy" );
 		go.WorldPosition = (WorldPosition + offset).WithZ( 0f );
+		LocalGameRunner.ParentRuntimeObject( go );
 		var enemy = go.Components.Create<EnemyBase>();
 		enemy.Target = GameObject;
 		return (go, enemy);

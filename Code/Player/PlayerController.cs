@@ -5,6 +5,7 @@
 public sealed class PlayerController : Component
 {
 	[Property] public string SelectedCharacter { get; set; } = "Archer";
+	[Property] public float CameraYaw { get; set; } = 90f;
 
 	private PlayerLocalState _state;
 	private PlayerStats _stats;
@@ -149,31 +150,51 @@ public sealed class PlayerController : Component
 	// Sprite is 32×32 world units (scale 2) but the character body doesn't fill the full tile.
 	// 8 units (¼ of sprite width) gives a snug inner hitbox that matches the visible body.
 	private const float PlayerHalfExtent = 8f;
+	// Slightly smaller body used only against trees so narrow visual gaps stay traversable.
+	private const float PlayerTreeHalfExtent = 7f;
+
+	// Map boundary: 100 tiles × tile size in each axis.
+	private const float MapHalfExtentX = 3200f; // 100 × 32 units
+	private const float MapHalfExtentY = 1600f; // 100 × 16 units
 	/// <summary>Tighter hitbox for player-enemy collisions only. Reduces padding so contact feels closer to the sprite.</summary>
 	private const float PlayerEnemyHalfExtent = 1f;
+	/// <summary>Chest collision half-extent used for player push-out.</summary>
+	private const float ChestCollisionHalfExtent = 10f;
 	/// <summary>Effective mass for collision push. Higher = player pushes enemies more, gets pushed less.</summary>
 	private const float PlayerMass = 3f;
 
+	private static Vector3 RotateScreenDirToWorld( Vector3 screenDir, float yawDegrees ) =>
+		Rotation.FromAxis( Vector3.Up, yawDegrees ) * screenDir;
+
+	private Rotation GetTopDownUiRotation()
+	{
+		var cam = Scene?.Camera;
+		return cam != null
+			? cam.WorldRotation
+			: Rotation.From( new Angles( 90f, CameraYaw, 0f ) );
+	}
+
 	private void HandleMovement()
 	{
-		var dir = Vector3.Zero;
+		var screenDir = Vector3.Zero;
 
 		// Try Input.Down first (reliable once InputActions are loaded in .sbproj)
-		if ( Input.Down( "forward" ) )  dir.x += 1f;
-		if ( Input.Down( "backward" ) ) dir.x -= 1f;
-		if ( Input.Down( "right" ) )    dir.y -= 1f;
-		if ( Input.Down( "left" ) )     dir.y += 1f;
+		if ( Input.Down( "forward" ) )  screenDir.x += 1f;
+		if ( Input.Down( "backward" ) ) screenDir.x -= 1f;
+		if ( Input.Down( "right" ) )    screenDir.y -= 1f;
+		if ( Input.Down( "left" ) )     screenDir.y += 1f;
 
 		// Fall back to AnalogMove if actions aren't registering yet
-		if ( dir.LengthSquared < 0.01f )
+		if ( screenDir.LengthSquared < 0.01f )
 		{
 			var m = Input.AnalogMove;
-			dir = new Vector3( m.y, -m.x, 0f );
+			screenDir = new Vector3( m.y, -m.x, 0f );
 		}
 
-		if ( dir.LengthSquared > 0.01f )
+		if ( screenDir.LengthSquared > 0.01f )
 		{
-			LastMoveDirection = dir.Normal;
+			var worldDir = RotateScreenDirToWorld( screenDir.Normal, CameraYaw );
+			LastMoveDirection = worldDir;
 			WorldPosition += LastMoveDirection * (_state?.Speed ?? 160f) * Time.Delta;
 		}
 
@@ -187,7 +208,14 @@ public sealed class PlayerController : Component
 		WorldPosition = WorldPosition.WithZ( 0f );
 
 		ResolveWorldObjectCollisions();
-		UpdateSpriteAnimation( dir );
+
+		var p = WorldPosition;
+		WorldPosition = new Vector3(
+			Math.Clamp( p.x, -MapHalfExtentX, MapHalfExtentX ),
+			Math.Clamp( p.y, -MapHalfExtentY, MapHalfExtentY ),
+			0f );
+
+		UpdateSpriteAnimation( screenDir );
 	}
 
 	/// <summary>
@@ -206,21 +234,18 @@ public sealed class PlayerController : Component
 			for ( int dty = -2; dty <= 2; dty++ )
 			{
 				if ( !TreeManager.IsTreeAtTile( ptx + dtx, pty + dty ) ) continue;
-				var treeCenter = new Vector3(
-					(ptx + dtx) * TreeManager.TileWorldWidth  + TreeManager.TileWorldWidth  * 0.5f,
-					(pty + dty) * TreeManager.TileWorldHeight + TreeManager.TileWorldHeight * 0.5f,
-					0f );
+				var treeCenter = TreeManager.GetTreeCollisionCenter( ptx + dtx, pty + dty );
 				pos = AabbPushOutRect( pos, treeCenter,
-					PlayerHalfExtent, PlayerHalfExtent,
-					TreeManager.TileWorldWidth  * 0.5f,
-					TreeManager.TileWorldHeight * 0.5f );
+					PlayerTreeHalfExtent, PlayerTreeHalfExtent,
+					TreeManager.CollisionHalfWidth,
+					TreeManager.CollisionHalfHeight );
 			}
 		}
 
 		// Solid world objects — use AABB push-out (square boxes, cardinal movement)
 		foreach ( var chest in Scene.GetAllComponents<Chest>() )
 		{
-			pos = AabbPushOut( pos, chest.WorldPosition.WithZ( 0f ), PlayerHalfExtent, 12f );
+			pos = AabbPushOut( pos, chest.WorldPosition.WithZ( 0f ), PlayerHalfExtent, ChestCollisionHalfExtent );
 		}
 
 		foreach ( var shrine in Scene.GetAllComponents<LevelUpBeacon>() )
@@ -362,19 +387,20 @@ public sealed class PlayerController : Component
 
 		if ( Input.Pressed( "jump" ) && _dashCooldown <= 0f )
 		{
-			_dashDir = Vector3.Zero;
-			if ( Input.Down( "forward" ) )  _dashDir.x += 1f;
-			if ( Input.Down( "backward" ) ) _dashDir.x -= 1f;
-			if ( Input.Down( "right" ) )    _dashDir.y -= 1f;
-			if ( Input.Down( "left" ) )     _dashDir.y += 1f;
-			if ( _dashDir.LengthSquared < 0.01f )
+			var screenDashDir = Vector3.Zero;
+			if ( Input.Down( "forward" ) )  screenDashDir.x += 1f;
+			if ( Input.Down( "backward" ) ) screenDashDir.x -= 1f;
+			if ( Input.Down( "right" ) )    screenDashDir.y -= 1f;
+			if ( Input.Down( "left" ) )     screenDashDir.y += 1f;
+			if ( screenDashDir.LengthSquared < 0.01f )
 			{
 				var m = Input.AnalogMove;
-				_dashDir = new Vector3( m.y, m.x, 0f );
+				screenDashDir = new Vector3( m.y, -m.x, 0f );
 			}
-			if ( _dashDir.LengthSquared < 0.01f )
-				_dashDir = Vector3.Forward;
-			_dashDir = _dashDir.Normal;
+			if ( screenDashDir.LengthSquared < 0.01f )
+				_dashDir = LastMoveDirection.LengthSquared > 0.01f ? LastMoveDirection.Normal : Vector3.Forward;
+			else
+				_dashDir = RotateScreenDirToWorld( screenDashDir.Normal, CameraYaw );
 
 			_isDashing = true;
 			_dashTime = 0.15f;
@@ -399,7 +425,7 @@ public sealed class PlayerController : Component
 		var camGo = new GameObject( true, "PlayerCamera" );
 		camGo.SetParent( GameObject );
 		camGo.LocalPosition = new Vector3( 0f, 0f, 1000f );
-		camGo.LocalRotation = Rotation.From( new Angles( 90f, 0f, 0f ) );
+		camGo.LocalRotation = Rotation.From( new Angles( 90f, CameraYaw, 0f ) );
 
 		var cam = camGo.Components.Create<CameraComponent>();
 		cam.Orthographic = true;
@@ -433,7 +459,7 @@ public sealed class PlayerController : Component
 	{
 		_hpBarGo = new GameObject( true, "HPBar" );
 		_hpBarGo.SetParent( GameObject );
-		_hpBarGo.WorldRotation = Rotation.From( new Angles( 90f, 0f, 0f ) );
+		_hpBarGo.WorldRotation = GetTopDownUiRotation();
 		_hpBarGo.WorldScale    = new Vector3( 1f, 1f, 1f );
 
 		var wp = _hpBarGo.Components.Create<Sandbox.WorldPanel>();
@@ -448,7 +474,8 @@ public sealed class PlayerController : Component
 		if ( _hpBarGo == null || _hpBar == null || _state == null ) return;
 
 		// Follow player every frame — 20 units below in screen space (-X = screen-down)
-		_hpBarGo.WorldPosition = WorldPosition + new Vector3( -14f, 0f, 1f );
+		_hpBarGo.WorldPosition = WorldPosition + RotateScreenDirToWorld( new Vector3( -14f, 0f, 0f ), CameraYaw ) + new Vector3( 0f, 0f, 1f );
+		_hpBarGo.WorldRotation = GetTopDownUiRotation();
 		_hpBar.HPPercent = Math.Clamp( _state.HPPercent, 0f, 1f );
 		_hpBar.MaxShield = _state.MaxShield;
 		_hpBar.ShieldPercent = _state.MaxShield > 0f

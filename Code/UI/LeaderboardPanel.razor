@@ -68,8 +68,9 @@
 
 	protected override int BuildHash()
 	{
+		if ( !IsVisible ) return 0;
 		var players = AllPlayers.ToList();
-		int hash = System.HashCode.Combine( IsVisible, players.Count );
+		int hash = System.HashCode.Combine( players.Count );
 		foreach ( var p in players )
 			hash = System.HashCode.Combine( hash, (int)p.TimeAlive, p.Kills, p.IsAlive );
 		return hash;

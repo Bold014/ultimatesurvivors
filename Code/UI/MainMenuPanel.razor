@@ -117,8 +117,8 @@
 			}
 		</div>
 
-		<!-- Chat — bottom-left, below active quests -->
-		<div class="widget-panel" style="position: absolute; bottom: 5%; left: 6%; width: 320px; pointer-events: all; cursor: @(_chatOpen ? "default" : "pointer");"
+		<!-- Chat — left of main buttons -->
+		<div class="widget-panel" style="position: absolute; top: 42%; left: 5%; width: 420px; pointer-events: all; cursor: @(_chatOpen ? "default" : "pointer");"
 			onclick=@OnChatPanelClick>
 			<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
 				<div class="widget-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">💬 CHAT</div>
@@ -128,7 +128,7 @@
 				</div>
 			</div>
 			<div style="height: 2px; background-color: #6a4a1a; margin-bottom: 10px;"></div>
-			<div style="min-height: 180px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;">
+			<div style="min-height: 250px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;">
 				@foreach ( var msg in _chatMessages )
 				{
 					var isServer = msg.Name == "Server";
@@ -159,58 +159,120 @@
 			}
 		</div>
 
-		<!-- Leaderboard — centered in right third, vertically aligned with buttons -->
-		<div class="widget-panel" style="position: absolute; top: 50%; transform: translateY(-50%); right: 6%; width: 320px;">
-			<div class="widget-header">🏆 LEADERBOARD</div>
-			<div style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">
-				@foreach ( var t in LeaderboardTabs )
-				{
-					var isActive = _lbTab == t.Id;
-					<div class="tab @(isActive ? "tab-active" : "")" onclick="@(() => { PlayClickSound(); _lbTab = t.Id; _ = RefreshLeaderboardAsync(); })">@t.Label</div>
+		<!-- Leaderboard — three-column, centered right -->
+		<div class="widget-panel" style="position: absolute; top: 50%; transform: translateY(-50%); right: 2%; width: 560px;">
+			<div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0;">
+				<div class="widget-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">🏆 LEADERBOARD</div>
+				@{
+					var canRefresh = !_lbLoading && _lbRefreshCooldown <= 0f;
+					var refreshLabel = _lbLoading ? "..." : _lbRefreshCooldown > 0f ? $"({(int)System.Math.Ceiling(_lbRefreshCooldown)}s)" : "↻";
 				}
+				<div onclick="@(() => { if ( canRefresh ) { PlayClickSound(); _lbRefreshCooldown = 5f; _lbRefreshTimer = 60f; _ = RefreshLeaderboardAsync(); } })"
+				     style="font-size: 16px; font-family: Minecraft; color: @(canRefresh ? "#f5c518" : "#555"); cursor: @(canRefresh ? "pointer" : "default"); padding: 2px 8px; border: 1px solid @(canRefresh ? "#6a4a1a" : "#2a1a08"); border-radius: 4px; font-weight: bold;">@refreshLabel</div>
 			</div>
-			@{
-				var lbTabLabel = LeaderboardTabs.FirstOrDefault( t => t.Id == _lbTab ).Label ?? "Kills";
-			}
-			<div style="display: flex; align-items: center; padding: 0 4px 8px 4px; border-bottom: 2px solid #6a4a1a; margin-bottom: 4px; gap: 8px;">
-				<span style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; width: 32px;">RANK</span>
-				<span style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; width: 34px;"></span>
-				<span style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; flex: 1;">PLAYER</span>
-				<span style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold;">@lbTabLabel.ToUpper()</span>
-			</div>
-			<div style="min-height: 400px; display: flex; flex-direction: column;">
-				@if ( _lbLoading )
-				{
-					<div style="font-size: 13px; color: #555; font-family: Minecraft; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">Loading...</div>
-				}
-				else if ( _lbError )
-				{
-					<div style="font-size: 13px; color: #a55; font-family: Minecraft; padding: 10px 4px; border-bottom: 1px solid #2a1a08;">Unable to load leaderboard</div>
-				}
-				else if ( _lbEntries.Count == 0 )
-				{
-					<div style="font-size: 13px; color: #555; font-family: Minecraft; padding: 10px 4px; border-bottom: 1px solid #2a1a08; font-style: italic;">No entries yet</div>
-				}
-				@foreach ( var entry in _lbEntries )
-				{
-					var isLocal   = Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
-					var rankColor = entry.Rank == 1 ? "#f5c518" : entry.Rank == 2 ? "#c0c0c0" : entry.Rank == 3 ? "#cd7f32" : "#aaa";
-					<div style="display: flex; align-items: center; padding: 9px 4px; border-bottom: 1px solid #3a2510; gap: 8px;">
-						<span style="font-size: 14px; font-weight: bold; color: @rankColor; font-family: Minecraft; width: 32px;">#@entry.Rank</span>
-						<img src="avatar:@entry.SteamId" style="width: 34px; height: 34px; border-radius: 4px; border: 2px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
-						<span style="font-size: 14px; color: @(isLocal ? "#f5e060" : "#eee"); font-family: Minecraft; text-shadow: 1px 1px 0 #000; flex: 1; overflow: hidden;">@entry.DisplayName</span>
-						<span style="font-size: 15px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@LbFormatValue( entry.Value )</span>
-					</div>
-				}
-				@for ( int i = _lbEntries.Count; i < 8; i++ )
-				{
-					<div style="display: flex; align-items: center; padding: 9px 4px; border-bottom: 1px solid #2a1a08; gap: 8px; opacity: 0.25;">
-						<span style="font-size: 14px; font-weight: bold; color: #666; font-family: Minecraft; width: 32px;">#@(i + 1)</span>
-						<div style="width: 34px; height: 34px; border-radius: 4px; border: 2px solid #3a2510; flex-shrink: 0; background-color: #1a1008;"></div>
-						<span style="font-size: 14px; color: #444; font-family: Minecraft; flex: 1;">---</span>
-						<span style="font-size: 15px; color: #555; font-family: Minecraft;">---</span>
-					</div>
-				}
+			<div style="height: 2px; background-color: #6a4a1a; margin-bottom: 10px;"></div>
+			<div style="display: flex; flex-direction: row; gap: 0;">
+
+				<!-- Kills column -->
+				<div style="flex: 1; display: flex; flex-direction: column; padding: 0 8px;">
+					<div style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 1px solid #6a4a1a; margin-bottom: 4px; white-space: nowrap;">⚔ KILLS</div>
+					@if ( _lbLoading )
+					{
+						<div style="font-size: 11px; color: #555; font-family: Minecraft; padding: 8px 0; text-align: center; font-style: italic;">Loading...</div>
+					}
+					else if ( _lbError )
+					{
+						<div style="font-size: 11px; color: #a55; font-family: Minecraft; padding: 8px 0; text-align: center;">Error</div>
+					}
+					@foreach ( var entry in _lbKills )
+					{
+						var isLocal   = Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
+						var rankColor = entry.Rank == 1 ? "#f5c518" : entry.Rank == 2 ? "#c0c0c0" : entry.Rank == 3 ? "#cd7f32" : "#aaa";
+						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #2a1a08; gap: 4px; flex-shrink: 0;">
+							<span style="font-size: 11px; font-weight: bold; color: @rankColor; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@entry.Rank</span>
+							<img src="avatar:@entry.SteamId" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
+							<span style="font-size: 11px; color: @(isLocal ? "#f5e060" : "#ddd"); font-family: Minecraft; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@entry.DisplayName</span>
+							<span style="font-size: 11px; color: #f5c518; font-family: Minecraft; font-weight: bold; flex-shrink: 0;">@LbFormatKills( entry.Value )</span>
+						</div>
+					}
+					@for ( int i = _lbKills.Count; i < 10; i++ )
+					{
+						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #1a1008; gap: 4px; opacity: 0.2; flex-shrink: 0;">
+							<span style="font-size: 11px; font-weight: bold; color: #666; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@(i+1)</span>
+							<div style="width: 20px; height: 20px; border-radius: 3px; background-color: #1a1008; flex-shrink: 0;"></div>
+							<span style="font-size: 11px; color: #444; font-family: Minecraft; flex: 1;">---</span>
+						</div>
+					}
+				</div>
+
+				<div style="width: 1px; background-color: #3a2510; flex-shrink: 0;"></div>
+
+				<!-- Survival column -->
+				<div style="flex: 1; display: flex; flex-direction: column; padding: 0 8px;">
+					<div style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 1px solid #6a4a1a; margin-bottom: 4px; white-space: nowrap;">⏱ SURVIVAL</div>
+					@if ( _lbLoading )
+					{
+						<div style="font-size: 11px; color: #555; font-family: Minecraft; padding: 8px 0; text-align: center; font-style: italic;">Loading...</div>
+					}
+					else if ( _lbError )
+					{
+						<div style="font-size: 11px; color: #a55; font-family: Minecraft; padding: 8px 0; text-align: center;">Error</div>
+					}
+					@foreach ( var entry in _lbSurvival )
+					{
+						var isLocal   = Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
+						var rankColor = entry.Rank == 1 ? "#f5c518" : entry.Rank == 2 ? "#c0c0c0" : entry.Rank == 3 ? "#cd7f32" : "#aaa";
+						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #2a1a08; gap: 4px; flex-shrink: 0;">
+							<span style="font-size: 11px; font-weight: bold; color: @rankColor; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@entry.Rank</span>
+							<img src="avatar:@entry.SteamId" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
+							<span style="font-size: 11px; color: @(isLocal ? "#f5e060" : "#ddd"); font-family: Minecraft; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@entry.DisplayName</span>
+							<span style="font-size: 11px; color: #f5c518; font-family: Minecraft; font-weight: bold; flex-shrink: 0;">@entry.Value m</span>
+						</div>
+					}
+					@for ( int i = _lbSurvival.Count; i < 10; i++ )
+					{
+						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #1a1008; gap: 4px; opacity: 0.2; flex-shrink: 0;">
+							<span style="font-size: 11px; font-weight: bold; color: #666; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@(i+1)</span>
+							<div style="width: 20px; height: 20px; border-radius: 3px; background-color: #1a1008; flex-shrink: 0;"></div>
+							<span style="font-size: 11px; color: #444; font-family: Minecraft; flex: 1;">---</span>
+						</div>
+					}
+				</div>
+
+				<div style="width: 1px; background-color: #3a2510; flex-shrink: 0;"></div>
+
+				<!-- Runs column -->
+				<div style="flex: 1; display: flex; flex-direction: column; padding: 0 8px;">
+					<div style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 1px solid #6a4a1a; margin-bottom: 4px; white-space: nowrap;">🔄 RUNS</div>
+					@if ( _lbLoading )
+					{
+						<div style="font-size: 11px; color: #555; font-family: Minecraft; padding: 8px 0; text-align: center; font-style: italic;">Loading...</div>
+					}
+					else if ( _lbError )
+					{
+						<div style="font-size: 11px; color: #a55; font-family: Minecraft; padding: 8px 0; text-align: center;">Error</div>
+					}
+					@foreach ( var entry in _lbRuns )
+					{
+						var isLocal   = Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
+						var rankColor = entry.Rank == 1 ? "#f5c518" : entry.Rank == 2 ? "#c0c0c0" : entry.Rank == 3 ? "#cd7f32" : "#aaa";
+						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #2a1a08; gap: 4px; flex-shrink: 0;">
+							<span style="font-size: 11px; font-weight: bold; color: @rankColor; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@entry.Rank</span>
+							<img src="avatar:@entry.SteamId" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
+							<span style="font-size: 11px; color: @(isLocal ? "#f5e060" : "#ddd"); font-family: Minecraft; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@entry.DisplayName</span>
+							<span style="font-size: 11px; color: #f5c518; font-family: Minecraft; font-weight: bold; flex-shrink: 0;">@entry.Value</span>
+						</div>
+					}
+					@for ( int i = _lbRuns.Count; i < 10; i++ )
+					{
+						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #1a1008; gap: 4px; opacity: 0.2; flex-shrink: 0;">
+							<span style="font-size: 11px; font-weight: bold; color: #666; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@(i+1)</span>
+							<div style="width: 20px; height: 20px; border-radius: 3px; background-color: #1a1008; flex-shrink: 0;"></div>
+							<span style="font-size: 11px; color: #444; font-family: Minecraft; flex: 1;">---</span>
+						</div>
+					}
+				</div>
+
 			</div>
 		</div>
 	}
@@ -683,58 +745,46 @@
 	bool _questNotify => QuestDefinition.All.Exists( q => PlayerProgress.CanClaimQuest( q.Id ) );
 
 	// ── Leaderboard ────────────────────────────────────────────────────────
-	readonly struct LbTab
-	{
-		public readonly string Id;
-		public readonly string Label;
-		public readonly string StatName;
-		public LbTab( string id, string label, string statName ) { Id = id; Label = label; StatName = statName; }
-	}
 	class LbEntry { public int Rank; public string DisplayName; public long Value; public ulong SteamId; }
-	static readonly LbTab[] LeaderboardTabs = {
-		new LbTab( "kills", "Kills", "total_kills" ),
-		new LbTab( "runs", "Runs", "runs_completed" ),
-		new LbTab( "survival", "Survival Time", "longest_survival" ),
-	};
-	string _lbTab = "kills";
-	List<LbEntry> _lbEntries = new();
+
+	List<LbEntry> _lbKills    = new();
+	List<LbEntry> _lbSurvival = new();
+	List<LbEntry> _lbRuns     = new();
 	bool _lbLoading = true;
-	bool _lbError = false;
+	bool _lbError   = false;
+	float _lbRefreshTimer   = 0f;
+	float _lbRefreshCooldown = 0f;
+	const float LbRefreshInterval = 60f;
 
 	async Task RefreshLeaderboardAsync()
 	{
 		_lbLoading = true; _lbError = false;
-		var tab = LeaderboardTabs.FirstOrDefault( t => t.Id == _lbTab );
-		if ( string.IsNullOrEmpty( tab.Id ) ) tab = LeaderboardTabs[0];
 		try
 		{
-			var board = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", tab.StatName );
-			board.MaxEntries = 8;
-			await board.Refresh();
-			var raw = board.Entries.Select( e => new LbEntry { Rank = (int)e.Rank, DisplayName = e.DisplayName ?? "???", Value = (long)e.Value, SteamId = (ulong)e.SteamId } );
-			// Exclude BoldTrooper(s) from leaderboard display
-			_lbEntries = raw.Where( e => !e.DisplayName.Contains( "BoldTrooper", System.StringComparison.OrdinalIgnoreCase ) )
-				.Take( 8 )
-				.Select( ( e, i ) => new LbEntry { Rank = i + 1, DisplayName = e.DisplayName, Value = e.Value, SteamId = e.SteamId } )
-				.ToList();
+			var bKills    = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "total_kills" );
+			var bSurvival = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "best_survival" );
+			var bRuns     = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "runs_played" );
+			bKills.MaxEntries = bSurvival.MaxEntries = bRuns.MaxEntries = 10;
+			await Task.WhenAll( bKills.Refresh(), bSurvival.Refresh(), bRuns.Refresh() );
+			_lbKills    = ProcessBoard( bKills );
+			_lbSurvival = ProcessBoard( bSurvival );
+			_lbRuns     = ProcessBoard( bRuns );
 		}
-		catch { _lbError = true; _lbEntries.Clear(); }
+		catch { _lbError = true; _lbKills.Clear(); _lbSurvival.Clear(); _lbRuns.Clear(); }
 		finally { _lbLoading = false; }
-		return;
 	}
 
-	string LbFormatValue( long value )
+	List<LbEntry> ProcessBoard( Sandbox.Services.Leaderboards.Board2 board )
 	{
-		var tab = LeaderboardTabs.FirstOrDefault( t => t.Id == _lbTab );
-		if ( string.IsNullOrEmpty( tab.Id ) ) tab = LeaderboardTabs[0];
-		return tab.Id switch
-		{
-			"kills"    => value >= 1000 ? $"{value / 1000.0:F1}K" : value.ToString(),
-			"runs"     => value.ToString(),
-			"survival" => $"{value} min",
-			_          => value.ToString()
-		};
+		return board.Entries
+			.Select( e => new LbEntry { Rank = (int)e.Rank, DisplayName = e.DisplayName ?? "???", Value = (long)e.Value, SteamId = (ulong)e.SteamId } )
+			.Where( e => !e.DisplayName.Contains( "BoldTrooper", System.StringComparison.OrdinalIgnoreCase ) )
+			.Take( 10 )
+			.Select( ( e, i ) => new LbEntry { Rank = i + 1, DisplayName = e.DisplayName, Value = e.Value, SteamId = e.SteamId } )
+			.ToList();
 	}
+
+	string LbFormatKills( long value ) => value >= 1000 ? $"{value / 1000.0:F1}K" : value.ToString();
 
 	// ── Chat ──────────────────────────────────────────────────────────────
 	struct ChatEntry { public string Name; public string Text; public string ColorHex; }
@@ -803,6 +853,7 @@
 	protected override void OnStart()
 	{
 		Panel.Style.PointerEvents = PointerEvents.All;
+		_lbRefreshTimer = LbRefreshInterval;
 		_ = RefreshLeaderboardAsync();
 	}
 
@@ -810,6 +861,8 @@
 	{
 		// Always return to the main page (not map/character select) when the menu re-appears after a run.
 		_view = MenuView.Main;
+		_lbRefreshTimer = 0f;
+		_ = RefreshLeaderboardAsync();
 	}
 
 	protected override void OnDestroy()
@@ -836,6 +889,21 @@
 		{
 			ChatComponent.Instance.OnMessageAdded += OnChatMessageAdded;
 			_chatSubscribed = true;
+		}
+
+		// Leaderboard refresh cooldown (manual button).
+		if ( _lbRefreshCooldown > 0f )
+			_lbRefreshCooldown -= Time.Delta;
+
+		// Periodic auto-refresh every 60 s while on the main view.
+		if ( _view == MenuView.Main && !_lbLoading )
+		{
+			_lbRefreshTimer -= Time.Delta;
+			if ( _lbRefreshTimer <= 0f )
+			{
+				_lbRefreshTimer = LbRefreshInterval;
+				_ = RefreshLeaderboardAsync();
+			}
 		}
 	}
 

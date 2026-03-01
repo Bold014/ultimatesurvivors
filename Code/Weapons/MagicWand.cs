@@ -36,6 +36,7 @@ public sealed class MagicWand : WeaponBase
 
 		var go = new GameObject( true, "Projectile_Wand" );
 		go.WorldPosition = WorldPosition;
+		LocalGameRunner.ParentRuntimeObject( go );
 
 		var proj = go.Components.Create<Projectile>();
 		proj.Direction = dir;
@@ -45,7 +46,7 @@ public sealed class MagicWand : WeaponBase
 		proj.Piercing = WeaponLevel >= 5;
 		proj.TintColor = new Color( 0.5f, 0.8f, 1f );
 		proj.SpritePath = "sprites/fireballcast.sprite";
-		proj.SpriteSize = 1f;
+		proj.SpriteSize = 1f * _state.Area;
 		proj.SourceWeaponId = WeaponId;
 	}
 

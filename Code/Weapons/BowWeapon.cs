@@ -36,6 +36,7 @@ public sealed class BowWeapon : WeaponBase
 
 		var go = new GameObject( true, "Projectile_Arrow" );
 		go.WorldPosition = WorldPosition;
+		LocalGameRunner.ParentRuntimeObject( go );
 
 		var proj = go.Components.Create<Projectile>();
 		proj.Direction = dir;
@@ -44,7 +45,7 @@ public sealed class BowWeapon : WeaponBase
 		proj.Lifetime = 2.0f * _state.DurationMultiplier;
 		proj.Piercing = WeaponLevel >= 4;
 		proj.SpritePath = "sprites/arrow.sprite";
-		proj.SpriteSize = 1f;
+		proj.SpriteSize = 1f * _state.Area;
 		proj.SourceWeaponId = WeaponId;
 	}
 

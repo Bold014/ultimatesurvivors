@@ -170,10 +170,10 @@ public sealed class Projectile : Component
 		if ( abLenSq < 0.0001f )
 		{
 			closest = a.WithZ( 0f );
-			return ac.Length < r;
+			return ac.Length <= r;
 		}
 		float t = MathF.Max( 0f, MathF.Min( 1f, Vector3.Dot( ac, ab ) / abLenSq ) );
 		closest = (a + ab * t).WithZ( 0f );
-		return ((c - closest).WithZ( 0f )).LengthSquared < r * r;
+		return ((c - closest).WithZ( 0f )).LengthSquared <= r * r;
 	}
 }

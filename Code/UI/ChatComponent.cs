@@ -26,11 +26,12 @@ public sealed class ChatComponent : Component
 
 	public void AddMessage( string playerName, string text, Color? nameColor = null )
 	{
-		// Avoid duplicate when optimistic add + RPC both run on sender
-		if ( Messages.Count > 0 )
+		// Avoid duplicate when optimistic add + RPC both run on sender.
+		// Check the last 3 messages in case another player's message arrived in between.
+		int checkFrom = Math.Max( 0, Messages.Count - 3 );
+		for ( int i = checkFrom; i < Messages.Count; i++ )
 		{
-			var last = Messages[^1];
-			if ( last.PlayerName == playerName && last.Text == text )
+			if ( Messages[i].PlayerName == playerName && Messages[i].Text == text )
 				return;
 		}
 
@@ -70,23 +71,17 @@ public sealed class ChatComponent : Component
 		AddMessage( name, msg );
 		CloseChat();
 
-		// Only route through PlayerController when the game objects are truly networked.
-		// In LocalGame mode the player prefab is client-only (no NetworkSpawn), so its
-		// [Rpc.Broadcast] never reaches other clients. Use BroadcastMenuMessage instead,
-		// which lives on this component — a networked scene object in the menu scene.
-		if ( LocalGameRunner.IsNetworked )
-		{
-			var localPlayer = Scene.GetAllComponents<PlayerController>()
-				.FirstOrDefault( p => !p.IsProxy );
+		if ( ShouldBroadcastLobbyRpc() )
+			BroadcastMenuMessage( name, msg );
+	}
 
-			if ( localPlayer != null )
-			{
-				localPlayer.BroadcastChat( msg );
-				return;
-			}
-		}
-
-		BroadcastMenuMessage( name, msg );
+	private static bool ShouldBroadcastLobbyRpc()
+	{
+		// Local prefab runs are intentionally client-only, so lobby RPCs will
+		// spam failed P2P session logs if we try to broadcast from that mode.
+		if ( LocalGameRunner.IsInLocalGame ) return false;
+		if ( !Networking.IsActive ) return false;
+		return Connection.All.Count > 1;
 	}
 
 	/// <summary>Used to send chat from the menu where no PlayerController exists.</summary>
@@ -101,6 +96,14 @@ public sealed class ChatComponent : Component
 	public void BroadcastServerMessage( string message, float r, float g, float b )
 	{
 		AddMessage( "Server", message, new Color( r, g, b ) );
+	}
+
+	public void SendServerMessage( string message, Color color )
+	{
+		if ( ShouldBroadcastLobbyRpc() )
+			BroadcastServerMessage( message, color.r, color.g, color.b );
+		else
+			AddMessage( "Server", message, color );
 	}
 
 	protected override void OnDestroy()

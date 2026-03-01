@@ -2,7 +2,7 @@ using SpriteTools;
 using System.Collections.Generic;
 
 /// <summary>
-/// Swings a wide arc in the player's last-pressed movement direction, hitting all enemies inside it.
+/// Swings a wide arc toward the nearest enemy, hitting all enemies inside it.
 /// Level 2+: increased damage. Level 3+: double slash (strikes twice per attack).
 /// Level 4+: wider arc and longer range. Level 5+: knockback on every hit.
 /// Quantity Tome (ProjectileCount) adds extra slashes, each staggered 0.15s apart.
@@ -19,8 +19,7 @@ public sealed class SwordWeapon : WeaponBase
 
 	protected override void OnFire()
 	{
-		var controller = Components.Get<PlayerController>();
-		var dir = (controller != null) ? controller.LastMoveDirection : Vector3.Forward;
+		var dir = GetNearestEnemyDirection();
 
 		int baseCount = WeaponLevel >= 3 ? 2 : 1;
 		int totalCount = baseCount + (_state?.ProjectileCount ?? 0);
@@ -29,6 +28,27 @@ public sealed class SwordWeapon : WeaponBase
 
 		for ( int i = 1; i < totalCount; i++ )
 			_pendingSlashes.Add( (i * 0.15f, dir) );
+	}
+
+	private Vector3 GetNearestEnemyDirection()
+	{
+		EnemyBase nearest = null;
+		float nearestDist = float.MaxValue;
+
+		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
+		{
+			float dist = (enemy.WorldPosition - WorldPosition).LengthSquared;
+			if ( dist < nearestDist )
+			{
+				nearestDist = dist;
+				nearest = enemy;
+			}
+		}
+
+		if ( nearest != null )
+			return (nearest.WorldPosition - WorldPosition).WithZ( 0f ).Normal;
+
+		return Vector3.Forward;
 	}
 
 	protected override void OnUpdate()
@@ -65,13 +85,14 @@ public sealed class SwordWeapon : WeaponBase
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
 			var toEnemy = (enemy.WorldPosition - WorldPosition).WithZ( 0f );
-			if ( toEnemy.LengthSquared > range * range ) continue;
+			float maxHitRange = range + enemy.ProjectileHitRadius;
+			if ( toEnemy.LengthSquared > maxHitRange * maxHitRange ) continue;
 			if ( toEnemy.LengthSquared < 0.01f ) continue;
 
 			float angle = Vector3.GetAngle( direction, toEnemy.Normal );
 			if ( angle > arcDeg * 0.5f ) continue;
 
-			float knockbackMult = WeaponLevel >= 5 ? 3f : 1f;
+			float knockbackMult = WeaponLevel >= 5 ? 12f : 4f;
 			enemy.TakeDamage( damage, WeaponId, WorldPosition, knockbackMult );
 		}
 	}

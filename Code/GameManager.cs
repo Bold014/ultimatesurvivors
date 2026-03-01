@@ -116,7 +116,10 @@ public sealed class GameManager : Component
 		var victoryName  = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "A player";
 		var victoryStats = Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
 		int victoryKills = victoryStats?.Kills ?? 0;
-		ChatComponent.Instance?.BroadcastServerMessage( $"{victoryName} defeated the final boss with {victoryKills} kills!", 1f, 0.85f, 0.2f );
+		ChatComponent.Instance?.SendServerMessage( $"{victoryName} defeated the final boss with {victoryKills} kills!", new Color( 1f, 0.85f, 0.2f ) );
+
+		// Record run result so kills, survival time, and run count are synced to the leaderboard.
+		RecordWinResult( stats, tier, map );
 
 		// Victory — return to menu
 		EscapeMenuOpen     = false;
@@ -124,14 +127,88 @@ public sealed class GameManager : Component
 		_returnToMenuDelay = 8f;
 	}
 
+	// ── Abandon recording (escape menu quit/restart) ───────────────────────────
+	public void RecordAbandonResult()
+	{
+		if ( _runEnded ) return; // already recorded (win or death path fired first)
+		var stats = Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
+		if ( stats == null ) return;
+
+		var result = new RunResult
+		{
+			Kills                   = stats.Kills,
+			Completed               = false,
+			Died                    = false,
+			CharacterId             = CharacterNameToId( stats.CharacterName ),
+			MaxLevel                = stats.Level,
+			SurviveMinutes          = (int)(stats.TimeAlive / 60f),
+			KillsByWeapon           = new System.Collections.Generic.Dictionary<string, int>( stats.KillsByWeapon ),
+			NoDamageSeconds         = stats.GameObject.Components.Get<PlayerLocalState>()?.LongestNoDamageSeconds ?? 0,
+			MapId                   = MenuManager.SelectedMap ?? "dark_forest",
+			TierCompleted           = 0,
+			GoldEarned              = 0,
+		};
+		PlayerProgress.RecordRunResult( result );
+	}
+
+	// ── Win result recording ──────────────────────────────────────────────────
+	private void RecordWinResult( PlayerStats stats, int tier, string map )
+	{
+		var tomes   = PlayerTomes.LocalInstance;
+		var weapons = stats.GameObject.Components.Get<PlayerWeapons>();
+		var state   = stats.GameObject.Components.Get<PlayerLocalState>();
+
+		var tomeLevels   = new System.Collections.Generic.Dictionary<string, int>();
+		if ( tomes != null )
+			foreach ( var kv in tomes.GetAllLevels() )
+				tomeLevels[kv.Key] = kv.Value;
+
+		var weaponLevels = new System.Collections.Generic.Dictionary<string, int>();
+		if ( weapons != null )
+			foreach ( var w in weapons.Weapons )
+				weaponLevels[w.WeaponDisplayName] = w.WeaponLevel;
+
+		var result = new RunResult
+		{
+			Kills                   = stats.Kills,
+			Completed               = true,
+			Died                    = false,
+			CharacterId             = CharacterNameToId( stats.CharacterName ),
+			MaxLevel                = stats.Level,
+			SurviveMinutes          = (int)(stats.TimeAlive / 60f),
+			KillsByWeapon           = new System.Collections.Generic.Dictionary<string, int>( stats.KillsByWeapon ),
+			NoDamageSeconds         = state?.LongestNoDamageSeconds ?? 0,
+			TomeLevels              = tomeLevels,
+			WeaponLevels            = weaponLevels,
+			ChestsOpenedThisRun     = Chest.ChestsOpened,
+			ProjectilesFiredThisRun = stats.ProjectilesFired,
+			MapId                   = map,
+			TierCompleted           = tier,
+			GoldEarned              = 0,
+		};
+		PlayerProgress.RecordRunResult( result );
+	}
+
 	// ── End-of-run check ──────────────────────────────────────────────────────
 	private void CheckRunEnd()
 	{
-		var allStats = Scene.GetAllComponents<PlayerStats>();
-		if ( !allStats.Any() ) return;
-		if ( !allStats.All( s => !s.IsAlive ) ) return;
+		List<PlayerStats> statsToRecord;
+		if ( LocalGameRunner.IsInLocalGame )
+		{
+			// In client-local lobby runs, only this client's own gameplay player should drive run end.
+			var localRunStats = Scene.GetAllComponents<PlayerStats>().FirstOrDefault( s => !s.IsProxy );
+			if ( localRunStats == null || localRunStats.IsAlive ) return;
+			statsToRecord = new List<PlayerStats> { localRunStats };
+		}
+		else
+		{
+			var allStats = Scene.GetAllComponents<PlayerStats>().ToList();
+			if ( !allStats.Any() ) return;
+			if ( !allStats.All( s => !s.IsAlive ) ) return;
+			statsToRecord = allStats;
+		}
 
-		foreach ( var stats in allStats )
+		foreach ( var stats in statsToRecord )
 		{
 			var playerState = stats.GameObject.Components.Get<PlayerLocalState>();
 			var tomes       = PlayerTomes.LocalInstance;
@@ -183,13 +260,13 @@ public sealed class GameManager : Component
 		var deathName  = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "A player";
 		var spawner    = Scene.GetAllComponents<EnemySpawner>().FirstOrDefault();
 		int wave       = spawner?.WaveNumber ?? 0;
-		var deathStats = Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
+		var deathStats = statsToRecord.FirstOrDefault();
 		int kills      = deathStats?.Kills ?? 0;
-		ChatComponent.Instance?.BroadcastServerMessage( $"{deathName} died and survived Wave {wave} with {kills} kills", 1f, 0.4f, 0.3f );
+		ChatComponent.Instance?.SendServerMessage( $"{deathName} died and survived Wave {wave} with {kills} kills", new Color( 1f, 0.4f, 0.3f ) );
 
 		EscapeMenuOpen     = false;
 		_runEnded          = true;
-		_returnToMenuDelay = 8f;
+		_returnToMenuDelay = 3f;
 	}
 
 	// ── Player spawning ───────────────────────────────────────────────────────
@@ -207,6 +284,9 @@ public sealed class GameManager : Component
 
 		var go = new GameObject( true, "Player" );
 		go.WorldPosition = Vector3.Zero;
+		var localRoot = LocalGameRunner.GetLocalGameRoot();
+		if ( localRoot != null && localRoot.IsValid() )
+			go.SetParent( localRoot );
 
 		go.Components.Create<PlayerStats>();
 		go.Components.Create<PlayerLocalState>();

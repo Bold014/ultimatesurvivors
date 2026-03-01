@@ -11,6 +11,8 @@ public sealed class OrbitalShard : Component
 	public float Damage { get; set; } = 12f;
 	/// <summary>World-space size of the shard sprite. Hit radius is derived from this.</summary>
 	public float ShardSize { get; set; } = 10f;
+	/// <summary>Scales the sprite-derived hit radius so collision matches visuals.</summary>
+	public float HitboxScale { get; set; } = 1f;
 	/// <summary>Weapon that spawned this shard — used to attribute kills for quest tracking.</summary>
 	public string SourceWeaponId { get; set; } = null;
 
@@ -54,13 +56,17 @@ public sealed class OrbitalShard : Component
 
 	private void CheckEnemyHits()
 	{
-		float hitRadius = ShardSize * 0.5f;
+		// Use sprite size as the shard's collision radius so contact matches what the player sees.
+		float shardHitRadius = MathF.Max( 0.5f, ShardSize * 0.5f * HitboxScale );
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
 			if ( _hitCooldowns.Contains( enemy ) ) continue;
 
 			var dist = (enemy.WorldPosition - WorldPosition).WithZ( 0f ).Length;
-			if ( dist < hitRadius )
+			// Shards are persistent contact damage, so use the enemy's core sprite bounds
+			// (no extra projectile forgiveness radius) to avoid "far away" hits.
+			float combinedRadius = shardHitRadius + enemy.HalfExtent;
+			if ( dist <= combinedRadius )
 			{
 				enemy.TakeDamage( Damage, SourceWeaponId, WorldPosition, knockbackMultiplier: 5f );
 				_hitCooldowns.Add( enemy );

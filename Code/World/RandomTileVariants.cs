@@ -29,12 +29,9 @@ public class RandomTileVariants : Component
 	/// <summary>Atlas row of the base ground tile.</summary>
 	[Property] public int GroundRow { get; set; } = 0;
 
-	/// <summary>Rotation applied to the base ground tile (0 / 90 / 180 / 270).</summary>
-	[Property] public int GroundAngle { get; set; } = 0;
-
 	/// <summary>
 	/// Variant/decoration tiles scattered over the ground.
-	/// Format: "col,row" or "col,row,angle" (angle = 0/90/180/270).
+	/// Format: "col,row".
 	/// </summary>
 	[Property] public List<string> VariantPositions { get; set; } = new();
 
@@ -54,10 +51,11 @@ public class RandomTileVariants : Component
 	readonly HashSet<Vector2Int> _generatedChunks = new();
 	TilesetComponent.Layer _layer;
 	Guid _groundGuid;
-	List<(Guid guid, int angle)> _variants = new();
+	List<Guid> _variants = new();
 	bool _ready;
 	System.Random _rng;
 	int _noiseSeed;
+	const int GroundRotation = 0;
 
 	protected override void OnStart()
 	{
@@ -102,7 +100,7 @@ public class RandomTileVariants : Component
 			return;
 		}
 
-		_variants = new List<(Guid, int)>();
+		_variants = new List<Guid>();
 		foreach ( var s in VariantPositions )
 		{
 			var parts = s.Split( ',' );
@@ -110,10 +108,9 @@ public class RandomTileVariants : Component
 			     int.TryParse( parts[0].Trim(), out int col ) &&
 			     int.TryParse( parts[1].Trim(), out int row ) )
 			{
-				int angle = parts.Length >= 3 && int.TryParse( parts[2].Trim(), out int a ) ? a : 0;
 				var vp = new Vector2Int( col, row );
 				if ( posToGuid.TryGetValue( vp, out var vg ) )
-					_variants.Add( (vg, angle) );
+					_variants.Add( vg );
 				else
 					Log.Warning( $"[MapGen] Variant ({col},{row}) not in tileset — skipped." );
 			}
@@ -184,7 +181,7 @@ public class RandomTileVariants : Component
 			{
 				var mapPos = new Vector2Int( x, y );
 				Guid tileGuid = _groundGuid;
-				int tileAngle = GroundAngle;
+				int tileAngle = GroundRotation;
 
 				if ( useVariants )
 				{
@@ -197,7 +194,7 @@ public class RandomTileVariants : Component
 					{
 						// Pick variant based on position hash for determinism within a tile
 						int vi = (int)(Math.Abs( (long)x * 31 + (long)y * 17 ) % _variants.Count);
-						(tileGuid, tileAngle) = _variants[vi];
+						tileGuid = _variants[vi];
 					}
 				}
 

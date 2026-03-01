@@ -439,6 +439,7 @@
 	{
 		PlayClickSound();
 		GameManager.EscapeMenuOpen = false;
+		GameManager.Instance?.RecordAbandonResult();
 		MenuManager.StartGame( MenuManager.SelectedCharacter, MenuManager.SelectedMap, MenuManager.SelectedTier );
 		LocalGameRunner.Instance?.EndLocalGame();
 	}
@@ -447,6 +448,7 @@
 	{
 		PlayClickSound();
 		GameManager.EscapeMenuOpen = false;
+		GameManager.Instance?.RecordAbandonResult();
 		LocalGameRunner.Instance?.EndLocalGame();
 	}
 
@@ -469,11 +471,12 @@
 			sp?.IntensityPhase ?? 0,
 			sp?.WaveNumber ?? 0
 		);
+		int weaponLevelSum = w?.Weapons?.Sum( ww => ww?.WeaponLevel ?? 0 ) ?? 0;
 		int h2 = System.HashCode.Combine(
 			(int)(sp?.TimeRemaining ?? 600f),
 			sp?.IsFinalBossPhase == true ? 1 : 0,
 			(int)((DragonBoss.Instance?.HPPercent ?? 0f) * 100),
-			w?.Weapons?.Count ?? 0,
+			(w?.Weapons?.Count ?? 0) * 1000 + weaponLevelSum,
 			s?.IsAlive ?? true,
 			(int)GameManager.ReturnToMenuCountdown,
 			GameManager.EscapeMenuOpen ? 1 : 0

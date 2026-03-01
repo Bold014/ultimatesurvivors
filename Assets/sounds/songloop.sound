@@ -3,7 +3,7 @@
   "Sounds": [
     {
       "Mixer": "Music",
-      "UI": false,
+      "UI": true,
       "Looping": true,
       "Volume": "1",
       "Pitch": "1",

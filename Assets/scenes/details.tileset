@@ -1,0 +1,392 @@
+{
+  "FilePath": "textures/lonesome_forest_detail_objects.png",
+  "TileSize": "16,16",
+  "TileSeparation": "0,0",
+  "TileScale": 1,
+  "Tiles": [
+    {
+      "Id": "c0eee81b-b00a-4422-a1e7-54ed8debc10b",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "823db321-5d1c-4c5c-a15f-bb5980a4ee00",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "87d0fe65-1409-4d2b-8822-f2d03af5093b",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "5dc3f192-6378-4a5d-a8f1-dd6518e1dd11",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "310631f9-0a53-4a4f-b252-4e4d3b1e5746",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "a0778e7d-32b8-4a9f-a32d-a1a54025b6ef",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,0",
+      "Size": "1,1"
+    },
+    {
+      "Id": "e3be5e24-01b1-4f03-ad13-d977e633cc01",
+      "Name": "",
+      "Tags": null,
+      "Position": "0,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "62dd23a1-4805-49a8-b959-4923a81b1995",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "bef5984f-ebfe-49d5-8bf3-df5c324539a5",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "6741e298-7326-4caa-aba8-2c3d04c59f89",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "78e53641-08cd-44ca-a817-6747d61d908d",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "81fa62a3-09f9-41a1-832e-e2ce7cc9a001",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "08a5ed12-5809-4c4c-8c47-d00948a75a26",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,1",
+      "Size": "1,1"
+    },
+    {
+      "Id": "7043b8f9-aa92-437b-b01a-f0991078a1b0",
+      "Name": "",
+      "Tags": null,
+      "Position": "0,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "839dc14f-da56-4d4f-9239-c492d09303bb",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "07b646d9-e1fb-45cc-86ce-ddc4c0b0f610",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "277a2eb1-d861-459f-8182-8b05500b0e99",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "1e7d80a7-2fe5-4c09-81c9-901db59a707e",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "9d9f534a-a0b9-4f05-af0e-dd3b37c1109c",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "561f77c3-6446-470a-b096-c022fdd01159",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,2",
+      "Size": "1,1"
+    },
+    {
+      "Id": "d1b97883-3f91-4d67-a2ff-0375150f31d0",
+      "Name": "",
+      "Tags": null,
+      "Position": "0,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "d68cfd54-a512-40cc-97c3-8dfc7a983f56",
+      "Name": "innerblobtopleft",
+      "Tags": null,
+      "Position": "1,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "aec038cf-8b3f-4668-b387-405cbf846120",
+      "Name": "innerblobtopright",
+      "Tags": null,
+      "Position": "2,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "a864eb38-cc49-492b-9332-37fa81e3c7ea",
+      "Name": "roundededgetopleft",
+      "Tags": null,
+      "Position": "3,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "168c94ee-c814-4e5d-9cf6-1d9e7e79676d",
+      "Name": "roundededgemiddle",
+      "Tags": null,
+      "Position": "4,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "669aad68-ae72-48de-ab07-6c66a579a1cd",
+      "Name": "roundededgetopright",
+      "Tags": null,
+      "Position": "5,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "b21d6b45-0d6a-41a7-a83d-dc5a2b915b2c",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,3",
+      "Size": "1,1"
+    },
+    {
+      "Id": "adb7e3b8-ad1a-44ea-898e-d82c68b27d22",
+      "Name": "singletreetop",
+      "Tags": null,
+      "Position": "0,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "fe75c864-9ac4-4aaf-bb1b-de51dc6c8567",
+      "Name": "innerblobbottomright",
+      "Tags": null,
+      "Position": "1,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "2e6c6c50-7a58-4778-8677-c361adc9e331",
+      "Name": "innerblobbottomright",
+      "Tags": null,
+      "Position": "2,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "a0cf3d25-fc27-4371-9f15-cea9bc2edfa9",
+      "Name": "roundededgemiddleleft",
+      "Tags": null,
+      "Position": "3,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "5b5f2f8c-608b-4f2d-86e3-3f35e5381a62",
+      "Name": "roundededgemiddle",
+      "Tags": null,
+      "Position": "4,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "160a0ae8-c74d-42fa-bb88-5f94e110a23c",
+      "Name": "roundededgemiddleright",
+      "Tags": null,
+      "Position": "5,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "25e199fe-cf9d-4c6d-8f86-725654676a71",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,4",
+      "Size": "1,1"
+    },
+    {
+      "Id": "998870ff-88f0-49ec-a36b-171c16e83ec0",
+      "Name": "singletreebottom",
+      "Tags": null,
+      "Position": "0,5",
+      "Size": "1,1"
+    },
+    {
+      "Id": "24da62e9-d2dc-4de9-829f-0fd19900e9f3",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,5",
+      "Size": "1,1"
+    },
+    {
+      "Id": "c271a822-8fbf-41a6-9072-ede8dde70d9d",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,5",
+      "Size": "1,1"
+    },
+    {
+      "Id": "2ae82d5d-94cf-4233-a401-ad74195b9fa9",
+      "Name": "roundededgebottomleft",
+      "Tags": null,
+      "Position": "3,5",
+      "Size": "1,1"
+    },
+    {
+      "Id": "89aaa32d-7648-41d8-9488-4b21dd55a526",
+      "Name": "roudnededgebottommiddle",
+      "Tags": null,
+      "Position": "4,5",
+      "Size": "1,1"
+    },
+    {
+      "Id": "4f611ed6-198a-4929-b82c-958118c41756",
+      "Name": "roundededgemiddleright",
+      "Tags": null,
+      "Position": "5,5",
+      "Size": "1,1"
+    },
+    {
+      "Id": "7ed414c8-7403-4492-b8fc-2b4f77e4678e",
+      "Name": "",
+      "Tags": null,
+      "Position": "0,6",
+      "Size": "1,1"
+    },
+    {
+      "Id": "53ab4c97-d4bc-4a5b-9954-07d6d2da16eb",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,6",
+      "Size": "1,1"
+    },
+    {
+      "Id": "a0952717-b0e7-4503-9131-318c3cd11a7f",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,6",
+      "Size": "1,1"
+    },
+    {
+      "Id": "87eae0de-4586-4cd0-8028-04135c6e2e4c",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,6",
+      "Size": "1,1"
+    },
+    {
+      "Id": "1178f4cc-4967-4d78-b993-9279a0fc083a",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,6",
+      "Size": "1,1"
+    },
+    {
+      "Id": "6c174fbb-a66b-4ea1-a532-8882bf498472",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,6",
+      "Size": "1,1"
+    },
+    {
+      "Id": "5e1a03f8-0f23-4081-b32f-cd407349f1d6",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,6",
+      "Size": "1,1"
+    },
+    {
+      "Id": "1d0d08fe-2873-43ca-bc5f-de99a5a3f27a",
+      "Name": "",
+      "Tags": null,
+      "Position": "0,7",
+      "Size": "1,1"
+    },
+    {
+      "Id": "22a1afb8-0ae4-4abc-913d-c3825e9b871c",
+      "Name": "",
+      "Tags": null,
+      "Position": "1,7",
+      "Size": "1,1"
+    },
+    {
+      "Id": "d8d6111c-65bd-43bf-a523-5ad402d4648f",
+      "Name": "",
+      "Tags": null,
+      "Position": "2,7",
+      "Size": "1,1"
+    },
+    {
+      "Id": "72d59e8e-f566-4746-9a12-005091b5638d",
+      "Name": "",
+      "Tags": null,
+      "Position": "3,7",
+      "Size": "1,1"
+    },
+    {
+      "Id": "b3301a3f-b68a-4c91-8034-ecb484774643",
+      "Name": "",
+      "Tags": null,
+      "Position": "4,7",
+      "Size": "1,1"
+    },
+    {
+      "Id": "9e8e5df1-4625-467a-8e3c-4f6ad66349dc",
+      "Name": "",
+      "Tags": null,
+      "Position": "5,7",
+      "Size": "1,1"
+    },
+    {
+      "Id": "f8953e2b-9fe4-4909-bc35-0f424b770e81",
+      "Name": "",
+      "Tags": null,
+      "Position": "6,7",
+      "Size": "1,1"
+    }
+  ],
+  "InheritAutotileFrom": null,
+  "AutotileBrushes": [],
+  "CurrentTextureSize": "112,128",
+  "CurrentTileSize": "16,16",
+  "__references": [],
+  "__version": 0
+}

@@ -49,17 +49,47 @@ public class TreeManager : Component
 	/// <summary>Tile positions (in tile coordinates) that contain a tree.</summary>
 	public static readonly HashSet<Vector2Int> TreeTiles = new();
 
-	/// <summary>World X extent of one tree tile.</summary>
-	public const int TileWorldWidth = 32;
+	/// <summary>World X extent of one tree tile (details.tileset uses 16×16 tiles).</summary>
+	public const int TileWorldWidth = 16;
 
 	/// <summary>World Y extent of one tree tile.</summary>
 	public const int TileWorldHeight = 16;
 
+	/// <summary>
+	/// Collision profile for a tree: a narrower trunk-shaped blocker that extends
+	/// slightly into the upper tile so canopy overlap doesn't feel walk-through.
+	/// </summary>
+	public const float CollisionHalfWidth = 4.5f;
+	public const float CollisionHalfHeight = 9f;
+	public const float CollisionCenterYOffset = 3f;
+
+	public static Vector3 GetTreeCollisionCenter( int tx, int ty ) => new(
+		tx * TileWorldWidth + TileWorldWidth * 0.5f,
+		ty * TileWorldHeight + TileWorldHeight * 0.5f + CollisionCenterYOffset,
+		0f
+	);
+
 	public static bool IsTreeAtWorldPos( float x, float y )
 	{
-		int tx = (int)MathF.Floor( x / TileWorldWidth );
-		int ty = (int)MathF.Floor( y / TileWorldHeight );
-		return TreeTiles.Contains( new Vector2Int( tx, ty ) );
+		int ptx = (int)MathF.Floor( x / TileWorldWidth );
+		int pty = (int)MathF.Floor( y / TileWorldHeight );
+
+		// Check a tight local neighborhood since the collision box is not full-tile.
+		for ( int tx = ptx - 1; tx <= ptx + 1; tx++ )
+		{
+			for ( int ty = pty - 2; ty <= pty + 1; ty++ )
+			{
+				if ( !TreeTiles.Contains( new Vector2Int( tx, ty ) ) )
+					continue;
+
+				var c = GetTreeCollisionCenter( tx, ty );
+				if ( MathF.Abs( x - c.x ) <= CollisionHalfWidth &&
+				     MathF.Abs( y - c.y ) <= CollisionHalfHeight )
+					return true;
+			}
+		}
+
+		return false;
 	}
 
 	public static bool IsTreeAtTile( int tx, int ty ) => TreeTiles.Contains( new Vector2Int( tx, ty ) );

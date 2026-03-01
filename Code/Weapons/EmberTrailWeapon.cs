@@ -35,6 +35,7 @@ public sealed class EmberTrailWeapon : WeaponBase
 			var offset = i == 0 ? Vector3.Zero : new Vector3( (i % 2 == 0 ? 1f : -1f) * 20f, 0f, 0f );
 			var go = new GameObject( true, "BurnZone" );
 			go.WorldPosition = (WorldPosition + offset).WithZ( 0f );
+			LocalGameRunner.ParentRuntimeObject( go );
 
 			var zone = go.Components.Create<BurnZone>();
 			zone.Damage = _state.Damage * (0.4f + WeaponLevel * 0.1f);

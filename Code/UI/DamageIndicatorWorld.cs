@@ -57,9 +57,15 @@ public sealed class DamageIndicatorWorld : Component
 		if ( _indicator != null )
 			_indicator.Elapsed = _elapsed;
 
+		var cam = Scene?.Camera;
+		float cameraYaw = cam != null ? cam.WorldRotation.Angles().yaw : 0f;
+		var screenUpWorld = Rotation.FromAxis( Vector3.Up, cameraYaw ) * Vector3.Forward;
+		if ( cam != null )
+			GameObject.WorldRotation = cam.WorldRotation;
+
 		// Float up from spawn position — no tracking, stays fixed in world space
 		float floatUp = FloatSpeed * _elapsed;
-		GameObject.WorldPosition = _spawnPos + new Vector3( floatUp, 0f, 0f );
+		GameObject.WorldPosition = _spawnPos + screenUpWorld * floatUp;
 
 		if ( _elapsed >= Lifetime )
 			GameObject.Destroy();

@@ -111,7 +111,7 @@ public sealed class BurnZone : Component
 			foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 			{
 				var dist = (enemy.WorldPosition - WorldPosition).WithZ( 0f ).Length;
-				if ( dist <= BaseFlameHitRadius * SizeScale + enemy.HalfExtent )
+				if ( dist <= BaseFlameHitRadius * SizeScale + enemy.ProjectileHitRadius )
 					enemy.TakeDamage( Damage, SourceWeaponId, WorldPosition );
 			}
 		}

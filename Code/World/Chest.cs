@@ -93,7 +93,12 @@ public sealed class Chest : Component
 		if ( !isFree )
 			coins.SpendCoins( Cost );
 
-		try { Sound.Play( ChestOpenSound ); } catch { }
+		try
+		{
+			var h = Sound.Play( ChestOpenSound );
+			h.Position = WorldPosition;
+		}
+		catch { }
 		ChestsOpened++;
 		IsOpened = true;
 		IsPlayerNearby = false;

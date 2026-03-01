@@ -62,7 +62,12 @@ public sealed class XPGem : Component
 	private void Collect()
 	{
 		var xp = PlayerObject?.Components.Get<PlayerXP>();
-		try { Sound.Play( XpPickupSound ); } catch { }
+		try
+		{
+			var h = Sound.Play( XpPickupSound );
+			h.Position = WorldPosition;
+		}
+		catch { }
 		xp?.AddXP( XPValue );
 		GameObject.Destroy();
 	}

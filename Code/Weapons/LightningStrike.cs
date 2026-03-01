@@ -48,7 +48,7 @@ public sealed class LightningStrike : Component
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
 			var dist = (enemy.WorldPosition - WorldPosition).WithZ( 0f ).Length;
-			if ( dist <= Radius + enemy.HalfExtent )
+			if ( dist <= Radius + enemy.ProjectileHitRadius )
 				enemy.TakeDamage( Damage, SourceWeaponId, WorldPosition );
 		}
 	}

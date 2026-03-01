@@ -167,7 +167,8 @@ public sealed class EnemyBase : Component
 		if ( _attackTimer > 0f )
 			_attackTimer -= Time.Delta;
 
-		// Direction to player — used only for animation and as fallback movement
+		// Direction to player — used for animation and as fallback movement
+		// Coordinate system (CameraYaw=90): +X = screen right, +Y = screen up.
 		var dir = (Target.WorldPosition - WorldPosition).WithZ( 0f );
 		if ( dir.LengthSquared > 1f )
 		{
@@ -505,7 +506,13 @@ public sealed class EnemyBase : Component
 			_flashTimer = 0.1f;
 		}
 
-		try { Sound.Play( HitSound ); } catch { }
+		try
+		{
+			var h = Sound.Play( HitSound );
+			h.Position = WorldPosition;
+			h.Volume = 3f;
+		}
+		catch { }
 		SpawnDamageIndicator( amount, isCrit );
 
 		// Apply knockback: add velocity to push enemy away from damage source (smooth slide over time)
@@ -573,6 +580,7 @@ public sealed class EnemyBase : Component
 
 		var gemGo = new GameObject( true, "XPGem" );
 		gemGo.WorldPosition = WorldPosition.WithZ( 0f );
+		LocalGameRunner.ParentRuntimeObject( gemGo );
 		var gem = gemGo.Components.Create<XPGem>();
 		gem.XPValue = XPValue;
 		gem.PlayerObject = Target;

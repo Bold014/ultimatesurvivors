@@ -64,7 +64,12 @@ public sealed class LevelUpBeacon : Component
 		if ( IsPlayerNearby && !_wasPlayerNearby )
 		{
 			// Player just entered — start charge sound
-			try { _chargeHandle = Sound.Play( ChargeSound ); } catch { }
+			try
+			{
+				_chargeHandle = Sound.Play( ChargeSound );
+				_chargeHandle.Position = WorldPosition;
+			}
+			catch { }
 		}
 		else if ( !IsPlayerNearby && _wasPlayerNearby )
 		{

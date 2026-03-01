@@ -11,7 +11,14 @@ public sealed class PlayerWeapons : Component
 	private readonly List<WeaponBase> _weapons = new();
 
 	public bool IsPaused { get; private set; } = false;
-	public IReadOnlyList<WeaponBase> Weapons => _weapons.AsReadOnly();
+	public IReadOnlyList<WeaponBase> Weapons
+	{
+		get
+		{
+			_weapons.RemoveAll( w => w == null || !w.IsValid );
+			return _weapons.AsReadOnly();
+		}
+	}
 	public bool IsFull => _weapons.Count >= MaxWeapons;
 
 	protected override void OnStart()

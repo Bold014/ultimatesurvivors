@@ -57,7 +57,12 @@ public sealed class PlayerXP : Component
 	private void LevelUp()
 	{
 		EnsureInitialized();
-		try { Sound.Play( LevelUpSound ); } catch { }
+		try
+		{
+			var h = Sound.Play( LevelUpSound );
+			h.Position = WorldPosition;
+		}
+		catch { }
 		Level++;
 		XPToNextLevel = GetXPForLevel( Level );
 

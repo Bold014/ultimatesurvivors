@@ -887,8 +887,9 @@ internal sealed class TilesetSceneObject : SceneCustomObject
 			// Camera-based frustum culling: only render tiles near the camera.
 			// Uses the highest-priority IsMainCamera component so we track the player camera,
 			// not the static fallback camera that stays at (0,0,1000).
-			const int TileCullRadiusX = 80; // tiles each side of camera in X
-			const int TileCullRadiusY = 55; // tiles each side of camera in Y
+			// Radius must cover stream range (e.g. 6 chunks × 32 = 192 tiles) so edge overflow tiles render.
+			const int TileCullRadiusX = 100; // tiles each side of camera in X
+			const int TileCullRadiusY = 100; // tiles each side of camera in Y
 			bool doCull = false;
 			int cullMinX = 0, cullMaxX = 0, cullMinY = 0, cullMaxY = 0;
 
@@ -944,8 +945,10 @@ internal sealed class TilesetSceneObject : SceneCustomObject
 				if ( !tile.Value.VerticalFlip )
 					offset.y = -offset.y - tiling.y;
 
-
-				var position = new Vector3( pos.x, pos.y, Layer.Height ?? ( Component.Layers.Count - Component.Layers.IndexOf( Layer ) ) ) * new Vector3( size.x, size.y, 1 );
+				// Y-based depth: tiles with higher Y draw in front (correct overlap of adjacent trees)
+				float baseZ = Layer.Height ?? ( Component.Layers.Count - Component.Layers.IndexOf( Layer ) );
+				float depthZ = pos.y * 0.0001f + pos.x * 0.000001f;
+				var position = new Vector3( pos.x * size.x, pos.y * size.y, baseZ + depthZ );
 
 				minPosition = Vector3.Min( minPosition, position );
 				maxPosition = Vector3.Max( maxPosition, position );
