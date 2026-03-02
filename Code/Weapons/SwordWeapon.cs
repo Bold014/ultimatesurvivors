@@ -85,9 +85,7 @@ public sealed class SwordWeapon : WeaponBase
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
 			var toEnemy = (enemy.WorldPosition - WorldPosition).WithZ( 0f );
-			// Melee should use the enemy's body size, not projectile forgiveness radius,
-			// otherwise sword hits can register visibly beyond the slash.
-			float maxHitRange = range + enemy.HalfExtent;
+			float maxHitRange = range;
 			if ( toEnemy.LengthSquared > maxHitRange * maxHitRange ) continue;
 			if ( toEnemy.LengthSquared < 0.01f ) continue;
 

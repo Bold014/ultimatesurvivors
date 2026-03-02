@@ -995,39 +995,51 @@
 
 	// ── Leaderboard ────────────────────────────────────────────────────────
 	class LbEntry { public int Rank; public string DisplayName; public long Value; public ulong SteamId; }
+	const ulong DevAccountSteamId = 76561198165180167UL;
 
 	List<LbEntry> _lbKills    = new();
 	List<LbEntry> _lbSurvival = new();
 	List<LbEntry> _lbRuns     = new();
-	bool _lbLoading = true;
+	bool _lbLoading = false;
 	bool _lbError   = false;
 	float _lbRefreshTimer   = 0f;
 	float _lbRefreshCooldown = 0f;
+	int   _lbRefreshGen     = 0;
 	const float LbRefreshInterval = 60f;
 
 	async Task RefreshLeaderboardAsync()
 	{
+		if ( _lbLoading ) return; // prevent concurrent fetches from overwriting each other
+		int gen = ++_lbRefreshGen;
 		_lbLoading = true; _lbError = false;
 		try
 		{
 			var bKills    = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "total_kills" );
 			var bSurvival = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "best_survival" );
 			var bRuns     = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "runs_played" );
-			bKills.MaxEntries = bSurvival.MaxEntries = bRuns.MaxEntries = 11; // fetch 11 so filtering dev accounts still leaves 10 to display
+			bKills.MaxEntries = bSurvival.MaxEntries = bRuns.MaxEntries = 20;
 			await Task.WhenAll( bKills.Refresh(), bSurvival.Refresh(), bRuns.Refresh() );
+			if ( gen != _lbRefreshGen ) return; // a newer refresh started; discard these results
 			_lbKills    = ProcessBoard( bKills );
 			_lbSurvival = ProcessBoard( bSurvival );
 			_lbRuns     = ProcessBoard( bRuns );
 		}
-		catch { _lbError = true; _lbKills.Clear(); _lbSurvival.Clear(); _lbRuns.Clear(); }
-		finally { _lbLoading = false; }
+		catch
+		{
+			if ( gen == _lbRefreshGen ) { _lbError = true; _lbKills.Clear(); _lbSurvival.Clear(); _lbRuns.Clear(); }
+		}
+		finally { if ( gen == _lbRefreshGen ) _lbLoading = false; }
 	}
 
 	List<LbEntry> ProcessBoard( Sandbox.Services.Leaderboards.Board2 board )
 	{
-		return board.Entries
+		var all = board.Entries
 			.Select( e => new LbEntry { Rank = (int)e.Rank, DisplayName = e.DisplayName ?? "???", Value = (long)e.Value, SteamId = (ulong)e.SteamId } )
-			.Where( e => !e.DisplayName.Contains( "BoldTrooper", System.StringComparison.OrdinalIgnoreCase ) )
+			.ToList();
+		Log.Info( $"[LB] raw entries: {all.Count} | MaxEntries was set to 20" );
+		foreach ( var e in all ) Log.Info( $"  #{e.Rank} {e.DisplayName} (SteamId={e.SteamId})" );
+		return all
+			.Where( e => e.SteamId != DevAccountSteamId )
 			.Take( 10 )
 			.Select( ( e, i ) => new LbEntry { Rank = i + 1, DisplayName = e.DisplayName, Value = e.Value, SteamId = e.SteamId } )
 			.ToList();
@@ -1146,7 +1158,7 @@
 	{
 		// Always return to the main page (not map/character select) when the menu re-appears after a run.
 		_view = MenuView.Main;
-		_lbRefreshTimer = 0f;
+		_lbRefreshTimer = LbRefreshInterval; // prevent immediate double-refresh after initial load completes
 		_onlineCount = Connection.All.Count;
 		_onlineRefreshTimer = 0f;
 		_ = RefreshLeaderboardAsync();

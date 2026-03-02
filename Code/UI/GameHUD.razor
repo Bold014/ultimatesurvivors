@@ -176,7 +176,7 @@
 								var tLevel = tomes?.GetLevel( p ) ?? 0;
 								@if ( tIcon != null )
 								{
-									<img src="@tIcon" style="width: 48px; height: 48px; object-fit: contain; object-position: center; image-rendering: pixelated; flex-shrink: 0;" />
+									<div style="width: 48px; height: 48px; background-image: url('@tIcon'); background-size: contain; background-position: center; background-repeat: no-repeat; image-rendering: pixelated; flex-shrink: 0;"></div>
 								}
 								else
 								{
