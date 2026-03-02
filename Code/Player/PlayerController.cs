@@ -36,6 +36,7 @@ public sealed class PlayerController : Component
 
 	// Sprite animation state
 	private SpriteRenderer _spriteRenderer;
+	private GameObject _spriteGo;
 	private bool _facingRight = true;
 	private string _currentAnim = "";
 	private SpriteConfig _spriteConfig;
@@ -143,6 +144,7 @@ public sealed class PlayerController : Component
 
 		HandleMovement();
 		HandleDash();
+		UpdateTreeOcclusion();
 		UpdateHealthBar();
 	}
 
@@ -152,6 +154,8 @@ public sealed class PlayerController : Component
 	private const float PlayerHalfExtent = 8f;
 	// Slightly smaller body used only against trees so narrow visual gaps stay traversable.
 	private const float PlayerTreeHalfExtent = 7f;
+	private const float PlayerSpriteFrontZ = 2f;
+	private const float PlayerSpriteBehindCanopyZ = 0.0005f;
 
 	// Map boundary: 100 tiles × tile size in each axis.
 	private const float MapHalfExtentX = 3200f; // 100 × 32 units
