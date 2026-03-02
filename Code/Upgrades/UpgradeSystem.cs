@@ -228,8 +228,20 @@ public sealed class UpgradeSystem : Component
 
 			var pool = tier == UpgradeDefinition.UpgradeRarity.Common ? commons
 				: tier == UpgradeDefinition.UpgradeRarity.Uncommon ? uncommons : rares;
+
+			if ( pool.Count == 0 )
+			{
+				// Fallback to any remaining shrine option to preserve 3 unique offers.
+				pool = commons.Count > 0 ? commons : uncommons.Count > 0 ? uncommons : rares;
+			}
+
 			if ( pool.Count > 0 )
-				choices.Add( pool[_rand.Next( pool.Count )] );
+			{
+				int idx = _rand.Next( pool.Count );
+				var picked = pool[idx];
+				choices.Add( picked );
+				pool.RemoveAt( idx ); // no duplicates in one shrine reward
+			}
 		}
 
 		return choices.AsReadOnly();

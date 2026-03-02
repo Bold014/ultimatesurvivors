@@ -163,6 +163,9 @@ public sealed class PlayerLocalState : Component
 	/// <summary>Returns true if the player should die (health hit 0 with no revival).</summary>
 	public bool TakeDamage( float amount )
 	{
+		if ( ChallengeRuntime.HasModifier( ChallengeModifierType.OneHitDeath ) )
+			amount = Math.Max( amount, MaxHP + MaxShield + 1f );
+
 		// Warding Pendant invincibility frames
 		if ( _iFrameTimer > 0f )
 			return false;

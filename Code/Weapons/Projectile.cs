@@ -16,12 +16,23 @@ public sealed class Projectile : Component
 	[Property] public float SpriteSize { get; set; } = 1f;
 	/// <summary>Weapon that fired this projectile — used to attribute kills for quest tracking.</summary>
 	public string SourceWeaponId { get; set; } = null;
+	/// <summary>When true, spawn a short-lived BurnZone on first impact (enemy or tree).</summary>
+	[Property] public bool ImpactBurnEnabled { get; set; } = false;
+	/// <summary>BurnZone scale multiplier for impact burst size.</summary>
+	[Property] public float ImpactBurnSizeScale { get; set; } = 0.75f;
+	/// <summary>Lifetime of the impact BurnZone burst.</summary>
+	[Property] public float ImpactBurnLifetime { get; set; } = 0.35f;
+	/// <summary>How often impact BurnZone pulses damage.</summary>
+	[Property] public float ImpactBurnPulseInterval { get; set; } = 0.8f;
+	/// <summary>Impact BurnZone damage relative to projectile direct damage.</summary>
+	[Property] public float ImpactBurnDamageMultiplier { get; set; } = 0.45f;
 	/// <summary>Nudge projectile toward enemy center at impact. Compensates for sprite padding — visible content often doesn't extend to full bounds.</summary>
 	[Property] public float ImpactOverlap { get; set; } = 12f;
 	private float _timeAlive = 0f;
 	private Vector3 _prevPosition;
 	private readonly HashSet<EnemyBase> _alreadyHit = new();
 	private bool _destroyNextFrame;
+	private bool _impactBurnSpawned;
 	private bool _spriteSetup = false;
 	private GameObject _spriteGo;
 	private Rotation _spriteTargetRot;
@@ -29,6 +40,9 @@ public sealed class Projectile : Component
 	protected override void OnStart()
 	{
 		_prevPosition = WorldPosition.WithZ( 0f );
+		var stats = PlayerStats.LocalInstance;
+		if ( stats != null )
+			stats.ProjectilesFired++;
 		if ( string.IsNullOrEmpty( SpritePath ) )
 		{
 			var renderer = Components.Create<ModelRenderer>();
@@ -109,6 +123,7 @@ public sealed class Projectile : Component
 		// Destroy on tree impact
 		if ( TreeManager.IsTreeAtWorldPos( WorldPosition.x, WorldPosition.y ) )
 		{
+			TrySpawnImpactBurn( WorldPosition.WithZ( 0f ) );
 			GameObject.Destroy();
 			return;
 		}
@@ -129,6 +144,9 @@ public sealed class Projectile : Component
 			var enemyPos = enemy.WorldPosition.WithZ( 0f );
 			if ( SegmentIntersectsCircle( prev, pos, enemyPos, hitRadius, out Vector3 closest ) )
 			{
+				// Fireball impact burst should appear centered on the enemy that was hit.
+				TrySpawnImpactBurn( enemyPos );
+
 				// Push enemy in projectile travel direction (knockback from point behind impact)
 				var knockbackFrom = pos - Direction.Normal * 50f;
 				enemy.TakeDamage( Damage, SourceWeaponId, knockbackFrom );
@@ -147,6 +165,25 @@ public sealed class Projectile : Component
 			}
 		}
 		return false;
+	}
+
+	private void TrySpawnImpactBurn( Vector3 impactPosition )
+	{
+		if ( !ImpactBurnEnabled || _impactBurnSpawned )
+			return;
+
+		_impactBurnSpawned = true;
+
+		var go = new GameObject( true, "ImpactBurnZone" );
+		go.WorldPosition = impactPosition.WithZ( 0f );
+		LocalGameRunner.ParentRuntimeObject( go );
+
+		var zone = go.Components.Create<BurnZone>();
+		zone.Damage = Damage * ImpactBurnDamageMultiplier;
+		zone.SizeScale = MathF.Max( 0.1f, ImpactBurnSizeScale );
+		zone.Lifetime = MathF.Max( 0.05f, ImpactBurnLifetime );
+		zone.PulseInterval = MathF.Max( 0.02f, ImpactBurnPulseInterval );
+		zone.SourceWeaponId = SourceWeaponId;
 	}
 
 	/// <summary>True if the world position is within the orthographic camera view (enemy must be on screen to be hit).</summary>

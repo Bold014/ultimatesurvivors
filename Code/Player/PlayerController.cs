@@ -41,11 +41,11 @@ public sealed class PlayerController : Component
 	private string _currentAnim = "";
 	private SpriteConfig _spriteConfig;
 
-	private record SpriteConfig( string Path, string Idle, string WalkRight, string WalkUp, string WalkDown );
+	private record SpriteConfig( string Path, string Idle, string WalkRight, string WalkUp, string WalkDown, float Scale = 2f );
 
 	private static readonly Dictionary<string, SpriteConfig> CharacterSprites = new()
 	{
-		["Knight"] = new( "sprites/knightanimations.sprite", "knightidle", "knightwalkright", "knightwalkup", "knightwalkdown" ),
+		["Knight"] = new( "sprites/knightanimations.sprite", "knightidle", "knightwalkright", "knightwalkup", "knightwalkdown", 2.6f ),
 		["Archer"]   = new( "sprites/archeranimations.sprite",   "idle", "walkright", "walkup", "walkdown" ),
 		["Warrior"]  = new( "sprites/warrioranimations.sprite",  "idle", "walkright", "walkup", "walkdown" ),
 		["Mage"]       = new( "sprites/mageanimations.sprite",       "idle", "walkright", "walkup", "walkdown" ),
@@ -74,6 +74,7 @@ public sealed class PlayerController : Component
 
 		var charDef = CharacterDefinition.GetByName( MenuManager.SelectedCharacter );
 		_state.Initialize( charDef );
+		ApplyChallengePlayerModifiers();
 
 		if ( _stats != null )
 		{
@@ -180,6 +181,12 @@ public sealed class PlayerController : Component
 
 	private void HandleMovement()
 	{
+		if ( ChallengeRuntime.HasModifier( ChallengeModifierType.NoMovement ) )
+		{
+			UpdateSpriteAnimation( Vector3.Zero );
+			return;
+		}
+
 		var screenDir = Vector3.Zero;
 
 		// Try Input.Down first (reliable once InputActions are loaded in .sbproj)
@@ -194,6 +201,9 @@ public sealed class PlayerController : Component
 			var m = Input.AnalogMove;
 			screenDir = new Vector3( m.y, -m.x, 0f );
 		}
+
+		if ( ChallengeRuntime.HasModifier( ChallengeModifierType.ReverseControls ) )
+			screenDir = -screenDir;
 
 		if ( screenDir.LengthSquared > 0.01f )
 		{
@@ -334,15 +344,49 @@ public sealed class PlayerController : Component
 		var sprite = ResourceLibrary.Get<Sprite>( cfg.Path );
 
 		// Child GO so scaling doesn't push the camera (also a child) past ZFar
-		var spriteGo = new GameObject( true, "CharacterSprite" );
-		spriteGo.SetParent( GameObject );
-		spriteGo.LocalPosition = new Vector3( 0f, 0f, 2f );
-		spriteGo.LocalScale = new Vector3( 2f, 2f, 2f );
+		_spriteGo = new GameObject( true, "CharacterSprite" );
+		_spriteGo.SetParent( GameObject );
+		_spriteGo.LocalPosition = new Vector3( 0f, 0f, PlayerSpriteFrontZ );
+		_spriteGo.LocalScale = new Vector3( cfg.Scale, cfg.Scale, cfg.Scale );
 
-		_spriteRenderer = spriteGo.Components.Create<SpriteRenderer>();
+		_spriteRenderer = _spriteGo.Components.Create<SpriteRenderer>();
 		_spriteRenderer.Sprite = sprite;
 		_spriteRenderer.PlaybackSpeed = 1f;
 		_spriteRenderer.TextureFilter = Sandbox.Rendering.FilterMode.Point;
+	}
+
+	private void UpdateTreeOcclusion()
+	{
+		if ( _spriteGo == null || _spriteRenderer == null ) return;
+
+		var p = WorldPosition.WithZ( 0f );
+		int ptx = (int)MathF.Floor( p.x / TreeManager.TileWorldWidth );
+		int pty = (int)MathF.Floor( p.y / TreeManager.TileWorldHeight );
+		bool behindCanopy = false;
+
+		// Depth-sort behind tree canopy when inside the top tile region.
+		for ( int dtx = -1; dtx <= 1 && !behindCanopy; dtx++ )
+		{
+			for ( int dty = -2; dty <= 1 && !behindCanopy; dty++ )
+			{
+				int tx = ptx + dtx;
+				int ty = pty + dty;
+				if ( !TreeManager.IsTreeAtTile( tx, ty ) ) continue;
+
+				float canopyCenterX = tx * TreeManager.TileWorldWidth + TreeManager.TileWorldWidth * 0.5f;
+				float canopyCenterY = (ty + 1) * TreeManager.TileWorldHeight + TreeManager.TileWorldHeight * 0.5f;
+				if ( MathF.Abs( p.x - canopyCenterX ) <= TreeManager.TileWorldWidth * 0.5f &&
+				     MathF.Abs( p.y - canopyCenterY ) <= TreeManager.TileWorldHeight * 0.5f )
+				{
+					behindCanopy = true;
+				}
+			}
+		}
+
+		float targetZ = behindCanopy ? PlayerSpriteBehindCanopyZ : PlayerSpriteFrontZ;
+		var localPos = _spriteGo.LocalPosition;
+		if ( MathF.Abs( localPos.z - targetZ ) > 0.0001f )
+			_spriteGo.LocalPosition = new Vector3( localPos.x, localPos.y, targetZ );
 	}
 
 	private void UpdateSpriteAnimation( Vector3 dir )
@@ -387,6 +431,9 @@ public sealed class PlayerController : Component
 
 	private void HandleDash()
 	{
+		if ( ChallengeRuntime.HasModifier( ChallengeModifierType.NoJump ) )
+			return;
+
 		_dashCooldown -= Time.Delta;
 
 		if ( Input.Pressed( "jump" ) && _dashCooldown <= 0f )
@@ -422,6 +469,22 @@ public sealed class PlayerController : Component
 			if ( _dashTime <= 0f )
 				_isDashing = false;
 		}
+	}
+
+	private void ApplyChallengePlayerModifiers()
+	{
+		if ( _state == null ) return;
+
+		float speedMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.PlayerMoveSpeedMultiplier );
+		float dmgMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.PlayerDamageMultiplier );
+		if ( speedMult != 1f ) _state.Speed *= speedMult;
+		if ( dmgMult != 1f ) _state.Damage *= dmgMult;
+
+		// Permanent challenge progression bonus applies to every run.
+		_state.GoldMultiplier *= PlayerProgress.GetPermanentChallengeCoinBonusMultiplier();
+		// Active challenge applies temporary run bonus while selected.
+		if ( ChallengeRuntime.IsChallengeRun )
+			_state.GoldMultiplier *= ChallengeRuntime.ActiveChallenge.RunCoinMultiplier;
 	}
 
 	private void SetupCamera()

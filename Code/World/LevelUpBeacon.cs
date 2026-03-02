@@ -1,5 +1,5 @@
 /// <summary>
-/// A Charge Shrine-style world object. Stand within range for 4 seconds to fully charge it,
+/// A Charge Shrine-style world object. Stand within range for 5.5 seconds to fully charge it,
 /// then receive a free upgrade selection via UpgradeSystem. Leaving the radius drains the charge
 /// at the same rate. Pulses visually while charging.
 /// </summary>
@@ -9,8 +9,8 @@ public sealed class LevelUpBeacon : Component
 	public bool IsActive { get; private set; } = true;
 	public bool IsPlayerNearby { get; private set; } = false;
 
-	private const float ChargeRadius = 65f;
-	private const float ChargeTime   = 4f;
+	private const float ChargeRadius = 60f;
+	private const float ChargeTime   = 5.5f;
 
 	private SpriteRenderer       _spriteRenderer;
 	private float                _pulseTimer = 0f;

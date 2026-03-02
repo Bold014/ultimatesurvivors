@@ -85,14 +85,16 @@ public sealed class SwordWeapon : WeaponBase
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
 			var toEnemy = (enemy.WorldPosition - WorldPosition).WithZ( 0f );
-			float maxHitRange = range + enemy.ProjectileHitRadius;
+			// Melee should use the enemy's body size, not projectile forgiveness radius,
+			// otherwise sword hits can register visibly beyond the slash.
+			float maxHitRange = range + enemy.HalfExtent;
 			if ( toEnemy.LengthSquared > maxHitRange * maxHitRange ) continue;
 			if ( toEnemy.LengthSquared < 0.01f ) continue;
 
 			float angle = Vector3.GetAngle( direction, toEnemy.Normal );
 			if ( angle > arcDeg * 0.5f ) continue;
 
-			float knockbackMult = WeaponLevel >= 5 ? 12f : 4f;
+			float knockbackMult = WeaponLevel >= 5 ? 7f : 3.5f;
 			enemy.TakeDamage( damage, WeaponId, WorldPosition, knockbackMult );
 		}
 	}
@@ -114,8 +116,8 @@ public sealed class SwordWeapon : WeaponBase
 		float angleDeg = MathF.Atan2( direction.y, direction.x ) * (180f / MathF.PI);
 		go.LocalRotation = Rotation.FromAxis( Vector3.Up, angleDeg );
 
-		// Scale: range / 150 so the sprite visually covers the full hitbox extent.
-		float scale = range / 150f * (_state?.Area ?? 1f);
+		// Scale: reduced base size by 50% while still scaling with range/area.
+		float scale = range / 300f * (_state?.Area ?? 1f);
 		go.WorldScale = new Vector3( scale, scale, scale );
 
 		var spriteRes = ResourceLibrary.Get<SpriteResource>( "ui/weapons/sword/swordeffect.spr" );
@@ -147,18 +149,18 @@ public sealed class SwordWeapon : WeaponBase
 
 	private float GetDamageMultiplier() => WeaponLevel switch
 	{
-		>= 5 => 2.5f,
-		>= 4 => 2.3f,
-		>= 3 => 2.0f,
-		>= 2 => 2.0f,
-		_    => 1.8f,
+		>= 5 => 2.2f,
+		>= 4 => 2.05f,
+		>= 3 => 1.9f,
+		>= 2 => 1.75f,
+		_    => 1.6f,
 	};
 
 	public override string GetUpgradeDescription( int nextLevel ) => nextLevel switch
 	{
-		2 => "Damage: +11%",
+		2 => "Damage: +9%",
 		3 => "Double slash — strikes twice per attack",
-		4 => "Wider arc (150°), longer range, Damage: +15%",
+		4 => "Wider arc (150°), longer range, Damage: +8%",
 		5 => "Knockback — enemies are pushed away on hit",
 		_ => $"Level {nextLevel}: improved stats",
 	};

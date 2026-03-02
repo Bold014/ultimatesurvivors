@@ -20,12 +20,23 @@ public sealed class GameManager : Component
 	private bool _runEnded              = false;
 	private float _returnToMenuDelay    = 0f;
 	private bool _tierCompleteGoldAwarded = false;
+	private bool _challengeReachedFinalSwarm = false;
+	private bool _challengeResolved = false;
 
 	protected override void OnStart()
 	{
 		Instance = this;
 		Log.Info( $"[GameManager] OnStart. Scene={Scene?.Name}, IsInLocalGame={LocalGameRunner.IsInLocalGame}" );
 		PlayerProgress.Load();
+		var selectedChallengeId = MenuManager.SelectedChallengeId;
+		if ( !PlayerProgress.CanUseChallengesFor( MenuManager.SelectedMap ?? "dark_forest", MenuManager.SelectedTier ) )
+			selectedChallengeId = null;
+		ChallengeRuntime.SetActive( ChallengeDefinition.GetById( selectedChallengeId ) );
+		if ( ChallengeRuntime.IsChallengeRun )
+		{
+			var c = ChallengeRuntime.ActiveChallenge;
+			GameNotification.Show( $"Challenge Active: {c.Name}", new Color( 0.95f, 0.7f, 0.2f ), 4f );
+		}
 		EnsureMapExists();
 		SpawnPlayer();
 	}
@@ -72,6 +83,9 @@ public sealed class GameManager : Component
 		}
 
 		ReturnToMenuCountdown = 0f;
+		var spawner = Scene.GetAllComponents<EnemySpawner>().FirstOrDefault();
+		if ( spawner?.IsFinalBossPhase == true )
+			_challengeReachedFinalSwarm = true;
 
 		CheckTierComplete();
 		CheckRunEnd();
@@ -120,6 +134,7 @@ public sealed class GameManager : Component
 
 		// Record run result so kills, survival time, and run count are synced to the leaderboard.
 		RecordWinResult( stats, tier, map );
+		ResolveChallengeOutcome( completedTier: true, died: false, stats );
 
 		// Victory — return to menu
 		EscapeMenuOpen     = false;
@@ -133,6 +148,7 @@ public sealed class GameManager : Component
 		if ( _runEnded ) return; // already recorded (win or death path fired first)
 		var stats = Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
 		if ( stats == null ) return;
+		ResolveChallengeOutcome( completedTier: false, died: false, stats );
 
 		var result = new RunResult
 		{
@@ -254,6 +270,7 @@ public sealed class GameManager : Component
 				GoldEarned          = goldEarned,
 			};
 			PlayerProgress.RecordRunResult( result );
+			ResolveChallengeOutcome( completedTier: completed, died: !completed, stats );
 		}
 
 		// Broadcast death stats to lobby chat so all players see it
@@ -267,6 +284,45 @@ public sealed class GameManager : Component
 		EscapeMenuOpen     = false;
 		_runEnded          = true;
 		_returnToMenuDelay = 3f;
+	}
+
+	private void ResolveChallengeOutcome( bool completedTier, bool died, PlayerStats stats )
+	{
+		if ( _challengeResolved || !ChallengeRuntime.IsChallengeRun ) return;
+		_challengeResolved = true;
+
+		var challenge = ChallengeRuntime.ActiveChallenge;
+		bool success = challenge.Goal switch
+		{
+			ChallengeGoalType.KillAllBosses => completedTier,
+			ChallengeGoalType.ReachFinalSwarm => _challengeReachedFinalSwarm,
+			_ => false
+		};
+
+		// Time-limit modifiers (Speedrunner variants) are additional constraints.
+		if ( success && ChallengeRuntime.HasModifier( ChallengeModifierType.RunTimeLimitSeconds ) )
+		{
+			float limit = ChallengeRuntime.GetModifier( ChallengeModifierType.RunTimeLimitSeconds, 0f );
+			if ( limit > 0f && (stats?.TimeAlive ?? 0f) > limit )
+				success = false;
+		}
+
+		if ( success )
+		{
+			bool firstTime = PlayerProgress.TryCompleteChallenge( challenge.Id );
+			if ( firstTime )
+			{
+				GameNotification.Show( $"Challenge complete: {challenge.Name} (+{challenge.PermanentBonusPercent:F0}% permanent coins)", new Color( 0.35f, 0.95f, 0.35f ), 5f );
+			}
+			else
+			{
+				GameNotification.Show( $"Challenge complete: {challenge.Name}", new Color( 0.35f, 0.95f, 0.35f ), 4f );
+			}
+		}
+		else if ( died || !completedTier )
+		{
+			GameNotification.Show( $"Challenge failed: {challenge.Name}", new Color( 0.95f, 0.35f, 0.35f ), 4f );
+		}
 	}
 
 	// ── Player spawning ───────────────────────────────────────────────────────
@@ -317,6 +373,7 @@ public sealed class GameManager : Component
 
 	protected override void OnDestroy()
 	{
+		ChallengeRuntime.Clear();
 		if ( Instance == this )
 			Instance = null;
 	}

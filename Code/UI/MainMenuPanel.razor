@@ -124,7 +124,7 @@
 				<div class="widget-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">💬 CHAT</div>
 				<div style="display: flex; align-items: center; gap: 5px;">
 					<div style="width: 7px; height: 7px; border-radius: 50%; background-color: #4cff6e; box-shadow: 0 0 5px #4cff6e;"></div>
-					<span style="font-size: 11px; color: #4cff6e; font-family: Minecraft; font-weight: bold; letter-spacing: 1px;">@Connection.All.Count ONLINE</span>
+					<span style="font-size: 11px; color: #4cff6e; font-family: Minecraft; font-weight: bold; letter-spacing: 1px;">@_onlineCount ONLINE</span>
 				</div>
 			</div>
 			<div style="height: 2px; background-color: #6a4a1a; margin-bottom: 10px;"></div>
@@ -412,7 +412,7 @@
 					}
 					else
 					{
-					<div class="confirm-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.MapSelect; })>
+					<div class="confirm-btn" onclick=@(() => { PlayClickSound(); _mapDetailsOpen = false; _view = MenuView.MapSelect; })>
 						PLAY AS @confirmLabel  >>
 					</div>
 					}
@@ -429,12 +429,22 @@
 	else if ( _view == MenuView.MapSelect )
 	{
 		@{
+			var selectedMapId = _selectedMapId ?? "dark_forest";
 			var darkForestTier2Unlocked = PlayerProgress.DevUnlockAll || PlayerProgress.GetHighestTierCompleted( "dark_forest" ) >= 1;
 			var darkForestTier3Unlocked = PlayerProgress.DevUnlockAll || PlayerProgress.GetHighestTierCompleted( "dark_forest" ) >= 2;
+			var darkForestTier1ChallengesUnlocked = PlayerProgress.CanUseChallengesFor( "dark_forest", 1 );
+			var darkForestTier2ChallengesUnlocked = PlayerProgress.CanUseChallengesFor( "dark_forest", 2 );
+			var darkForestTier3ChallengesUnlocked = PlayerProgress.CanUseChallengesFor( "dark_forest", 3 );
+			var challengesUnlockedForTier = PlayerProgress.CanUseChallengesFor( selectedMapId, _selectedTier );
+			var mapChallenges = PlayerProgress.GetChallengesFor( selectedMapId, _selectedTier );
+			if ( !string.IsNullOrEmpty( _selectedChallengeId ) && !mapChallenges.Any( c => c.Id == _selectedChallengeId ) )
+				_selectedChallengeId = null;
+			if ( !challengesUnlockedForTier )
+				_selectedChallengeId = null;
 		}
 		<!-- Dim overlay -->
 		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center;">
-		<div style="width: 720px; display: flex; flex-direction: column; font-family: Minecraft; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
+		<div style="width: 980px; max-width: 94%; display: flex; flex-direction: column; font-family: Minecraft; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;">
 
 			<!-- Header -->
 			<div style="padding: 18px 28px 16px 28px; flex-shrink: 0; border-bottom: 2px solid #6a4a1a; display: flex; align-items: center; justify-content: space-between;">
@@ -445,58 +455,292 @@
 				<div class="back-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.CharacterSelect; })>← BACK</div>
 			</div>
 
-			<!-- Map cards row -->
-			<div style="display: flex; flex-direction: row; gap: 16px; padding: 24px 28px; flex-wrap: wrap;">
+			<!-- Map and details layout -->
+			<div style="display: flex; flex-direction: row; gap: 16px; padding: 24px 28px; align-items: flex-start;">
+				<!-- Left: maps stacked vertically -->
+				<div style="width: 340px; min-width: 340px; display: flex; flex-direction: column; gap: 12px;">
+					<div style="background-color: #221508; border: 3px solid @(_selectedMapId == "dark_forest" ? "#f5c518" : "#6a4a1a"); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; overflow: hidden;"
+					     onclick=@(() => { PlayClickSound(); _selectedMapId = "dark_forest"; _mapDetailsOpen = true; })>
+						<img src="ui/dark_forest.png" style="width: 100%; height: 110px; object-fit: cover; border-radius: 6px; image-rendering: pixelated;" />
+						<div style="font-size: 20px; font-weight: bold; color: #f5c518; letter-spacing: 2px;">DARK FOREST</div>
+						<div style="font-size: 12px; color: #a08050;">10 min survival • intense waves + final boss</div>
+						@if ( _mapDetailsOpen && _selectedMapId == "dark_forest" )
+						{
+							<div style="font-size: 12px; color: #c8a800;">@($"Selected Tier: Tier {_selectedTier}")</div>
+						}
+					</div>
 
-				<!-- Dark Forest — selectable -->
-				<div style="flex: 1; min-width: 200px; background-color: #221508; border: 3px solid @(_selectedMapId == "dark_forest" ? "#f5c518" : "#6a4a1a"); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 14px; cursor: pointer; overflow: hidden;"
-				     onclick=@(() => { PlayClickSound(); _selectedMapId = "dark_forest"; })>
-					<img src="ui/dark_forest.png" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; image-rendering: pixelated;" />
-					<div style="font-size: 20px; font-weight: bold; color: #f5c518; letter-spacing: 2px;">DARK FOREST</div>
-					<div style="font-size: 12px; color: #a08050;">10 min survival • intense waves + final boss</div>
-					<!-- Tier buttons -->
-					<div style="display: flex; flex-direction: column; gap: 8px;">
-						<div style="font-size: 11px; color: #a08050; letter-spacing: 1px;">DIFFICULTY TIER</div>
-						<div style="display: flex; gap: 8px; flex-wrap: wrap;">
-							<div class="tier-btn @(_selectedTier == 1 ? "tier-btn-selected" : "") @(true ? "" : "tier-btn-locked")"
+					<div style="background-color: #120c04; border: 2px solid #3a2510; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0.6; min-height: 112px;">
+						<img src="ui/locked.png" style="width: 32px; height: 32px; image-rendering: pixelated;" />
+						<div style="font-size: 18px; font-weight: bold; color: #666; letter-spacing: 2px;">???</div>
+						<div style="font-size: 12px; color: #5a4a1a; letter-spacing: 1px;">COMING SOON</div>
+					</div>
+
+					<div style="background-color: #120c04; border: 2px solid #3a2510; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0.6; min-height: 112px;">
+						<img src="ui/locked.png" style="width: 32px; height: 32px; image-rendering: pixelated;" />
+						<div style="font-size: 18px; font-weight: bold; color: #666; letter-spacing: 2px;">???</div>
+						<div style="font-size: 12px; color: #5a4a1a; letter-spacing: 1px;">COMING SOON</div>
+					</div>
+				</div>
+
+				<!-- Right: details -->
+				<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px;">
+					@if ( !_mapDetailsOpen )
+					{
+						<div style="border: 2px solid #6a4a1a; border-radius: 10px; background-color: #120c04; padding: 20px;">
+							<div style="font-size: 18px; color: #f5c518; letter-spacing: 2px; font-weight: bold;">SELECT A MAP</div>
+							<div style="font-size: 12px; color: #a08050; margin-top: 8px;">Choose a map on the left to open tier and challenge options.</div>
+						</div>
+					}
+					else
+					{
+						<div style="border: 2px solid #6a4a1a; border-radius: 10px; background-color: #120c04; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+							<div style="font-size: 12px; color: #a08050; letter-spacing: 2px;">DIFFICULTY TIER & CHALLENGES</div>
+
+							<div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border: 1px solid #3a2510; border-radius: 8px; background-color: #100904;">
+								<div class="tier-btn @(_selectedTier == 1 ? "tier-btn-selected" : "")" style="text-align: center;" onclick=@(() => { PlayClickSound(); _selectedTier = 1; })>
+									Tier 1 • 1x gold
+								</div>
+								@if ( darkForestTier1ChallengesUnlocked )
+								{
+									<div class="tier-btn" style="text-align: center;" onclick=@(() => OpenChallengePopup( "dark_forest", 1, true ))>
+										Challenges
+									</div>
+								}
+								else
+								{
+									<div class="tier-btn tier-btn-locked" style="text-align: center; pointer-events: none; background-color: #0f0a05; color: #5a4630;">
+										Challenges
+									</div>
+								}
+							</div>
+
+							<div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border: 1px solid #3a2510; border-radius: 8px; background-color: #100904;">
+								<div class="tier-btn @(_selectedTier == 2 ? "tier-btn-selected" : "") @(darkForestTier2Unlocked ? "" : "tier-btn-locked")" style="text-align: center;" onclick=@(() => { if (darkForestTier2Unlocked) { PlayClickSound(); _selectedTier = 2; } })>
+									@(darkForestTier2Unlocked ? "Tier 2 • 1.1x gold" : "Tier 2 • Beat Tier 1")
+								</div>
+								@if ( darkForestTier2ChallengesUnlocked )
+								{
+									<div class="tier-btn" style="text-align: center;" onclick=@(() => OpenChallengePopup( "dark_forest", 2, true ))>
+										Challenges
+									</div>
+								}
+								else
+								{
+									<div class="tier-btn tier-btn-locked" style="text-align: center; pointer-events: none; background-color: #0f0a05; color: #5a4630;">
+										Challenges
+									</div>
+								}
+							</div>
+
+							<div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border: 1px solid #3a2510; border-radius: 8px; background-color: #100904;">
+								<div class="tier-btn @(_selectedTier == 3 ? "tier-btn-selected" : "") @(darkForestTier3Unlocked ? "" : "tier-btn-locked")" style="text-align: center;" onclick=@(() => { if (darkForestTier3Unlocked) { PlayClickSound(); _selectedTier = 3; } })>
+									@(darkForestTier3Unlocked ? "Tier 3 • 1.2x gold" : "Tier 3 • Beat Tier 2")
+								</div>
+								@if ( darkForestTier3ChallengesUnlocked )
+								{
+									<div class="tier-btn" style="text-align: center;" onclick=@(() => OpenChallengePopup( "dark_forest", 3, true ))>
+										Challenges
+									</div>
+								}
+								else
+								{
+									<div class="tier-btn tier-btn-locked" style="text-align: center; pointer-events: none; background-color: #0f0a05; color: #5a4630;">
+										Challenges
+									</div>
+								}
+							</div>
+						</div>
+
+						<div class="confirm-btn" onclick=@(() => { PlayClickSound(); MenuManager.StartGame( _selectedCharName ?? "Archer", _selectedMapId ?? "dark_forest", _selectedTier, _selectedChallengeId ); })>
+							START RUN  >>
+						</div>
+
+						@{
+							var selectedChallenge = !string.IsNullOrEmpty( _selectedChallengeId ) ? ChallengeDefinition.GetById( _selectedChallengeId ) : null;
+						}
+						<div style="border: 2px solid @(selectedChallenge != null ? "#c8a800" : "#5a3a10"); border-radius: 10px; background-color: @(selectedChallenge != null ? "#241b08" : "#120c04"); padding: 10px 14px; display: flex; flex-direction: column; gap: 6px;">
+							<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+								<div style="font-size: 11px; color: #a08050; letter-spacing: 2px;">SELECTED CHALLENGE</div>
+								<div style="font-size: 11px; color: #a08050; text-align: right;">
+									@($"Completed: {PlayerProgress.GetCompletedChallengeCount()} • Permanent bonus: +{PlayerProgress.GetPermanentChallengeCoinBonusPercent():F0}%")
+								</div>
+							</div>
+
+							@if ( selectedChallenge != null )
+							{
+								<div style="font-size: 20px; color: #f5c518; font-weight: 900; letter-spacing: 1px; line-height: 1.1;">@selectedChallenge.Name</div>
+								<div style="font-size: 12px; color: #d8b878; line-height: 1.2;">@($"Tier {selectedChallenge.Tier} • {selectedChallenge.RunCoinMultiplier:F2}x run coins • +{selectedChallenge.PermanentBonusPercent:F0}% permanent on first clear")</div>
+								<div style="font-size: 11px; color: #a08050; line-height: 1.2;">@selectedChallenge.Description</div>
+							}
+							else
+							{
+								<div style="font-size: 15px; color: #a08050; font-weight: bold;">None</div>
+							}
+						</div>
+					}
+				</div>
+			</div>
+
+			@*
+				<!-- Tier and challenge controls -->
+				<div style="padding: 0 28px 16px 28px;">
+					<div style="border: 2px solid #6a4a1a; border-radius: 10px; background-color: #120c04; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+						<div style="font-size: 12px; color: #a08050; letter-spacing: 2px;">DIFFICULTY TIER & CHALLENGES</div>
+
+						<div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border: 1px solid #3a2510; border-radius: 8px; background-color: #100904;">
+							<div class="tier-btn @(_selectedTier == 1 ? "tier-btn-selected" : "")"
+							     style="text-align: center;"
 							     onclick=@(() => { PlayClickSound(); _selectedTier = 1; })>
 								Tier 1 • 1x gold
 							</div>
+							<div class="tier-btn @(darkForestTier1ChallengesUnlocked ? "" : "tier-btn-locked")"
+							     style="text-align: center;"
+							     onclick=@(() => OpenChallengePopup( "dark_forest", 1, darkForestTier1ChallengesUnlocked ))>
+								@(darkForestTier1ChallengesUnlocked ? "Challenges" : "Beat Tier 1")
+							</div>
+						</div>
+
+						<div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border: 1px solid #3a2510; border-radius: 8px; background-color: #100904;">
 							<div class="tier-btn @(_selectedTier == 2 ? "tier-btn-selected" : "") @(darkForestTier2Unlocked ? "" : "tier-btn-locked")"
+							     style="text-align: center;"
 							     onclick=@(() => { if (darkForestTier2Unlocked) { PlayClickSound(); _selectedTier = 2; } })>
 								@(darkForestTier2Unlocked ? "Tier 2 • 1.1x gold" : "Tier 2 • Beat Tier 1")
 							</div>
+							<div class="tier-btn @((darkForestTier2Unlocked && darkForestTier2ChallengesUnlocked) ? "" : "tier-btn-locked")"
+							     style="text-align: center;"
+							     onclick=@(() => OpenChallengePopup( "dark_forest", 2, darkForestTier2Unlocked && darkForestTier2ChallengesUnlocked ))>
+								@((darkForestTier2Unlocked && darkForestTier2ChallengesUnlocked) ? "Challenges" : "Beat Tier 2")
+							</div>
+						</div>
+
+						<div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border: 1px solid #3a2510; border-radius: 8px; background-color: #100904;">
 							<div class="tier-btn @(_selectedTier == 3 ? "tier-btn-selected" : "") @(darkForestTier3Unlocked ? "" : "tier-btn-locked")"
+							     style="text-align: center;"
 							     onclick=@(() => { if (darkForestTier3Unlocked) { PlayClickSound(); _selectedTier = 3; } })>
 								@(darkForestTier3Unlocked ? "Tier 3 • 1.2x gold" : "Tier 3 • Beat Tier 2")
+							</div>
+							<div class="tier-btn @((darkForestTier3Unlocked && darkForestTier3ChallengesUnlocked) ? "" : "tier-btn-locked")"
+							     style="text-align: center;"
+							     onclick=@(() => OpenChallengePopup( "dark_forest", 3, darkForestTier3Unlocked && darkForestTier3ChallengesUnlocked ))>
+								@((darkForestTier3Unlocked && darkForestTier3ChallengesUnlocked) ? "Challenges" : "Beat Tier 3")
 							</div>
 						</div>
 					</div>
 				</div>
+			*@
 
-				<!-- Map 2 — locked -->
-				<div style="flex: 1; min-width: 200px; background-color: #120c04; border: 2px solid #3a2510; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0.6;">
-					<img src="ui/locked.png" style="width: 32px; height: 32px; image-rendering: pixelated;" />
-					<div style="font-size: 18px; font-weight: bold; color: #666; letter-spacing: 2px;">???</div>
-					<div style="font-size: 12px; color: #5a4a1a; letter-spacing: 1px;">COMING SOON</div>
+			@*
+				<!-- Start button -->
+				<div style="padding: 0 28px 8px 28px;">
+					<div class="confirm-btn" onclick=@(() => { PlayClickSound(); MenuManager.StartGame( _selectedCharName ?? "Archer", _selectedMapId ?? "dark_forest", _selectedTier, _selectedChallengeId ); })>
+						START RUN  >>
+					</div>
 				</div>
 
-				<!-- Map 3 — locked -->
-				<div style="flex: 1; min-width: 200px; background-color: #120c04; border: 2px solid #3a2510; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0.6;">
-					<img src="ui/locked.png" style="width: 32px; height: 32px; image-rendering: pixelated;" />
-					<div style="font-size: 18px; font-weight: bold; color: #666; letter-spacing: 2px;">???</div>
-					<div style="font-size: 12px; color: #5a4a1a; letter-spacing: 1px;">COMING SOON</div>
-				</div>
-			</div>
+				@{
+					var selectedChallenge = !string.IsNullOrEmpty( _selectedChallengeId ) ? ChallengeDefinition.GetById( _selectedChallengeId ) : null;
+				}
+				<div style="padding: 0 28px 24px 28px;">
+					<div style="border: 2px solid @(selectedChallenge != null ? "#c8a800" : "#5a3a10"); border-radius: 10px; background-color: @(selectedChallenge != null ? "#241b08" : "#120c04"); padding: 10px 14px; display: flex; flex-direction: column; gap: 6px;">
+						<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+							<div style="font-size: 11px; color: #a08050; letter-spacing: 2px;">SELECTED CHALLENGE</div>
+							<div style="font-size: 11px; color: #a08050; text-align: right;">
+								@($"Completed: {PlayerProgress.GetCompletedChallengeCount()} • Permanent bonus: +{PlayerProgress.GetPermanentChallengeCoinBonusPercent():F0}%")
+							</div>
+						</div>
 
-			<!-- Start button -->
-			<div style="padding: 0 28px 24px 28px;">
-				<div class="confirm-btn" onclick=@(() => { PlayClickSound(); MenuManager.StartGame( _selectedCharName ?? "Archer", _selectedMapId ?? "dark_forest", _selectedTier ); })>
-					START RUN  >>
+						@if ( selectedChallenge != null )
+						{
+							<div style="font-size: 20px; color: #f5c518; font-weight: 900; letter-spacing: 1px; line-height: 1.1;">@selectedChallenge.Name</div>
+							<div style="font-size: 12px; color: #d8b878; line-height: 1.2;">@($"Tier {selectedChallenge.Tier} • {selectedChallenge.RunCoinMultiplier:F2}x run coins • +{selectedChallenge.PermanentBonusPercent:F0}% permanent on first clear")</div>
+							<div style="font-size: 11px; color: #a08050; line-height: 1.2;">@selectedChallenge.Description</div>
+						}
+						else
+						{
+							<div style="font-size: 15px; color: #a08050; font-weight: bold;">None</div>
+						}
+					}
 				</div>
-			</div>
+			*@
 		</div>
 		</div>
+
+		@if ( _challengePopupOpen )
+		{
+			@{
+				var popupMapId = _challengePopupMapId ?? "dark_forest";
+				var popupTier = _challengePopupTier;
+				var popupTierPlayable = popupTier switch
+				{
+					1 => true,
+					2 => darkForestTier2Unlocked,
+					3 => darkForestTier3Unlocked,
+					_ => false
+				};
+				var popupChallengesUnlocked = PlayerProgress.CanUseChallengesFor( popupMapId, popupTier );
+				var popupChallenges = PlayerProgress.GetChallengesFor( popupMapId, popupTier );
+			}
+			<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 20;"
+			     onmousedown=@(() => _challengePopupOpen = false)>
+				<div style="width: 760px; max-width: 92%; max-height: 82%; display: flex; flex-direction: column; background-color: #1a1008; border: 3px solid #6a4a1a; border-radius: 10px; overflow: hidden;"
+				     onmousedown=@StopPropagation>
+					<div style="padding: 16px 22px; border-bottom: 2px solid #6a4a1a; display: flex; align-items: center; justify-content: space-between;">
+						<div>
+							<div style="font-size: 22px; font-weight: 900; color: #f5c518; letter-spacing: 3px;">CHALLENGES</div>
+							<div style="font-size: 11px; color: #a08050; margin-top: 3px;">@($"Dark Forest • Tier {popupTier}")</div>
+						</div>
+						<div class="back-btn" onclick=@(() => { PlayClickSound(); _challengePopupOpen = false; })>CLOSE</div>
+					</div>
+
+					<div style="padding: 12px 22px; font-size: 11px; color: #a08050; border-bottom: 1px solid #3a2510; display: flex; justify-content: space-between; gap: 8px;">
+						<div>ONE ACTIVE CHALLENGE PER RUN</div>
+						<div>@($"Completed: {PlayerProgress.GetCompletedChallengeCount()} • Bonus: +{PlayerProgress.GetPermanentChallengeCoinBonusPercent():F0}%")</div>
+					</div>
+
+					<div style="padding: 16px 22px; overflow-y: scroll; display: flex; flex-direction: column; gap: 8px;">
+						@if ( !popupTierPlayable )
+						{
+							<div style="font-size: 12px; color: #a08050;">Unlock this tier first to view its challenges.</div>
+						}
+						else if ( popupChallenges.Count == 0 )
+						{
+							<div style="font-size: 12px; color: #666;">No challenges configured for this tier yet.</div>
+						}
+						else if ( !popupChallengesUnlocked )
+						{
+							<div style="font-size: 12px; color: #a08050;">Complete this tier once to unlock its challenges.</div>
+						}
+						else
+						{
+							<div class="tab @(_selectedTier == popupTier && _selectedChallengeId == null ? "tab-active" : "")"
+							     style="display: flex; align-self: flex-start;"
+							     onclick=@(() => { PlayClickSound(); _selectedMapId = popupMapId; _selectedTier = popupTier; _selectedChallengeId = null; _challengePopupOpen = false; })>
+								NONE
+							</div>
+							@foreach ( var challenge in popupChallenges )
+							{
+								var selected = _selectedChallengeId == challenge.Id && _selectedTier == popupTier;
+								var done = PlayerProgress.IsChallengeCompleted( challenge.Id );
+								<div onclick=@(() => { PlayClickSound(); _selectedMapId = popupMapId; _selectedTier = popupTier; _selectedChallengeId = challenge.Id; _challengePopupOpen = false; })
+								     style="cursor: pointer; border: 2px solid @(selected ? "#c8a800" : "#3a2510"); background-color: @(selected ? "#241b08" : "#140d06"); border-radius: 8px; padding: 8px 10px;">
+									<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+										<div style="font-size: 14px; color: @(selected ? "#f5c518" : "#ddd"); font-weight: bold;">@challenge.Name</div>
+										<div style="font-size: 11px; color: #f5c518;">@($"{challenge.RunCoinMultiplier:F2}x run coins")</div>
+									</div>
+									<div style="font-size: 11px; color: #a08050; margin-top: 3px;">@challenge.Description</div>
+									<div style="font-size: 11px; color: #8a6a40; margin-top: 4px;">@($"Goal: {ChallengeGoalLabel( challenge.Goal )} • Permanent: +{challenge.PermanentBonusPercent:F0}%")</div>
+									@if ( done )
+									{
+										<div style="font-size: 11px; color: #7ee27e; margin-top: 4px;">✓ Completed</div>
+									}
+								</div>
+							}
+						}
+					</div>
+				</div>
+			</div>
+		}
 	}
 
 	@* ══════════════════════════════════════════════════
@@ -731,6 +975,11 @@
 
 	string _selectedMapId = "dark_forest";
 	int    _selectedTier  = 1;
+	string _selectedChallengeId = null;
+	bool _challengePopupOpen = false;
+	string _challengePopupMapId = "dark_forest";
+	int _challengePopupTier = 1;
+	bool _mapDetailsOpen = false;
 
 	UnlockCategory _unlockTab          = UnlockCategory.Characters;
 	string         _unlockFeedback     = null;
@@ -764,7 +1013,7 @@
 			var bKills    = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "total_kills" );
 			var bSurvival = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "best_survival" );
 			var bRuns     = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "runs_played" );
-			bKills.MaxEntries = bSurvival.MaxEntries = bRuns.MaxEntries = 10;
+			bKills.MaxEntries = bSurvival.MaxEntries = bRuns.MaxEntries = 11; // fetch 11 so filtering dev accounts still leaves 10 to display
 			await Task.WhenAll( bKills.Refresh(), bSurvival.Refresh(), bRuns.Refresh() );
 			_lbKills    = ProcessBoard( bKills );
 			_lbSurvival = ProcessBoard( bSurvival );
@@ -792,6 +1041,11 @@
 	bool _chatOpen = false;
 	bool _chatSubscribed = false;
 	List<ChatEntry> _chatMessages = new();
+	const int MaxMenuChatMessages = 120;
+	static readonly TimeSpan MenuChatHistoryWindow = TimeSpan.FromMinutes( 15 );
+	int _onlineCount = 0;
+	float _onlineRefreshTimer = 0f;
+	const float OnlineRefreshInterval = 1f;
 
 	void OnChatPanelClick( PanelEvent e )
 	{
@@ -809,8 +1063,7 @@
 		var name = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "Player";
 
 		// Show message immediately (optimistic), then broadcast.
-		_chatMessages.Add( new ChatEntry { Name = name, Text = msg, ColorHex = "#ffffff" } );
-		if ( _chatMessages.Count > 8 ) _chatMessages.RemoveAt( 0 );
+		AppendMenuChatEntry( new ChatEntry { Name = name, Text = msg, ColorHex = "#ffffff" } );
 		StateHasChanged();
 
 		var chat = ChatComponent.Instance;
@@ -837,7 +1090,37 @@
 			Text     = latest.Text,
 			ColorHex = MenuChatColor( latest.NameColor )
 		} );
-		if ( _chatMessages.Count > 8 ) _chatMessages.RemoveAt( 0 );
+		TrimMenuChatBuffer();
+	}
+
+	void AppendMenuChatEntry( ChatEntry entry )
+	{
+		_chatMessages.Add( entry );
+		TrimMenuChatBuffer();
+	}
+
+	void TrimMenuChatBuffer()
+	{
+		if ( _chatMessages.Count <= MaxMenuChatMessages ) return;
+		_chatMessages.RemoveRange( 0, _chatMessages.Count - MaxMenuChatMessages );
+	}
+
+	void RefreshMenuChatFromHistory()
+	{
+		var chat = ChatComponent.Instance;
+		if ( chat == null ) return;
+
+		_chatMessages = chat.GetRecentMessages( MenuChatHistoryWindow )
+			.Select( msg => new ChatEntry
+			{
+				Name = msg.PlayerName,
+				Text = msg.Text,
+				ColorHex = MenuChatColor( msg.NameColor )
+			} )
+			.ToList();
+
+		TrimMenuChatBuffer();
+		StateHasChanged();
 	}
 
 	void StopPropagation( PanelEvent e ) => e.StopPropagation();
@@ -854,7 +1137,9 @@
 	{
 		Panel.Style.PointerEvents = PointerEvents.All;
 		_lbRefreshTimer = LbRefreshInterval;
-		_ = RefreshLeaderboardAsync();
+		_onlineCount = Connection.All.Count;
+		_onlineRefreshTimer = OnlineRefreshInterval;
+		RefreshMenuChatFromHistory();
 	}
 
 	protected override void OnEnabled()
@@ -862,7 +1147,10 @@
 		// Always return to the main page (not map/character select) when the menu re-appears after a run.
 		_view = MenuView.Main;
 		_lbRefreshTimer = 0f;
+		_onlineCount = Connection.All.Count;
+		_onlineRefreshTimer = 0f;
 		_ = RefreshLeaderboardAsync();
+		RefreshMenuChatFromHistory();
 	}
 
 	protected override void OnDestroy()
@@ -889,11 +1177,25 @@
 		{
 			ChatComponent.Instance.OnMessageAdded += OnChatMessageAdded;
 			_chatSubscribed = true;
+			RefreshMenuChatFromHistory();
 		}
 
 		// Leaderboard refresh cooldown (manual button).
 		if ( _lbRefreshCooldown > 0f )
 			_lbRefreshCooldown -= Time.Delta;
+
+		// Keep "ONLINE" indicator fresh while idling in menu.
+		_onlineRefreshTimer -= Time.Delta;
+		if ( _onlineRefreshTimer <= 0f )
+		{
+			_onlineRefreshTimer = OnlineRefreshInterval;
+			int latestOnline = Connection.All.Count;
+			if ( latestOnline != _onlineCount )
+			{
+				_onlineCount = latestOnline;
+				StateHasChanged();
+			}
+		}
 
 		// Periodic auto-refresh every 60 s while on the main view.
 		if ( _view == MenuView.Main && !_lbLoading )
@@ -982,6 +1284,22 @@
 		"Projectiles" => QuestDefinition.All.FindAll( q => q.GoalType == QuestGoalType.ProjectilesFired ),
 		_             => QuestDefinition.All
 	};
+
+	static string ChallengeGoalLabel( ChallengeGoalType goal ) => goal switch
+	{
+		ChallengeGoalType.KillAllBosses => "Defeat final boss",
+		ChallengeGoalType.ReachFinalSwarm => "Reach final boss phase",
+		_ => "Complete objective"
+	};
+
+	void OpenChallengePopup( string mapId, int tier, bool tierPlayable )
+	{
+		PlayClickSound();
+		if ( !tierPlayable ) return;
+		_challengePopupMapId = mapId ?? "dark_forest";
+		_challengePopupTier = tier;
+		_challengePopupOpen = true;
+	}
 
 	static string CharColor( string name ) => name switch
 	{

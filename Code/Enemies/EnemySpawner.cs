@@ -1,7 +1,7 @@
 /// <summary>
-/// Megabonk-style spawner: 10-minute survival, wave-based enemy spawning.
-/// 3 intensity phases at 2:30, 5:00, 7:30 ramp up wave difficulty. Final boss at 10:00.
-/// Beat the final boss to win. Lives on the player GameObject.
+/// Endless wave-based spawner.
+/// 3 intensity surges at 2:30, 5:00, 7:30 ramp up wave difficulty, then waves continue forever.
+/// Lives on the player GameObject.
 /// </summary>
 public sealed class EnemySpawner : Component
 {
@@ -39,7 +39,7 @@ public sealed class EnemySpawner : Component
 	};
 
 	private const float IntermissionTime = 4f;
-	private const float TimeScaleFactor  = 0.04f;
+	private const float TimeScaleFactor  = 0.035f;
 
 	// ── State ─────────────────────────────────────────────────────────────────
 	private enum SpawnState { Intermission, WaveActive }
@@ -52,7 +52,6 @@ public sealed class EnemySpawner : Component
 	private float     _runTimer        = 0f;
 	private int       _intensityPhase  = 0;
 	private float     _effectiveSpawnRate = 0f;
-	private bool      _finalBossSpawned = false;
 	private bool      _finalBossPhase   = false;
 	private bool      _tierJustCompleted = false;
 	private bool      _isActive        = false;
@@ -84,24 +83,19 @@ public sealed class EnemySpawner : Component
 		_runTimer += Time.Delta;
 		_stateTimer -= Time.Delta;
 
+		// Hard transition to the final boss exactly when the run timer expires.
+		if ( !_finalBossPhase && _runTimer >= RunDuration )
+		{
+			EnterFinalBossPhase();
+			return;
+		}
+
 		// Check if final boss was killed (object destroyed)
 		if ( _finalBossObject != null && !_finalBossObject.IsValid() )
 		{
 			_finalBossObject = null;
 			_tierJustCompleted = true;
 			GameNotification.Show( "FINAL BOSS DEFEATED! Victory!", new Color( 0.4f, 1f, 0.4f ), 5f );
-		}
-
-		// Past 10 min: only final boss phase (no more waves)
-		if ( _runTimer >= RunDuration )
-		{
-			if ( !_finalBossSpawned )
-			{
-				_finalBossSpawned = true;
-				_finalBossPhase   = true;
-				SpawnFinalBoss();
-			}
-			return;
 		}
 
 		// Intensity phase surges at 2:30, 5:00, 7:30 (ramps wave difficulty)
@@ -140,16 +134,9 @@ public sealed class EnemySpawner : Component
 
 		if ( _stateTimer > 0f ) return;
 
-		_waveNumber++;
+		_waveNumber = nextWave;
 		WaveDef? def = GetWaveDef( _waveNumber );
-		if ( !def.HasValue )
-		{
-			_state = SpawnState.Intermission;
-			_stateTimer = 1f;
-			return;
-		}
-
-		StartWave( def.Value );
+		StartWave( def ?? Waves[^1] );
 	}
 
 	private void TickWaveActive()
@@ -174,8 +161,9 @@ public sealed class EnemySpawner : Component
 
 	private void StartWave( WaveDef def )
 	{
-		float countMult = 1f + _intensityPhase * 0.2f;
-		float rateMult  = 1f - _intensityPhase * 0.12f;
+		float countMult = 1f + _intensityPhase * 0.24f;
+		countMult *= ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyAmountMultiplier );
+		float rateMult  = MathF.Max( 0.55f, 1f - _intensityPhase * 0.14f );
 
 		_state             = SpawnState.WaveActive;
 		_stateTimer        = 0f;
@@ -203,6 +191,16 @@ public sealed class EnemySpawner : Component
 	{
 		if ( w >= 1 && w <= Waves.Length )
 			return Waves[w - 1];
+
+		if ( w > Waves.Length )
+		{
+			int extraWaves = w - Waves.Length;
+			var last = Waves[^1];
+			int count = last.EnemyCount + (extraWaves * 9);
+			float rate = MathF.Max( 0.10f, last.SpawnRate - (extraWaves * 0.014f) );
+			return new WaveDef( count, rate );
+		}
+
 		return null;
 	}
 
@@ -210,6 +208,28 @@ public sealed class EnemySpawner : Component
 	{
 		GameNotification.Show( "FINAL BOSS INCOMING!", new Color( 1f, 0.2f, 0.2f ), 5f );
 		_finalBossObject = SpawnFinalBossEntity();
+	}
+
+	private void EnterFinalBossPhase()
+	{
+		_finalBossPhase = true;
+
+		// Stop all normal wave spawning and clear remaining non-boss enemies.
+		_state = SpawnState.Intermission;
+		_stateTimer = 0f;
+		_enemiesLeft = 0;
+		_spawnTimer = 0f;
+		_lastCountdownSecond = -1;
+
+		foreach ( var go in _spawnedEnemies )
+		{
+			if ( go.IsValid() )
+				go.Destroy();
+		}
+		_spawnedEnemies.Clear();
+		_waveEnemies.Clear();
+
+		SpawnFinalBoss();
 	}
 
 	/// <summary>Dev command: spawn the dragon boss immediately for testing. Skips the 10-min wait. Spawns far (380–460 units) so it flies in from out of view.</summary>
@@ -220,7 +240,6 @@ public sealed class EnemySpawner : Component
 			GameNotification.Show( "Dragon boss already spawned.", Color.Yellow, 2f );
 			return;
 		}
-		_finalBossSpawned = true;
 		_finalBossPhase   = true;
 		GameNotification.Show( "FINAL BOSS INCOMING!", new Color( 1f, 0.2f, 0.2f ), 5f );
 		_finalBossObject = SpawnFinalBossEntity();
@@ -232,12 +251,15 @@ public sealed class EnemySpawner : Component
 		var (go, enemy) = spawnMinDist.HasValue && spawnMaxDist.HasValue
 			? CreateEnemyAtRandomOffset( spawnMinDist.Value, spawnMaxDist.Value )
 			: CreateEnemyAtRandomOffset();
-		float timeScale = 1f + _runTimer / 120f;
-		float phaseScale = 1.6f;
+		float timeScale = 1f + _runTimer / 300f;
+		float phaseScale = 1.25f;
+		float hpMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyHpMultiplier );
+		float dmgMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyDamageMultiplier );
+		float speedMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemySpeedMultiplier );
 
-		enemy.MaxHP                  = 1200f * timeScale * phaseScale;
-		enemy.Speed                  = 18f;
-		enemy.ContactDamage          = 55f * timeScale;
+		enemy.MaxHP                  = 1400f * timeScale * phaseScale * hpMult;
+		enemy.Speed                  = 18f * speedMult;
+		enemy.ContactDamage          = 38f * timeScale * dmgMult;
 		enemy.DamageCooldownDuration  = 2.0f;
 		enemy.XPValue                = 120;
 		enemy.EnemyColor             = new Color( 0.9f, 0.1f, 0.1f );
@@ -258,7 +280,7 @@ public sealed class EnemySpawner : Component
 	private void SpawnEnemy( WaveDef def )
 	{
 		var (go, enemy) = CreateEnemyAtRandomOffset();
-		float timeScale = 1f + _runTimer / 120f;
+		float timeScale = 1f + _runTimer / 300f;
 		float phaseScale = MathF.Pow( 1f + TimeScaleFactor, _intensityPhase + 1 );
 
 		EnemyType type = PickType();
@@ -288,7 +310,7 @@ public sealed class EnemySpawner : Component
 
 	private EnemyType PickType()
 	{
-		float t = _runTimer / RunDuration;
+		float t = Math.Clamp( _runTimer / RunDuration, 0f, 1f );
 		float batWeight     = 0.5f + (0.2f - 0.5f) * t;
 		float armoredWeight = 0f + (0.45f - 0f) * t;
 		float basicWeight   = 1f - batWeight - armoredWeight;
@@ -303,13 +325,16 @@ public sealed class EnemySpawner : Component
 	{
 		float dmgScale  = timeScale * phaseScale;
 		float speedScale = phaseScale;
+		float hpMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyHpMultiplier );
+		float dmgMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyDamageMultiplier );
+		float speedMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemySpeedMultiplier );
 
 		switch ( type )
 		{
 			case EnemyType.Armored:
-				enemy.MaxHP                  = 90f * timeScale;
-				enemy.Speed                  = (20.8f + (float)(_rand.NextDouble() * 6f)) * speedScale;
-				enemy.ContactDamage          = 22f * dmgScale;
+				enemy.MaxHP                  = 100f * timeScale * hpMult;
+				enemy.Speed                  = (20.8f + (float)(_rand.NextDouble() * 6f)) * speedScale * speedMult;
+				enemy.ContactDamage          = 16f * dmgScale * dmgMult;
 				enemy.DamageCooldownDuration  = 1.4f;
 				enemy.XPValue                = 38;
 				enemy.EnemyColor             = new Color( 0.5f, 0.5f, 1f );
@@ -323,9 +348,9 @@ public sealed class EnemySpawner : Component
 				break;
 
 			case EnemyType.Bat:
-				enemy.MaxHP                  = 18f * timeScale;
-				enemy.Speed                  = 44f * speedScale;
-				enemy.ContactDamage          = 12f * dmgScale;
+				enemy.MaxHP                  = 20f * timeScale * hpMult;
+				enemy.Speed                  = 44f * speedScale * speedMult;
+				enemy.ContactDamage          = 8f * dmgScale * dmgMult;
 				enemy.DamageCooldownDuration  = 0.6f;
 				enemy.XPValue                = 20;
 				enemy.EnemyColor             = new Color( 0.85f, 0.45f, 0.1f );
@@ -337,9 +362,9 @@ public sealed class EnemySpawner : Component
 				break;
 
 			default:
-				enemy.MaxHP                  = 30f * timeScale;
-				enemy.Speed                  = (20f + (float)(_rand.NextDouble() * 8f)) * speedScale;
-				enemy.ContactDamage          = 14f * dmgScale;
+				enemy.MaxHP                  = 34f * timeScale * hpMult;
+				enemy.Speed                  = (20f + (float)(_rand.NextDouble() * 8f)) * speedScale * speedMult;
+				enemy.ContactDamage          = 10f * dmgScale * dmgMult;
 				enemy.DamageCooldownDuration  = 1.0f;
 				enemy.XPValue                = 14;
 				enemy.EnemyColor             = new Color( 0.85f, 0.15f, 0.15f );

@@ -7,11 +7,11 @@ public sealed class PlayerXP : Component
 	static SoundEvent LevelUpSound = new( "sounds/level_up.mp3" );
 
 	public int CurrentXP     { get; private set; } = 0;
-	public int XPToNextLevel { get; private set; } = 25;  // Level 1→2: fast. Gentler curve for 10-min runs.
+	public int XPToNextLevel { get; private set; } = 30;  // Level 1→2: still quick, but less front-loaded.
 	public int Level         { get; private set; } = 1;
 
-	/// <summary>XP required to reach next level. Early levels are fast; later levels scale exponentially.</summary>
-	private static int GetXPForLevel( int level ) => (int)(20 * System.Math.Pow( level, 1.18 ));
+	/// <summary>XP required to reach next level. Slightly slower to avoid early snowballing.</summary>
+	private static int GetXPForLevel( int level ) => (int)(22 * System.Math.Pow( level, 1.2 ));
 
 	public float XPPercent => XPToNextLevel > 0 ? (float)CurrentXP / XPToNextLevel : 0f;
 

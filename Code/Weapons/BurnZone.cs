@@ -36,17 +36,12 @@ public sealed class BurnZone : Component
 		// Uniform scale; base 2.5 matches character sprite size; scales with Size Tome.
 		float flameScale = 2.5f * SizeScale;
 		spriteGo.LocalScale = new Vector3( flameScale, flameScale, flameScale );
-		// Rotate -90° around Y so the sprite lies flat; 180° clockwise around Z to flip right-side up.
-		var faceUp = Rotation.FromAxis( new Vector3( 0f, 1f, 0f ), -90f );
-		var flipClockwise = Rotation.FromAxis( new Vector3( 0f, 0f, 1f ), -180f );
-		spriteGo.LocalRotation = flipClockwise * faceUp;
 
 		var sprite = ResourceLibrary.Get<Sprite>( FlameSpritePath );
 		if ( sprite != null )
 		{
 			_flameSprite = spriteGo.Components.Create<SpriteRenderer>();
 			_flameSprite.Sprite = sprite;
-			_flameSprite.Billboard = SpriteRenderer.BillboardMode.None;
 			_flameSprite.TextureFilter = Sandbox.Rendering.FilterMode.Point;
 			_flameSprite.PlaybackSpeed = 1f;
 			_flameSprite.PlayAnimation( "rise" );

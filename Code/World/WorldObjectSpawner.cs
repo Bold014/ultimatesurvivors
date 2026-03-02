@@ -1,15 +1,15 @@
 /// <summary>
 /// Spawns Chests and LevelUpBeacons throughout the run.
-/// On start: spawns 3 chests + 2 beacons.
-/// Every 1 minute: spawns 1 more chest.
-/// Every 1.5 minutes: spawns 1 more beacon.
+/// On start: spawns 2 chests + 1 beacon.
+/// Every 1.5 minutes: spawns 1 more chest.
+/// Every 2.25 minutes: spawns 1 more beacon.
 /// </summary>
 public sealed class WorldObjectSpawner : Component
 {
 	private EnemySpawner _spawner;
 	private Random       _rand;
-	private int          _chestsSpawned  = 3;   // 3 spawned in OnStart
-	private int          _beaconsSpawned = 2;   // 2 spawned in OnStart
+	private int          _chestsSpawned  = 2;   // 2 spawned in OnStart
+	private int          _beaconsSpawned = 1;   // 1 spawned in OnStart
 
 	private const float SpawnMinDist = 200f;
 	private const float SpawnMaxDist = 400f;
@@ -25,9 +25,9 @@ public sealed class WorldObjectSpawner : Component
 		foreach ( var beacon in Scene.GetAllComponents<LevelUpBeacon>().ToList() )
 			beacon.GameObject.Destroy();
 
-		for ( int i = 0; i < 3; i++ )
-			SpawnChest();
 		for ( int i = 0; i < 2; i++ )
+			SpawnChest();
+		for ( int i = 0; i < 1; i++ )
 			SpawnBeacon();
 	}
 
@@ -36,8 +36,8 @@ public sealed class WorldObjectSpawner : Component
 		if ( _spawner == null ) return;
 
 		float runMinutes = _spawner.RunTime / 60f;
-		int targetChests  = 3 + (int)(runMinutes / 1f);    // 3 initial + 1 per 1 min
-		int targetBeacons = 2 + (int)(runMinutes / 1.5f); // 2 initial + 1 per 1.5 min
+		int targetChests  = 2 + (int)(runMinutes / 1.5f);    // 2 initial + 1 per 1.5 min
+		int targetBeacons = 1 + (int)(runMinutes / 2.25f);   // 1 initial + 1 per 2.25 min
 
 		while ( _chestsSpawned < targetChests )
 		{

@@ -5,12 +5,15 @@
 public sealed class ChatComponent : Component
 {
 	public static ChatComponent Instance { get; private set; }
+	private static readonly TimeSpan HistoryWindow = TimeSpan.FromMinutes( 15 );
+	private const int MaxBufferedMessages = 300;
 
 	public class ChatMessage
 	{
 		public string PlayerName { get; set; }
 		public string Text { get; set; }
 		public Color NameColor { get; set; } = Color.White;
+		public DateTime TimestampUtc { get; set; } = DateTime.UtcNow;
 	}
 
 	public List<ChatMessage> Messages { get; } = new();
@@ -39,13 +42,20 @@ public sealed class ChatComponent : Component
 		{
 			PlayerName = playerName,
 			Text = text,
-			NameColor = nameColor ?? Color.White
+			NameColor = nameColor ?? Color.White,
+			TimestampUtc = DateTime.UtcNow
 		} );
 
-		if ( Messages.Count > 50 )
-			Messages.RemoveAt( 0 );
+		PruneHistory();
 
 		OnMessageAdded?.Invoke();
+	}
+
+	public IReadOnlyList<ChatMessage> GetRecentMessages( TimeSpan maxAge )
+	{
+		PruneHistory();
+		var cutoff = DateTime.UtcNow - maxAge;
+		return Messages.Where( m => m.TimestampUtc >= cutoff ).ToList();
 	}
 
 	public void OpenChat()
@@ -104,6 +114,15 @@ public sealed class ChatComponent : Component
 			BroadcastServerMessage( message, color.r, color.g, color.b );
 		else
 			AddMessage( "Server", message, color );
+	}
+
+	private void PruneHistory()
+	{
+		var cutoff = DateTime.UtcNow - HistoryWindow;
+		Messages.RemoveAll( m => m.TimestampUtc < cutoff );
+
+		if ( Messages.Count > MaxBufferedMessages )
+			Messages.RemoveRange( 0, Messages.Count - MaxBufferedMessages );
 	}
 
 	protected override void OnDestroy()

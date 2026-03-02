@@ -26,8 +26,8 @@ public sealed class Chest : Component
 
 	private const float InteractRadius  = 70f;
 	private const float BaseCost        = 20f;   // coins at wave 1 with no prior chests opened
-	private const float WaveScaleFactor = 0.09f; // +9 % base cost per wave
-	private const float ChestCostScale  = 1.35f; // multiplier per chest already opened this run
+	private const float WaveScaleFactor = 0.08f; // +8 % base cost per wave
+	private const float ChestCostScale  = 1.28f; // multiplier per chest already opened this run
 
 	private SpriteRenderer _spriteRenderer;
 
@@ -44,6 +44,9 @@ public sealed class Chest : Component
 	protected override void OnStart()
 	{
 		Cost = ComputeCost( ChestsOpened, SpawnedOnWave );
+		float challengeCostMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.ChestCostMultiplier );
+		if ( challengeCostMult != 1f )
+			Cost = Math.Max( 1, (int)MathF.Round( Cost * challengeCostMult ) );
 
 		SetupSprite();
 	}
@@ -139,7 +142,7 @@ public sealed class Chest : Component
 	/// Cost formula:
 	///   waveBase  = BaseCost * (1 + wave * WaveScaleFactor)   — grows linearly with wave
 	///   finalCost = waveBase * ChestCostScale ^ opened         — extra multiplier per chest opened
-	/// Example: wave 1 / 0 opens ≈ 20 c  |  wave 15 / 2 opens ≈ 78 c  |  wave 30 / 4 opens ≈ 230 c
+	/// Example: wave 1 / 0 opens ≈ 22 c  |  wave 10 / 2 opens ≈ 58 c  |  wave 20 / 4 opens ≈ 111 c
 	/// </summary>
 	private static int ComputeCost( int opened, int wave )
 	{

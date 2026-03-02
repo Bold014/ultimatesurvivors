@@ -35,6 +35,7 @@ public sealed class DamageIndicatorWorld : Component
 		go.WorldPosition = pos;
 		go.WorldRotation = Rotation.From( new Angles( 90f, 0f, 0f ) );
 		go.WorldScale = Vector3.One;
+		LocalGameRunner.ParentRuntimeObject( go );
 
 		var wp = go.Components.Create<Sandbox.WorldPanel>();
 		wp.PanelSize = new Vector2( 420f, 90f );

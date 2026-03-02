@@ -40,19 +40,14 @@
 				}
 				@if ( iconPath != null )
 				{
-					var isEmberTrail = isWeapon && upgrade.WeaponName?.Contains( "Ember Trail" ) == true;
 					<div style="width: 96px; height: 96px; align-self: center; background: #0d0805; border: 1px solid @cardBorder; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
 						@if ( iconIsDirect )
 						{
-							<img src="@iconPath" style="width: 80px; height: 80px; image-rendering: pixelated;" />
-						}
-						else if ( isEmberTrail )
-						{
-							<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+							<img src="@iconPath" style="width: 80px; height: 80px; object-fit: contain; object-position: center; image-rendering: pixelated;" />
 						}
 						else
 						{
-							<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+							<img src="@iconPath" style="width: 80px; height: 80px; object-fit: contain; object-position: center; image-rendering: pixelated;" />
 						}
 					</div>
 				}

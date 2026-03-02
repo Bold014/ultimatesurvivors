@@ -43,6 +43,7 @@ public sealed class EnemyBase : Component
 
 	private float _damageCooldown = 0f;
 	private ModelRenderer _renderer;
+	private GameObject _spriteGo;
 	private SpriteRenderer _spriteRenderer;
 	private SpriteComponent _spriteComponent;
 	private float _flashTimer = 0f;
@@ -67,6 +68,8 @@ public sealed class EnemyBase : Component
 	private const float StuckCheckInterval = 0.4f;
 	/// <summary>Minimum world-unit movement over StuckCheckInterval before we consider the enemy stuck.</summary>
 	private const float StuckMoveThreshold = 3f;
+	private const float EnemySpriteFrontZ = 2f;
+	private const float EnemySpriteBehindCanopyZ = 0.0005f;
 
 	protected override void OnStart()
 	{
@@ -78,11 +81,11 @@ public sealed class EnemyBase : Component
 
 		if ( !string.IsNullOrEmpty( SpritePath ) )
 		{
-			var spriteGo = new GameObject( true, "EnemySprite" );
-			spriteGo.SetParent( GameObject );
-			spriteGo.LocalPosition = new Vector3( 0f, 0f, 2f );
+			_spriteGo = new GameObject( true, "EnemySprite" );
+			_spriteGo.SetParent( GameObject );
+			_spriteGo.LocalPosition = new Vector3( 0f, 0f, EnemySpriteFrontZ );
 			// Negative Y scale flips sprites that are authored upside-down
-			spriteGo.LocalScale = new Vector3( SizeScale * 2f, -SizeScale * 2f, SizeScale * 2f );
+			_spriteGo.LocalScale = new Vector3( SizeScale * 2f, -SizeScale * 2f, SizeScale * 2f );
 
 			// Try Sandbox Sprite (.sprite) first, then SpriteResource (.spr) for SpriteTools format
 			var sprite = ResourceLibrary.Get<Sprite>( SpritePath );
@@ -93,7 +96,7 @@ public sealed class EnemyBase : Component
 
 			if ( sprite != null )
 			{
-				_spriteRenderer = spriteGo.Components.Create<SpriteRenderer>();
+				_spriteRenderer = _spriteGo.Components.Create<SpriteRenderer>();
 				_spriteRenderer.Sprite = sprite;
 				_spriteRenderer.TextureFilter = Sandbox.Rendering.FilterMode.Point;
 				_spriteRenderer.PlayAnimation( _lastWalkAnim );
@@ -101,8 +104,8 @@ public sealed class EnemyBase : Component
 			else if ( spriteResource != null )
 			{
 				// SpriteComponent: use positive scale (negative Y can break it), enable pixel scale for 96x96
-				spriteGo.LocalScale = new Vector3( SizeScale * 2f, SizeScale * 2f, SizeScale * 2f );
-				_spriteComponent = spriteGo.Components.Create<SpriteComponent>();
+				_spriteGo.LocalScale = new Vector3( SizeScale * 2f, SizeScale * 2f, SizeScale * 2f );
+				_spriteComponent = _spriteGo.Components.Create<SpriteComponent>();
 				_spriteComponent.Sprite = spriteResource;
 				_spriteComponent.UsePixelScale = true;
 				_spriteComponent.PlayAnimation( _lastWalkAnim );
@@ -139,6 +142,7 @@ public sealed class EnemyBase : Component
 		}
 
 		if ( HP <= 0f ) return;
+		UpdateTreeOcclusion();
 
 		// Flash white on hit, then restore color
 		if ( _flashTimer > 0f )
@@ -160,6 +164,7 @@ public sealed class EnemyBase : Component
 		// Freeze while the player is choosing an upgrade — prevents dying during the selection screen
 		var upgradeSystem = Target.Components.Get<UpgradeSystem>();
 		if ( upgradeSystem?.IsShowingUpgrades == true ) return;
+		if ( GameManager.EscapeMenuOpen ) return;
 
 		if ( DisableMovement ) return;
 
@@ -334,6 +339,40 @@ public sealed class EnemyBase : Component
 				}
 			}
 		}
+	}
+
+	private void UpdateTreeOcclusion()
+	{
+		if ( _spriteGo == null ) return;
+
+		var p = WorldPosition.WithZ( 0f );
+		int ptx = (int)MathF.Floor( p.x / TreeManager.TileWorldWidth );
+		int pty = (int)MathF.Floor( p.y / TreeManager.TileWorldHeight );
+		bool behindCanopy = false;
+
+		// Depth-sort behind tree canopy when inside the top tile region.
+		for ( int dtx = -1; dtx <= 1 && !behindCanopy; dtx++ )
+		{
+			for ( int dty = -2; dty <= 1 && !behindCanopy; dty++ )
+			{
+				int tx = ptx + dtx;
+				int ty = pty + dty;
+				if ( !TreeManager.IsTreeAtTile( tx, ty ) ) continue;
+
+				float canopyCenterX = tx * TreeManager.TileWorldWidth + TreeManager.TileWorldWidth * 0.5f;
+				float canopyCenterY = (ty + 1) * TreeManager.TileWorldHeight + TreeManager.TileWorldHeight * 0.5f;
+				if ( MathF.Abs( p.x - canopyCenterX ) <= TreeManager.TileWorldWidth * 0.5f &&
+				     MathF.Abs( p.y - canopyCenterY ) <= TreeManager.TileWorldHeight * 0.5f )
+				{
+					behindCanopy = true;
+				}
+			}
+		}
+
+		float targetZ = behindCanopy ? EnemySpriteBehindCanopyZ : EnemySpriteFrontZ;
+		var localPos = _spriteGo.LocalPosition;
+		if ( MathF.Abs( localPos.z - targetZ ) > 0.0001f )
+			_spriteGo.LocalPosition = new Vector3( localPos.x, localPos.y, targetZ );
 	}
 
 	/// <summary>

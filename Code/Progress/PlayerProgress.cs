@@ -38,6 +38,7 @@ public static class PlayerProgress
 
 		// Ensure new fields exist (migration for old saves)
 		Data.HighestTierCompletedByMap ??= new Dictionary<string, int>();
+		Data.CompletedChallengeIds ??= new List<string>();
 
 		// Archer and starter weapons are always unlocked
 		EnsureDefaultUnlocks();
@@ -88,6 +89,16 @@ public static class PlayerProgress
 		return Data.HighestTierCompletedByMap.TryGetValue( mapId ?? "", out var t ) ? t : 0;
 	}
 
+	/// <summary>
+	/// Challenges for a map tier unlock only after that exact tier has been completed at least once.
+	/// </summary>
+	public static bool CanUseChallengesFor( string mapId, int tier )
+	{
+		if ( DevUnlockAll ) return true;
+		if ( string.IsNullOrWhiteSpace( mapId ) ) return false;
+		return GetHighestTierCompleted( mapId ) >= tier;
+	}
+
 	// --- Quest helpers ---
 
 	public static int GetQuestProgress( string questId )
@@ -119,6 +130,50 @@ public static class PlayerProgress
 		// TODO: Unlock S&box achievement when API is available. AchievementCollection.Unlock/ManualUnlock
 		// are not exposed in current build, and reflection is disallowed by S&box whitelist.
 
+		return true;
+	}
+
+	// --- Challenge helpers ---
+
+	public static bool IsChallengeCompleted( string challengeId )
+	{
+		return !string.IsNullOrEmpty( challengeId ) && Data.CompletedChallengeIds.Contains( challengeId );
+	}
+
+	public static float GetPermanentChallengeCoinBonusPercent()
+	{
+		return Data.PermanentChallengeCoinBonusPercent;
+	}
+
+	public static float GetPermanentChallengeCoinBonusMultiplier()
+	{
+		return 1f + (Data.PermanentChallengeCoinBonusPercent / 100f);
+	}
+
+	public static int GetCompletedChallengeCount()
+	{
+		return Data.CompletedChallengeIds?.Count ?? 0;
+	}
+
+	public static List<ChallengeDefinition> GetChallengesFor( string mapId, int tier )
+	{
+		return ChallengeDefinition.ForMapTier( mapId, tier );
+	}
+
+	/// <summary>
+	/// Marks a challenge complete once. Returns true only when this call is the first completion.
+	/// </summary>
+	public static bool TryCompleteChallenge( string challengeId )
+	{
+		if ( string.IsNullOrWhiteSpace( challengeId ) ) return false;
+		if ( IsChallengeCompleted( challengeId ) ) return false;
+
+		var def = ChallengeDefinition.GetById( challengeId );
+		if ( def == null ) return false;
+
+		Data.CompletedChallengeIds.Add( challengeId );
+		Data.PermanentChallengeCoinBonusPercent += def.PermanentBonusPercent;
+		Save();
 		return true;
 	}
 
@@ -185,8 +240,11 @@ public static class PlayerProgress
 		// Sync quest progress from cumulative stats
 		SyncQuestProgress();
 		Save();
-		SyncStatsToBackend( result.Kills, Data.LongestSurvivalMinutes );
-		Data.SurvivalStatSynced = Data.LongestSurvivalMinutes;
+		if ( !ChallengeRuntime.IsChallengeRun )
+		{
+			SyncStatsToBackend( result.Kills, Data.LongestSurvivalMinutes );
+			Data.SurvivalStatSynced = Data.LongestSurvivalMinutes;
+		}
 	}
 
 	// Pulled from SaveData on first use so the delta is correct across game sessions.
@@ -293,6 +351,10 @@ public class SaveData
 
 	/// <summary>Highest tier completed per map. e.g. ["dark_forest"] = 2 means T1 and T2 done.</summary>
 	public Dictionary<string, int> HighestTierCompletedByMap { get; set; } = new();
+	/// <summary>Challenge IDs completed at least once.</summary>
+	public List<string> CompletedChallengeIds { get; set; } = new();
+	/// <summary>Permanent bonus to all coin gain from completed challenges (stored as percent, e.g. 4 = +4%).</summary>
+	public float PermanentChallengeCoinBonusPercent { get; set; } = 0f;
 
 	public bool MusicMuted { get; set; } = false;
 }

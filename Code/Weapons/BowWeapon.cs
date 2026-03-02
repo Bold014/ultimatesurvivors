@@ -1,7 +1,7 @@
 /// <summary>
 /// Fires a fast arrow at the nearest enemy.
-/// Level 2+: +25% damage. Level 3+: fires 2 arrows in a tight spread.
-/// Level 4+: arrows pierce through enemies. Level 5+: 3 arrows and +60% damage.
+/// Level 2+: +18% damage. Level 3+: fires 2 arrows in a tight spread.
+/// Level 4+: arrows pierce through enemies. Level 5+: 3 arrows and +45% damage.
 /// </summary>
 public sealed class BowWeapon : WeaponBase
 {
@@ -51,18 +51,18 @@ public sealed class BowWeapon : WeaponBase
 
 	private float GetDamageMultiplier() => WeaponLevel switch
 	{
-		>= 5 => 1.6f,
-		>= 4 => 1.4f,
-		>= 2 => 1.25f,
+		>= 5 => 1.45f,
+		>= 4 => 1.3f,
+		>= 2 => 1.18f,
 		_    => 1.0f,
 	};
 
 	public override string GetUpgradeDescription( int nextLevel ) => nextLevel switch
 	{
-		2 => "Damage: +25%",
+		2 => "Damage: +18%",
 		3 => "Fires 2 arrows in a tight spread",
 		4 => "Arrows pierce through enemies, speed +18%",
-		5 => "Fires 3 arrows, Damage: +60%",
+		5 => "Fires 3 arrows, Damage: +45%",
 		_ => $"Level {nextLevel}: improved stats",
 	};
 }

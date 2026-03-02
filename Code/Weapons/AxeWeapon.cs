@@ -1,7 +1,8 @@
 /// <summary>
 /// Throws 1+ spinning axes at the nearest enemy.
 /// Level 2+: increased damage. Level 3+: 2 axes in a radial spread.
-/// Level 4+: axes pierce through enemies. Level 5+: 3 axes, max damage.
+/// Axes always pierce through enemies and boomerang back to the player.
+/// Level 5+: 3 axes, max damage.
 /// </summary>
 public sealed class AxeWeapon : WeaponBase
 {
@@ -39,9 +40,11 @@ public sealed class AxeWeapon : WeaponBase
 		proj.ThrowDirection = dir;
 		proj.Speed = 280f * _state.ProjectileSpeedMultiplier;
 		proj.Damage = _state.Damage * GetDamageMultiplier();
-		proj.TravelTime = 1.6f * _state.DurationMultiplier;
+		proj.TravelTime = 0.4f * _state.DurationMultiplier;
 		proj.SpriteSize = 22f * _state.Area;
-		proj.Piercing = WeaponLevel >= 4;
+		// Axe should feel like a true boomerang weapon, not an arrow:
+		// it slices through enemies on the way out and way back at every level.
+		proj.Piercing = true;
 		proj.SourceWeaponId = WeaponId;
 	}
 
@@ -65,7 +68,7 @@ public sealed class AxeWeapon : WeaponBase
 	{
 		2 => "Damage: +25%",
 		3 => "Throws 2 axes in a radial spread",
-		4 => "Axes pierce through enemies, Damage: +20%",
+		4 => "Damage: +20%",
 		5 => "Throws 3 axes, Damage: +17%",
 		_ => $"Level {nextLevel}: improved stats",
 	};

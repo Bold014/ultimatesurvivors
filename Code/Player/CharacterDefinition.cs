@@ -37,7 +37,7 @@ public class CharacterDefinition
 	{
 		Name = "Mage",
 		Description = "Powerful spellcaster. +15% area, high damage.",
-		BaseHP = 80f,
+		BaseHP = 90f,
 		BaseSpeed = 82.5f,
 		BaseDamage = 16f,
 		BaseArea = 1.15f,
@@ -59,7 +59,7 @@ public class CharacterDefinition
 	{
 		Name = "Templar",
 		Description = "Swift lightning striker. Chains bolts between multiple enemies.",
-		BaseHP = 95f,
+		BaseHP = 100f,
 		BaseSpeed = 87.5f,
 		BaseDamage = 13f,
 		BaseArea = 1f,
@@ -81,7 +81,7 @@ public class CharacterDefinition
 	{
 		Name = "Pyromancer",
 		Description = "Glass-cannon fire mage. Scorches the ground with ember trails.",
-		BaseHP = 75f,
+		BaseHP = 85f,
 		BaseSpeed = 82.5f,
 		BaseDamage = 18f,
 		BaseArea = 1f,

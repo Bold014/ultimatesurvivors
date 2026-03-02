@@ -88,6 +88,18 @@
 		</div>
 	}
 
+	@if ( ChallengeRuntime.IsChallengeRun )
+	{
+		var active = ChallengeRuntime.ActiveChallenge;
+		var goalDone = IsChallengeGoalCurrentlyMet( active, spawner );
+		var goalText = active.Goal == ChallengeGoalType.KillAllBosses ? "Defeat final boss" : "Reach final boss phase";
+		<div style="position: absolute; top: 112px; left: 50%; transform: translateX(-50%); background: #120c04ee; border: 2px solid @(goalDone ? "#5ae88a" : "#c8a800"); border-radius: 10px; padding: 8px 16px; min-width: 360px; text-align: center;">
+			<div style="font-size: 13px; color: #f5c518; font-family: Minecraft; letter-spacing: 2px;">CHALLENGE • @active.Name.ToUpper()</div>
+			<div style="font-size: 11px; color: #a08050; margin-top: 2px;">@($"{goalText} • {active.RunCoinMultiplier:F2}x run coins")</div>
+			<div style="font-size: 11px; color: @(goalDone ? "#7ee27e" : "#d0b080"); margin-top: 3px;">@(goalDone ? "Objective reached" : "Objective in progress")</div>
+		</div>
+	}
+
 	<!-- ── Left panel ───────────────────────────────────────────────────── -->
 		<div style="position: absolute; top: 68px; left: 14px; width: 288px; background: linear-gradient(180deg, #1a1410 0%, #0f0c08 100%); border: 2px solid #4a3520; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
 
@@ -131,19 +143,9 @@
 						@if ( w != null )
 							{
 								var wIcon = WeaponIconPath( w.WeaponDisplayName );
-								var wName = w.WeaponDisplayName ?? "";
-								var isStormRod = wName.Equals( "Storm Rod", System.StringComparison.OrdinalIgnoreCase );
-								var isEmberTrail = wName.Equals( "Ember Trail", System.StringComparison.OrdinalIgnoreCase );
 								@if ( wIcon != null )
 								{
-									@if ( isStormRod || isEmberTrail )
-									{
-										<div style="width: 52px; height: 52px; background-image: url('@wIcon'); background-size: 25% 100%; background-position: 37.5% center; background-repeat: no-repeat; image-rendering: pixelated; flex-shrink: 0;"></div>
-									}
-									else
-									{
-										<img src="@wIcon" style="width: 48px; height: 48px; image-rendering: pixelated; flex-shrink: 0;" />
-									}
+									<img src="@wIcon" style="width: 48px; height: 48px; object-fit: contain; object-position: center; image-rendering: pixelated; flex-shrink: 0;" />
 								}
 								else
 								{
@@ -174,7 +176,7 @@
 								var tLevel = tomes?.GetLevel( p ) ?? 0;
 								@if ( tIcon != null )
 								{
-									<div style="width: 48px; height: 48px; background-image: url('@tIcon'); background-size: 33.33% 100%; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+									<img src="@tIcon" style="width: 48px; height: 48px; object-fit: contain; object-position: center; image-rendering: pixelated; flex-shrink: 0;" />
 								}
 								else
 								{
@@ -416,11 +418,14 @@
 		if ( Input.EscapePressed )
 		{
 			var stats = LocalStats;
-			if ( stats?.IsAlive == true && GameManager.ReturnToMenuCountdown <= 0f )
+			if ( stats?.IsAlive == true
+				&& GameManager.ReturnToMenuCountdown <= 0f
+				&& UpgradeSystem.LocalInstance?.IsShowingUpgrades != true )
 			{
 				// Consume the escape press so s&box doesn't open its own overlay
 				Input.EscapePressed = false;
 				GameManager.EscapeMenuOpen = !GameManager.EscapeMenuOpen;
+				ApplyPauseState();
 				StateHasChanged();
 			}
 		}
@@ -433,14 +438,16 @@
 	{
 		PlayClickSound();
 		GameManager.EscapeMenuOpen = false;
+		ApplyPauseState();
 	}
 
 	void RestartRun()
 	{
 		PlayClickSound();
 		GameManager.EscapeMenuOpen = false;
+		ApplyPauseState();
 		GameManager.Instance?.RecordAbandonResult();
-		MenuManager.StartGame( MenuManager.SelectedCharacter, MenuManager.SelectedMap, MenuManager.SelectedTier );
+		MenuManager.StartGame( MenuManager.SelectedCharacter, MenuManager.SelectedMap, MenuManager.SelectedTier, MenuManager.SelectedChallengeId );
 		LocalGameRunner.Instance?.EndLocalGame();
 	}
 
@@ -448,8 +455,16 @@
 	{
 		PlayClickSound();
 		GameManager.EscapeMenuOpen = false;
+		ApplyPauseState();
 		GameManager.Instance?.RecordAbandonResult();
 		LocalGameRunner.Instance?.EndLocalGame();
+	}
+
+	void ApplyPauseState()
+	{
+		bool shouldPause = GameManager.EscapeMenuOpen || UpgradeSystem.LocalInstance?.IsShowingUpgrades == true;
+		LocalWeapons?.SetPaused( shouldPause );
+		LocalSpawner?.SetPaused( shouldPause );
 	}
 
 	protected override int BuildHash()
@@ -491,7 +506,22 @@
 			tomeLevelSum
 		);
 		int h4 = (GameNotification.CurrentText ?? "").GetHashCode();
-		return System.HashCode.Combine( h1, h2, h3, h4 );
+		int h5 = System.HashCode.Combine(
+			ChallengeRuntime.IsChallengeRun ? 1 : 0,
+			ChallengeRuntime.ActiveChallenge?.Id?.GetHashCode() ?? 0
+		);
+		return System.HashCode.Combine( h1, h2, h3, h4, h5 );
+	}
+
+	static bool IsChallengeGoalCurrentlyMet( ChallengeDefinition active, EnemySpawner spawner )
+	{
+		if ( active == null ) return false;
+		return active.Goal switch
+		{
+			ChallengeGoalType.KillAllBosses => spawner?.TierJustCompleted == true,
+			ChallengeGoalType.ReachFinalSwarm => spawner?.IsFinalBossPhase == true,
+			_ => false
+		};
 	}
 
 	string FormatTime( float seconds )

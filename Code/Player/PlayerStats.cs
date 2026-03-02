@@ -39,6 +39,7 @@ public sealed class PlayerStats : Component
 	{
 		if ( !_timerRunning ) return;
 		if ( UpgradeSystem.LocalInstance?.IsShowingUpgrades == true ) return;
+		if ( GameManager.EscapeMenuOpen ) return;
 
 		_localTime += Time.Delta;
 		TimeAlive   = _localTime;

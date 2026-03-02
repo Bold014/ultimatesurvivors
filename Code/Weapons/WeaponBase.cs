@@ -20,6 +20,7 @@ public abstract class WeaponBase : Component
 	protected override void OnUpdate()
 	{
 		if ( _state == null ) return;
+		if ( ChallengeRuntime.HasModifier( ChallengeModifierType.NoWeapons ) ) return;
 
 		_cooldownTimer -= Time.Delta;
 		if ( _cooldownTimer <= 0f )
