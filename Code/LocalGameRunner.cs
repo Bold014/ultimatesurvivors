@@ -1,3 +1,5 @@
+using SpriteTools;
+
 /// <summary>
 /// Runs the game as a client-local prefab instance when multiple players are in the lobby.
 /// Clones GamePrefab without NetworkSpawn so only the clicking client sees/runs the game.
@@ -103,6 +105,14 @@ public sealed class LocalGameRunner : Component
 			return;
 		}
 
+		// Destroy any orphaned TilesetComponents from a prior run that survived EndLocalGame
+		// (e.g. deferred Destroy() timing or cleanup running with a null Instance).
+		foreach ( var tc in Scene.GetAllComponents<TilesetComponent>().ToList() )
+		{
+			tc.GameObject.Enabled = false;
+			tc.GameObject.Destroy();
+		}
+
 		// Snapshot scene-root objects before cloning so we can clean up orphans on end.
 		_preGameRootObjects = new HashSet<GameObject>(
 			Scene.Children.OfType<GameObject>().Where( g => g.IsValid() ) );
@@ -152,6 +162,13 @@ public sealed class LocalGameRunner : Component
 				music.Stop();
 		}
 
+		// Immediately disable the game root so all components under it become
+		// invisible to Scene.GetAllComponents (which skips disabled GameObjects).
+		// This prevents orphaned TilesetComponents from fooling the next run's
+		// MapSpawner, even if Destroy() hasn't completed yet (deferred to end-of-frame).
+		if ( _localGameRoot != null )
+			_localGameRoot.Enabled = false;
+
 		_localGameRoot?.Destroy();
 		_localGameRoot = null;
 		_runtimeEntitiesRoot = null;
@@ -165,7 +182,10 @@ public sealed class LocalGameRunner : Component
 			foreach ( var go in Scene.Children.OfType<GameObject>().ToList() )
 			{
 				if ( go.IsValid() && !_preGameRootObjects.Contains( go ) )
+				{
+					go.Enabled = false;
 					go.Destroy();
+				}
 			}
 			_preGameRootObjects = null;
 		}

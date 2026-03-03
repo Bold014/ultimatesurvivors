@@ -8,3 +8,167 @@ UpgradePanel
 	pointer-events: auto;
 	font-family: Minecraft;
 }
+
+@keyframes ray-spin
+{
+	0%   { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+
+.upgrade-rays
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: repeating-conic-gradient(
+		rgba(245, 197, 24, 0.045) 0deg 7deg,
+		transparent 7deg 18deg
+	);
+	animation: ray-spin 35s linear infinite;
+	pointer-events: none;
+}
+
+.gem
+{
+	position: absolute;
+	pointer-events: none;
+	image-rendering: pixelated;
+}
+
+.upgrade-side-panel
+{
+	width: 210px;
+	background: #0f0c08ee;
+	border: 2px solid #4a3520;
+	border-radius: 4px;
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+	max-height: 80vh;
+	overflow-y: auto;
+	flex-shrink: 0;
+}
+
+.upgrade-panel-header
+{
+	font-size: 14px;
+	font-family: Minecraft;
+	color: #f5c518;
+	font-weight: bold;
+	letter-spacing: 2px;
+	text-shadow: 2px 2px 0 #000;
+	border-bottom: 1px solid #3a2510;
+	padding-bottom: 6px;
+}
+
+.upgrade-section-label
+{
+	font-size: 11px;
+	font-family: Minecraft;
+	color: #a08050;
+	letter-spacing: 1px;
+	text-shadow: 1px 1px 0 #000;
+	margin-top: 4px;
+}
+
+.upgrade-stat-row
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	font-size: 11px;
+	font-family: Minecraft;
+}
+
+.upgrade-stat-name
+{
+	color: #b09070;
+	text-shadow: 1px 1px 0 #000;
+}
+
+.upgrade-stat-value
+{
+	color: #f0e0b0;
+	text-shadow: 1px 1px 0 #000;
+	font-weight: bold;
+}
+
+.upgrade-stat-value.highlight
+{
+	color: #88ee88;
+}
+
+.upgrade-icon-grid
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.upgrade-icon-slot
+{
+	position: relative;
+	width: 52px;
+	height: 52px;
+	background: #0d0805;
+	border: 1px solid #6a4a1a;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.upgrade-icon-level
+{
+	position: absolute;
+	bottom: 2px;
+	right: 3px;
+	font-size: 9px;
+	font-family: Minecraft;
+	color: #f5c518;
+	text-shadow: 1px 1px 0 #000;
+	line-height: 1;
+}
+
+.upgrade-action-btn
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	padding: 10px 20px;
+	background: #1a1008;
+	border: 2px solid #6a4a1a;
+	border-radius: 4px;
+	pointer-events: all;
+	cursor: pointer;
+	font-family: Minecraft;
+	text-shadow: 1px 1px 0 #000;
+	min-width: 90px;
+}
+
+.upgrade-action-btn:hover
+{
+	opacity: 0.85;
+	box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.upgrade-action-btn.disabled
+{
+	opacity: 0.35;
+	pointer-events: none;
+}
+
+.upgrade-action-label
+{
+	font-size: 12px;
+	font-weight: bold;
+	letter-spacing: 1px;
+}

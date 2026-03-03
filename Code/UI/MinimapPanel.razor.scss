@@ -1,0 +1,108 @@
+MinimapPanel
+{
+    .minimap-root
+    {
+        position: absolute;
+        top: 100px;
+        right: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        pointer-events: none;
+    }
+
+    .minimap-frame
+    {
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        border: 2px solid #c8a800;
+        box-shadow: 0 0 12px rgba(200,168,0,0.25);
+        overflow: hidden;
+    }
+
+    .minimap-bg
+    {
+        width: 256px;
+        height: 256px;
+        border-radius: 50%;
+        background: #2a2010;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .minimap-terrain-tree
+    {
+        position: absolute;
+        width: 7px;
+        height: 7px;
+        background: #1a3a10;
+        pointer-events: none;
+    }
+
+    .minimap-cardinal
+    {
+        position: absolute;
+        font-family: Minecraft;
+        font-size: 8px;
+        color: #5a4a30;
+        pointer-events: none;
+
+        &--n { top: 2px;    left: 50%; transform: translateX(-50%); }
+        &--s { bottom: 2px; left: 50%; transform: translateX(-50%); }
+        &--e { right: 2px;  top: 50%; transform: translateY(-50%); }
+        &--w { left: 2px;   top: 50%; transform: translateY(-50%); }
+    }
+
+    .minimap-dot
+    {
+        position: absolute;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+    }
+
+    .minimap-dot--enemy
+    {
+        width: 6px;
+        height: 6px;
+        background: #cc2222;
+        box-shadow: 0 0 3px rgba(204,34,34,0.7);
+    }
+
+    .minimap-dot--beacon
+    {
+        width: 9px;
+        height: 9px;
+        background: #3a6fff;
+        box-shadow: 0 0 5px rgba(58,111,255,0.8);
+    }
+
+    .minimap-dot--chest
+    {
+        width: 8px;
+        height: 8px;
+        background: #c8a800;
+        box-shadow: 0 0 4px rgba(200,168,0,0.7);
+    }
+
+    .minimap-dot--player
+    {
+        width: 8px;
+        height: 8px;
+        background: #ffffff;
+        box-shadow: 0 0 4px rgba(255,255,255,0.9);
+        left: 50%;
+        top: 50%;
+        z-index: 10;
+    }
+
+    .minimap-label
+    {
+        font-family: Minecraft;
+        font-size: 9px;
+        color: #5a4a30;
+        letter-spacing: 3px;
+    }
+}

@@ -29,7 +29,7 @@ public sealed class EmberTrailWeapon : WeaponBase
 	{
 		if ( _state == null ) return;
 
-		int zoneCount = (WeaponLevel >= 4 ? 2 : 1) + _state.ProjectileCount;
+		int zoneCount = GetZoneCount() + _state.ProjectileCount;
 		for ( int i = 0; i < zoneCount; i++ )
 		{
 			var offset = i == 0 ? Vector3.Zero : new Vector3( (i % 2 == 0 ? 1f : -1f) * 20f, 0f, 0f );
@@ -38,13 +38,35 @@ public sealed class EmberTrailWeapon : WeaponBase
 			LocalGameRunner.ParentRuntimeObject( go );
 
 			var zone = go.Components.Create<BurnZone>();
-			zone.Damage = _state.Damage * (0.4f + WeaponLevel * 0.1f);
+			zone.Damage = _state.Damage * GetDamageMultiplier();
 			zone.SizeScale = _state.Area;
-			float baseLifetime = 2f + WeaponLevel * 0.4f;
+			float baseLifetime = GetBaseLifetime();
 			zone.Lifetime = baseLifetime * _state.DurationMultiplier;
 			zone.PulseInterval = 0.5f;
 			zone.SourceWeaponId = WeaponId;
 		}
+	}
+
+	private int GetZoneCount() => WeaponLevel switch
+	{
+		>= 30 => 4,
+		>= 10 => 3,
+		>= 4  => 2,
+		_     => 1,
+	};
+
+	private float GetDamageMultiplier()
+	{
+		int clamped = Math.Min( WeaponLevel, 5 );
+		int extra = Math.Max( 0, WeaponLevel - 5 );
+		return 0.4f + clamped * 0.1f + extra * 0.03f;
+	}
+
+	private float GetBaseLifetime()
+	{
+		int clamped = Math.Min( WeaponLevel, 5 );
+		int extra = Math.Max( 0, WeaponLevel - 5 );
+		return 2f + clamped * 0.4f + extra * 0.1f;
 	}
 
 	private void UpdateCooldown()
@@ -63,6 +85,8 @@ public sealed class EmberTrailWeapon : WeaponBase
 		3 => "Damage: +11%, Drop rate: +22%",
 		4 => "Drops 2 fire zones per activation",
 		5 => "Damage: +11%, Drop rate: +29%",
-		_ => $"Level {nextLevel}: improved stats",
+		10 => "Drops 3 fire zones per activation",
+		30 => "Drops 4 fire zones per activation",
+		_ => $"Level {nextLevel}: +3% damage, +0.1s lifetime",
 	};
 }

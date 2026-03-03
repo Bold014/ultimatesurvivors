@@ -47,6 +47,12 @@ public class RandomTileVariants : Component
 	/// <summary>Variant chance (%) outside patches (sparse single tiles).</summary>
 	[Property, Range( 0, 100 )] public int SparseVariantPercent { get; set; } = 2;
 
+	/// <summary>
+	/// When true, no base tile is written — only variants are placed sparsely.
+	/// Use for decoration overlay layers on top of the ground.
+	/// </summary>
+	[Property] public bool OverlayMode { get; set; } = false;
+
 	// ── runtime state ─────────────────────────────────────────────────────────
 	readonly HashSet<Vector2Int> _generatedChunks = new();
 	TilesetComponent.Layer _layer;
@@ -93,11 +99,14 @@ public class RandomTileVariants : Component
 
 		var posToGuid = tilesetRes.Tiles.ToDictionary( t => t.Position, t => t.Id );
 
-		var groundPos = new Vector2Int( GroundColumn, GroundRow );
-		if ( !posToGuid.TryGetValue( groundPos, out _groundGuid ) )
+		if ( !OverlayMode )
 		{
-			Log.Warning( $"[MapGen] Ground tile not found at ({GroundColumn},{GroundRow})." );
-			return;
+			var groundPos = new Vector2Int( GroundColumn, GroundRow );
+			if ( !posToGuid.TryGetValue( groundPos, out _groundGuid ) )
+			{
+				Log.Warning( $"[MapGen] Ground tile not found at ({GroundColumn},{GroundRow})." );
+				return;
+			}
 		}
 
 		_variants = new List<Guid>();
@@ -180,25 +189,46 @@ public class RandomTileVariants : Component
 			for ( int y = startY; y < startY + ChunkSize; y++ )
 			{
 				var mapPos = new Vector2Int( x, y );
-				Guid tileGuid = _groundGuid;
-				int tileAngle = GroundRotation;
 
-				if ( useVariants )
+				if ( OverlayMode )
 				{
-					// Noise-based patch detection
-					float patchNoise = SmoothNoise( x, y, _noiseSeed, PatchNoiseScale );
-					bool inPatch = patchNoise > PatchThreshold;
-					int chance = inPatch ? PatchVariantPercent : SparseVariantPercent;
-
-					if ( _rng.Next( 100 ) < chance )
+					// Only place a decoration tile; leave everything else empty
+					if ( useVariants )
 					{
-						// Pick variant based on position hash for determinism within a tile
-						int vi = (int)(Math.Abs( (long)x * 31 + (long)y * 17 ) % _variants.Count);
-						tileGuid = _variants[vi];
+						float patchNoise = SmoothNoise( x, y, _noiseSeed, PatchNoiseScale );
+						bool inPatch = patchNoise > PatchThreshold;
+						int chance = inPatch ? PatchVariantPercent : SparseVariantPercent;
+
+						if ( _rng.Next( 100 ) < chance )
+						{
+							int vi = (int)(Math.Abs( (long)x * 31 + (long)y * 17 ) % _variants.Count);
+							_layer.SetTile( mapPos, _variants[vi], Vector2Int.Zero, GroundRotation, rebuild: false );
+						}
 					}
 				}
+				else
+				{
+					// Normal mode: fill every tile with ground or variant
+					Guid tileGuid = _groundGuid;
+					int tileAngle = GroundRotation;
 
-				_layer.SetTile( mapPos, tileGuid, Vector2Int.Zero, tileAngle, rebuild: false );
+					if ( useVariants )
+					{
+						// Noise-based patch detection
+						float patchNoise = SmoothNoise( x, y, _noiseSeed, PatchNoiseScale );
+						bool inPatch = patchNoise > PatchThreshold;
+						int chance = inPatch ? PatchVariantPercent : SparseVariantPercent;
+
+						if ( _rng.Next( 100 ) < chance )
+						{
+							// Pick variant based on position hash for determinism within a tile
+							int vi = (int)(Math.Abs( (long)x * 31 + (long)y * 17 ) % _variants.Count);
+							tileGuid = _variants[vi];
+						}
+					}
+
+					_layer.SetTile( mapPos, tileGuid, Vector2Int.Zero, tileAngle, rebuild: false );
+				}
 			}
 		}
 

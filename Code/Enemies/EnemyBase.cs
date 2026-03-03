@@ -62,12 +62,29 @@ public sealed class EnemyBase : Component
 	/// <summary>World-unit radius at which a waypoint is considered reached.</summary>
 	private const float WaypointRadius = 16f;
 
+	// ── Per-frame enemy list cache (avoids O(n²) scene scans in SeparateFromOtherEnemies) ──
+	private static List<EnemyBase> _cachedEnemies   = new();
+	private static float           _enemyCacheTime  = -1f;
+
+	private IReadOnlyList<EnemyBase> GetEnemiesThisFrame()
+	{
+		if ( Time.Now != _enemyCacheTime )
+		{
+			_cachedEnemies.Clear();
+			_cachedEnemies.AddRange( Scene.GetAllComponents<EnemyBase>() );
+			_enemyCacheTime = Time.Now;
+		}
+		return _cachedEnemies;
+	}
+
 	// ── Stuck detection ───────────────────────────────────────────────────
 	private Vector3 _lastStuckPos;
 	private float _stuckCheckTimer;
 	private const float StuckCheckInterval = 0.4f;
 	/// <summary>Minimum world-unit movement over StuckCheckInterval before we consider the enemy stuck.</summary>
 	private const float StuckMoveThreshold = 3f;
+	private int _consecutiveStuckCount;
+	private const float StuckNudgeAmount = 10f;
 	private const float EnemySpriteFrontZ = 2f;
 	private const float EnemySpriteBehindCanopyZ = 0.0005f;
 
@@ -128,6 +145,7 @@ public sealed class EnemyBase : Component
 			float s = 0.35f * SizeScale;
 			GameObject.WorldScale = new Vector3( s, s, 0.05f * SizeScale );
 		}
+
 	}
 
 	protected override void OnUpdate()
@@ -267,31 +285,15 @@ public sealed class EnemyBase : Component
 		_knockbackVelocity *= MathF.Pow( 0.08f, Time.Delta ); // ~92% decay per second
 
 		if ( step.LengthSquared > 0.0001f )
-		{
-			var desired = WorldPosition + step;
-			if ( !TreeManager.IsTreeAtWorldPos( desired.x, desired.y ) )
-			{
-				WorldPosition = desired;
-			}
-			else
-			{
-				// Last-resort axis slide (handles edge cases where A* path clips a tree corner)
-				var slideX = WorldPosition + new Vector3( step.x, 0f, 0f );
-				var slideY = WorldPosition + new Vector3( 0f, step.y, 0f );
-				if ( !TreeManager.IsTreeAtWorldPos( slideX.x, slideX.y ) )
-					WorldPosition = slideX;
-				else if ( !TreeManager.IsTreeAtWorldPos( slideY.x, slideY.y ) )
-					WorldPosition = slideY;
-				else
-					_knockbackVelocity = Vector3.Zero;
-			}
-		}
+			MoveWithSlide( step );
 		WorldPosition = WorldPosition.WithZ( 0f );
+		ResolveTreeCollisions();
 
 		SeparateFromOtherEnemies();
+		ResolveTreeCollisions();
 		SeparateFromPlayer();
-		// If separation or knockback pushed us into a tree, immediately nudge out
-		EscapeFromTree();
+		ResolveTreeCollisions();
+		EscapeFromTree(); // unchanged — last resort for deep knockback penetration
 
 		// Stuck detection: if we've barely moved over the last interval, invalidate the cached
 		// path so A* gets a fresh chance from the current (possibly adjusted) position
@@ -302,6 +304,21 @@ public sealed class EnemyBase : Component
 			{
 				_path = null;
 				_pathRecalcTimer = 0f;
+				_consecutiveStuckCount++;
+				if ( _consecutiveStuckCount >= 2 )
+				{
+					// Nudge perpendicular to player direction to escape corners
+					var toPlayer = (Target.WorldPosition - WorldPosition).WithZ( 0f ).Normal;
+					var perp = new Vector3( -toPlayer.y, toPlayer.x, 0f );
+					if ( System.Random.Shared.NextSingle() < 0.5f ) perp = -perp;
+					var nudged = (WorldPosition + perp * StuckNudgeAmount).WithZ( 0f );
+					if ( !WouldOverlapTree( nudged ) ) WorldPosition = nudged;
+					_consecutiveStuckCount = 0;
+				}
+			}
+			else
+			{
+				_consecutiveStuckCount = 0;
 			}
 			_lastStuckPos = WorldPosition;
 			_stuckCheckTimer = StuckCheckInterval;
@@ -383,12 +400,12 @@ public sealed class EnemyBase : Component
 	{
 		var pos = WorldPosition.WithZ( 0f );
 
-		foreach ( var other in Scene.GetAllComponents<EnemyBase>() )
+		foreach ( var other in GetEnemiesThisFrame() )
 		{
 			if ( other == this || other.HP <= 0f ) continue;
 
 			var diff    = pos - other.WorldPosition.WithZ( 0f );
-			float minDist = HalfExtent + other.HalfExtent;
+			float minDist = (HalfExtent + other.HalfExtent) * 0.3f;
 			float distSq  = diff.LengthSquared;
 
 			if ( distSq < minDist * minDist && distSq > 0.001f )
@@ -466,6 +483,88 @@ public sealed class EnemyBase : Component
 		( 1f,  1f), (-1f,  1f), ( 1f, -1f), (-1f, -1f),
 	};
 
+	private static Vector3 AabbPushOutRect(
+		Vector3 aPos, Vector3 bPos,
+		float aHalfX, float aHalfY,
+		float bHalfX, float bHalfY)
+	{
+		var diff = aPos - bPos;
+		float overlapX = (aHalfX + bHalfX) - MathF.Abs( diff.x );
+		float overlapY = (aHalfY + bHalfY) - MathF.Abs( diff.y );
+		if ( overlapX <= 0f || overlapY <= 0f ) return aPos;
+		if ( overlapX < overlapY )
+			aPos.x += overlapX * (diff.x >= 0f ? 1f : -1f);
+		else
+			aPos.y += overlapY * (diff.y >= 0f ? 1f : -1f);
+		return aPos;
+	}
+
+	// Matches PlayerController.PlayerTreeHalfExtent — same tight hitbox so enemies
+	// navigate trees identically to the player (can squeeze through the same gaps).
+	private const float EnemyTreeHalfExtent = 7f;
+
+	private void ResolveTreeCollisions()
+	{
+		var pos = WorldPosition.WithZ( 0f );
+		int ptx = (int)MathF.Floor( pos.x / TreeManager.TileWorldWidth );
+		int pty = (int)MathF.Floor( pos.y / TreeManager.TileWorldHeight );
+		for ( int dtx = -2; dtx <= 2; dtx++ )
+		for ( int dty = -2; dty <= 2; dty++ )
+		{
+			if ( !TreeManager.IsTreeAtTile( ptx + dtx, pty + dty ) ) continue;
+			var treeCenter = TreeManager.GetTreeCollisionCenter( ptx + dtx, pty + dty );
+			pos = AabbPushOutRect( pos, treeCenter,
+				EnemyTreeHalfExtent, EnemyTreeHalfExtent,
+				TreeManager.CollisionHalfWidth,
+				TreeManager.CollisionHalfHeight );
+		}
+		WorldPosition = pos;
+	}
+
+	/// <summary>
+	/// Returns true if placing the enemy center at <paramref name="pos"/> would AABB-overlap
+	/// any nearby tree. Uses the same constants as ResolveTreeCollisions for consistency.
+	/// </summary>
+	private static bool WouldOverlapTree( Vector3 pos )
+	{
+		int ptx = (int)MathF.Floor( pos.x / TreeManager.TileWorldWidth );
+		int pty = (int)MathF.Floor( pos.y / TreeManager.TileWorldHeight );
+		for ( int dtx = -2; dtx <= 2; dtx++ )
+		for ( int dty = -2; dty <= 2; dty++ )
+		{
+			if ( !TreeManager.IsTreeAtTile( ptx + dtx, pty + dty ) ) continue;
+			var tc = TreeManager.GetTreeCollisionCenter( ptx + dtx, pty + dty );
+			if ( MathF.Abs( pos.x - tc.x ) < EnemyTreeHalfExtent + TreeManager.CollisionHalfWidth &&
+			     MathF.Abs( pos.y - tc.y ) < EnemyTreeHalfExtent + TreeManager.CollisionHalfHeight )
+				return true;
+		}
+		return false;
+	}
+
+	/// <summary>
+	/// Moves the enemy by <paramref name="step"/>, sliding along walls instead of pressing into them.
+	/// Falls back to X-only then Y-only decomposition. Resets path recalc timer when sliding
+	/// so A* replans from the corrected position next frame.
+	/// </summary>
+	private void MoveWithSlide( Vector3 step )
+	{
+		var full = (WorldPosition + step).WithZ( 0f );
+		if ( !WouldOverlapTree( full ) ) { WorldPosition = full; return; }
+
+		if ( MathF.Abs( step.x ) > 0.001f )
+		{
+			var sx = (WorldPosition + new Vector3( step.x, 0f, 0f )).WithZ( 0f );
+			if ( !WouldOverlapTree( sx ) ) { WorldPosition = sx; _pathRecalcTimer = 0f; return; }
+		}
+
+		if ( MathF.Abs( step.y ) > 0.001f )
+		{
+			var sy = (WorldPosition + new Vector3( 0f, step.y, 0f )).WithZ( 0f );
+			if ( !WouldOverlapTree( sy ) ) { WorldPosition = sy; _pathRecalcTimer = 0f; return; }
+		}
+		// Fully blocked — AABB resolution is the backstop
+	}
+
 	/// <summary>
 	/// Returns true if any tree tile intersects the straight line between two world positions.
 	/// Uses ray-marching at a step smaller than the narrowest tile dimension (16 units).
@@ -521,12 +620,28 @@ public sealed class EnemyBase : Component
 
 		HP -= amount;
 
-		// Lifesteal: heal player for a fraction of damage dealt
+		// Lifesteal: proc-chance per hit, heals 1 HP per proc
+		// e.g. 2% lifesteal = 2% chance to heal 1 HP; 100%+ = guaranteed 1 HP;
+		// 200% = guaranteed 1 HP + 100% chance for another 1 HP, etc.
 		if ( playerState != null && playerState.Lifesteal > 0f )
 		{
-			float healAmount = amount * playerState.Lifesteal;
-			playerState.Heal( healAmount );
-			DamageIndicatorWorld.SpawnHeal( Target, new Vector3( 0f, 0f, 14f ), healAmount );
+			float remaining = playerState.Lifesteal;
+			int healed = 0;
+
+			while ( remaining >= 1f )
+			{
+				healed++;
+				remaining -= 1f;
+			}
+
+			if ( remaining > 0f && Game.Random.Float( 0f, 1f ) < remaining )
+				healed++;
+
+			if ( healed > 0 )
+			{
+				playerState.Heal( healed );
+				DamageIndicatorWorld.SpawnHeal( Target, new Vector3( 0f, 0f, 14f ), healed );
+			}
 		}
 
 		if ( _renderer != null )
@@ -592,6 +707,7 @@ public sealed class EnemyBase : Component
 		int coins = state != null ? Math.Max( 1, (int)Math.Ceiling( 1 * state.GoldMultiplier ) ) : 1;
 		Target?.Components.Get<PlayerCoins>()?.AddCoins( coins );
 		SpawnXPGem();
+		TrySpawnDrops();
 
 		if ( ( _spriteRenderer != null || _spriteComponent != null ) && !string.IsNullOrEmpty( DieAnimation ) )
 		{
@@ -623,5 +739,46 @@ public sealed class EnemyBase : Component
 		var gem = gemGo.Components.Create<XPGem>();
 		gem.XPValue = XPValue;
 		gem.PlayerObject = Target;
+	}
+
+	private void TrySpawnDrops()
+	{
+		if ( Target == null ) return;
+		var state = Target.Components.Get<PlayerLocalState>();
+		if ( state == null ) return;
+
+		float luckMult = 1f + state.Luck;
+
+		// Health Heart — 3% base chance
+		if ( state.HP < state.MaxHP && System.Random.Shared.NextSingle() < 0.03f * luckMult )
+		{
+			SpawnPickup<HealthPickup>();
+			return; // only one drop per kill
+		}
+
+		// Shield Orb — 3% base chance (only if player has shield capacity)
+		if ( state.MaxShield > 0f && state.Shield < state.MaxShield
+		     && System.Random.Shared.NextSingle() < 0.03f * luckMult )
+		{
+			SpawnPickup<ShieldPickup>();
+			return;
+		}
+
+		// Magnet — 0.2% base chance
+		if ( System.Random.Shared.NextSingle() < 0.002f * luckMult )
+		{
+			SpawnPickup<MagnetPickup>();
+		}
+	}
+
+	private void SpawnPickup<T>() where T : Component, new()
+	{
+		var go = new GameObject( true, typeof(T).Name );
+		go.WorldPosition = WorldPosition.WithZ( 0f );
+		LocalGameRunner.ParentRuntimeObject( go );
+		var pickup = go.Components.Create<T>();
+		if ( pickup is HealthPickup hp ) hp.PlayerObject = Target;
+		else if ( pickup is ShieldPickup sp ) sp.PlayerObject = Target;
+		else if ( pickup is MagnetPickup mp ) mp.PlayerObject = Target;
 	}
 }

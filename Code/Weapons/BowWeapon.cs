@@ -17,7 +17,7 @@ public sealed class BowWeapon : WeaponBase
 		if ( target == null ) return;
 
 		var baseDir = (target.WorldPosition - WorldPosition).WithZ( 0f ).Normal;
-		int count = (WeaponLevel >= 5 ? 3 : WeaponLevel >= 3 ? 2 : 1) + _state.ProjectileCount;
+		int count = GetArrowCount() + _state.ProjectileCount;
 		float spread = 8f;
 
 		for ( int i = 0; i < count; i++ )
@@ -49,13 +49,24 @@ public sealed class BowWeapon : WeaponBase
 		proj.SourceWeaponId = WeaponId;
 	}
 
-	private float GetDamageMultiplier() => WeaponLevel switch
+	private int GetArrowCount() => WeaponLevel switch
 	{
-		>= 5 => 1.45f,
-		>= 4 => 1.3f,
-		>= 2 => 1.18f,
-		_    => 1.0f,
+		>= 30 => 6,
+		>= 20 => 5,
+		>= 10 => 4,
+		>= 5  => 3,
+		>= 3  => 2,
+		_     => 1,
 	};
+
+	private float GetDamageMultiplier()
+	{
+		if ( WeaponLevel <= 1 ) return 1.0f;
+		if ( WeaponLevel <= 3 ) return 1.18f;
+		if ( WeaponLevel <= 4 ) return 1.3f;
+		if ( WeaponLevel <= 5 ) return 1.45f;
+		return 1.45f + (WeaponLevel - 5) * 0.035f;
+	}
 
 	public override string GetUpgradeDescription( int nextLevel ) => nextLevel switch
 	{
@@ -63,6 +74,9 @@ public sealed class BowWeapon : WeaponBase
 		3 => "Fires 2 arrows in a tight spread",
 		4 => "Arrows pierce through enemies, speed +18%",
 		5 => "Fires 3 arrows, Damage: +45%",
-		_ => $"Level {nextLevel}: improved stats",
+		10 => "Fires 4 arrows",
+		20 => "Fires 5 arrows",
+		30 => "Fires 6 arrows",
+		_ => $"Level {nextLevel}: +3.5% damage",
 	};
 }

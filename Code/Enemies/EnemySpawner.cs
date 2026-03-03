@@ -54,6 +54,10 @@ public sealed class EnemySpawner : Component
 	private float     _effectiveSpawnRate = 0f;
 	private bool      _finalBossPhase   = false;
 	private bool      _tierJustCompleted = false;
+	private int       _endlessWavesCompleted = 0;
+	public  int       EndlessWavesCompleted  => _endlessWavesCompleted;
+	/// <summary>Wave number at the moment the first endless boss was killed. Used to time periodic boss respawns.</summary>
+	private int       _endlessStartWave = 0;
 	private bool      _isActive        = false;
 	private Random    _rand;
 	private readonly List<GameObject> _spawnedEnemies = new();
@@ -84,18 +88,38 @@ public sealed class EnemySpawner : Component
 		_stateTimer -= Time.Delta;
 
 		// Hard transition to the final boss exactly when the run timer expires.
+		// In endless mode this is suppressed — boss respawns are wave-driven instead.
 		if ( !_finalBossPhase && _runTimer >= RunDuration )
 		{
-			EnterFinalBossPhase();
-			return;
+			var gmTimer = Scene.GetAllComponents<GameManager>().FirstOrDefault();
+			if ( gmTimer == null || !gmTimer.IsEndlessModeActive )
+			{
+				EnterFinalBossPhase();
+				return;
+			}
 		}
 
 		// Check if final boss was killed (object destroyed)
 		if ( _finalBossObject != null && !_finalBossObject.IsValid() )
 		{
 			_finalBossObject = null;
-			_tierJustCompleted = true;
-			GameNotification.Show( "FINAL BOSS DEFEATED! Victory!", new Color( 0.4f, 1f, 0.4f ), 5f );
+			var gmBoss = Scene.GetAllComponents<GameManager>().FirstOrDefault();
+			if ( gmBoss != null && gmBoss.IsEndlessModeActive )
+			{
+				// Subsequent boss kills in endless: clear boss phase, give intermission, count the cycle
+				_finalBossPhase = false;
+				_endlessWavesCompleted++;
+				_stateTimer = IntermissionTime;
+			}
+			else
+			{
+				// First boss kill: trigger normal tier-complete flow in GameManager
+				_tierJustCompleted = true;
+				_endlessStartWave  = _waveNumber;
+				_finalBossPhase    = false;       // clear so HUD stops showing FINAL BOSS / BOSS!
+				_stateTimer        = IntermissionTime;  // brief pause before endless waves resume
+			}
+			GameNotification.Show( "FINAL BOSS DEFEATED!", new Color( 0.4f, 1f, 0.4f ), 5f );
 		}
 
 		// Intensity phase surges at 2:30, 5:00, 7:30 (ramps wave difficulty)
@@ -133,6 +157,20 @@ public sealed class EnemySpawner : Component
 		}
 
 		if ( _stateTimer > 0f ) return;
+
+		// In endless mode, respawn the boss every 5 waves instead of starting a normal wave
+		var gmEndless = Scene.GetAllComponents<GameManager>().FirstOrDefault();
+		if ( gmEndless != null && gmEndless.IsEndlessModeActive && _endlessStartWave > 0 )
+		{
+			if ( (nextWave - _endlessStartWave) % 5 == 0 && nextWave > _endlessStartWave )
+			{
+				_waveNumber          = nextWave;
+				_finalBossPhase      = true;
+				_lastCountdownSecond = -1;
+				SpawnFinalBoss();
+				return;
+			}
+		}
 
 		_waveNumber = nextWave;
 		WaveDef? def = GetWaveDef( _waveNumber );
@@ -257,11 +295,13 @@ public sealed class EnemySpawner : Component
 		float dmgMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyDamageMultiplier );
 		float speedMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemySpeedMultiplier );
 
-		enemy.MaxHP                  = 1400f * timeScale * phaseScale * hpMult;
+		var (weaponPower, tomePower) = GetPlayerPowerScales();
+		float endlessBossScale = MathF.Pow( 1.3f, _endlessWavesCompleted );
+		enemy.MaxHP                  = 1400f * timeScale * phaseScale * hpMult * endlessBossScale * weaponPower * tomePower;
 		enemy.Speed                  = 18f * speedMult;
-		enemy.ContactDamage          = 38f * timeScale * dmgMult;
+		enemy.ContactDamage          = 38f * timeScale * dmgMult * endlessBossScale * MathF.Sqrt( weaponPower * tomePower );
 		enemy.DamageCooldownDuration  = 2.0f;
-		enemy.XPValue                = 120;
+		enemy.XPValue                = (int)(120 * (1f + _runTimer / 600f));
 		enemy.EnemyColor             = new Color( 0.9f, 0.1f, 0.1f );
 		enemy.SizeScale              = 6f;
 		enemy.CollisionScale         = 0.3f; // Sprite-based; default formula overestimates hitbox vs visual
@@ -280,11 +320,14 @@ public sealed class EnemySpawner : Component
 	private void SpawnEnemy( WaveDef def )
 	{
 		var (go, enemy) = CreateEnemyAtRandomOffset();
-		float timeScale = 1f + _runTimer / 300f;
-		float phaseScale = MathF.Pow( 1f + TimeScaleFactor, _intensityPhase + 1 );
+		float timeScale   = 1f + _runTimer / 300f;
+		float phaseScale  = MathF.Pow( 1f + TimeScaleFactor, _intensityPhase + 1 );
+		float endlessScale = _waveNumber > Waves.Length
+			? MathF.Pow( 1.18f, _waveNumber - Waves.Length )
+			: 1f;
 
 		EnemyType type = PickType();
-		ApplyType( go, enemy, type, timeScale, phaseScale );
+		ApplyType( go, enemy, type, timeScale, phaseScale, endlessScale );
 		_spawnedEnemies.Add( go );
 		_waveEnemies.Add( go );
 	}
@@ -321,38 +364,55 @@ public sealed class EnemySpawner : Component
 		return EnemyType.Basic;
 	}
 
-	private void ApplyType( GameObject go, EnemyBase enemy, EnemyType type, float timeScale, float phaseScale )
+	private (float weaponPower, float tomePower) GetPlayerPowerScales()
 	{
-		float dmgScale  = timeScale * phaseScale;
-		float speedScale = phaseScale;
-		float hpMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyHpMultiplier );
-		float dmgMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyDamageMultiplier );
+		var weapons = Components.Get<PlayerWeapons>();
+		var tomes = Components.Get<PlayerTomes>();
+		float avgWeaponLvl = weapons != null ? weapons.GetAverageWeaponLevel() : 1f;
+		int totalTomeLvls = tomes != null ? tomes.GetTotalTomeLevels() : 0;
+		float weaponPower = MathF.Pow( 1.05f, avgWeaponLvl - 1f );
+		float tomePower = MathF.Pow( 1.005f, totalTomeLvls );
+		return (weaponPower, tomePower);
+	}
+
+	private void ApplyType( GameObject go, EnemyBase enemy, EnemyType type,
+	                         float timeScale, float phaseScale, float endlessScale = 1f )
+	{
+		var (weaponPower, tomePower) = GetPlayerPowerScales();
+		float hpScale    = timeScale * endlessScale * weaponPower * tomePower;
+		float dmgScale   = timeScale * phaseScale * endlessScale * MathF.Sqrt( weaponPower * tomePower );
+		float speedScale = phaseScale * MathF.Pow( endlessScale, 0.4f );
+		float hpMult    = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyHpMultiplier );
+		float dmgMult   = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemyDamageMultiplier );
 		float speedMult = ChallengeRuntime.GetCombinedMultiplier( ChallengeModifierType.EnemySpeedMultiplier );
+
+		float xpTimeScale = 1f + _runTimer / 600f;
+		float cdMult = _waveNumber > Waves.Length
+			? MathF.Max( 0.35f, MathF.Pow( 0.92f, _waveNumber - Waves.Length ) )
+			: 1f;
 
 		switch ( type )
 		{
 			case EnemyType.Armored:
-				enemy.MaxHP                  = 100f * timeScale * hpMult;
+				enemy.MaxHP                  = 100f * hpScale * hpMult;
 				enemy.Speed                  = (20.8f + (float)(_rand.NextDouble() * 6f)) * speedScale * speedMult;
 				enemy.ContactDamage          = 16f * dmgScale * dmgMult;
-				enemy.DamageCooldownDuration  = 1.4f;
-				enemy.XPValue                = 38;
+				enemy.DamageCooldownDuration  = 1.4f * cdMult;
+				enemy.XPValue                = (int)(38 * xpTimeScale);
 				enemy.EnemyColor             = new Color( 0.5f, 0.5f, 1f );
 				enemy.SizeScale              = 1.2f;
 				enemy.SpritePath             = "sprites/bear/bearanimations.sprite";
 				enemy.DieAnimation           = "die";
 				enemy.DieAnimDuration        = 0.5f;
-				enemy.AttackAnimationPrefix  = "attack";
-				enemy.AttackAnimDuration     = 0.5f;
 				go.Name                      = "EnemyArmored";
 				break;
 
 			case EnemyType.Bat:
-				enemy.MaxHP                  = 20f * timeScale * hpMult;
+				enemy.MaxHP                  = 20f * hpScale * hpMult;
 				enemy.Speed                  = 44f * speedScale * speedMult;
 				enemy.ContactDamage          = 8f * dmgScale * dmgMult;
-				enemy.DamageCooldownDuration  = 0.6f;
-				enemy.XPValue                = 20;
+				enemy.DamageCooldownDuration  = 0.6f * cdMult;
+				enemy.XPValue                = (int)(20 * xpTimeScale);
 				enemy.EnemyColor             = new Color( 0.85f, 0.45f, 0.1f );
 				enemy.SizeScale              = 0.65f;
 				enemy.SpritePath             = "sprites/wraith/wraithanimations.sprite";
@@ -362,11 +422,11 @@ public sealed class EnemySpawner : Component
 				break;
 
 			default:
-				enemy.MaxHP                  = 34f * timeScale * hpMult;
+				enemy.MaxHP                  = 34f * hpScale * hpMult;
 				enemy.Speed                  = (20f + (float)(_rand.NextDouble() * 8f)) * speedScale * speedMult;
 				enemy.ContactDamage          = 10f * dmgScale * dmgMult;
-				enemy.DamageCooldownDuration  = 1.0f;
-				enemy.XPValue                = 14;
+				enemy.DamageCooldownDuration  = 1.0f * cdMult;
+				enemy.XPValue                = (int)(14 * xpTimeScale);
 				enemy.EnemyColor             = new Color( 0.85f, 0.15f, 0.15f );
 				enemy.SpritePath             = "sprites/orcanimations.sprite";
 				enemy.DieAnimation           = "die";

@@ -21,28 +21,35 @@
 	   ══════════════════════════════════════════════════ *@
 	@if ( _view == MenuView.Main )
 	{
-		<!-- Top-right stats — coin counter -->
-		<div style="position: absolute; top: 20px; right: 24px;">
-			<div style="display: flex; align-items: center; gap: 8px; background-color: #120c04; border: 2px solid #6a4a1a; padding: 6px 14px; border-radius: 6px;">
-				<img src="ui/coin.png" style="width: 42px; height: 42px; flex-shrink: 0;" />
+		<!-- Top-right stats — coin + essence counters -->
+		<div style="position: absolute; top: 20px; right: 24px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+			<div style="display: flex; align-items: center; gap: 4px; background-color: #120c04; border: 2px solid #6a4a1a; padding: 6px 12px 6px 0px; border-radius: 6px;">
+				<img src="ui/coin.png" style="width: 50px; height: 50px; margin: -6px -8px -6px -14px; position: relative; left: -10px; flex-shrink: 0;" />
 				<span style="font-size: 16px; color: #f5c518; font-weight: bold;">@PlayerProgress.Data.Coins</span>
+			</div>
+			<div style="display: flex; align-items: center; gap: 8px; background-color: #120c04; border: 2px solid #3a2060; padding: 6px 14px; border-radius: 6px; overflow: visible;">
+				<div style="width: 24px; height: 30px; background-image: url(ui/pickups/essence.png); background-size: contain; background-repeat: no-repeat; background-position: center; image-rendering: pixelated; flex-shrink: 0;"></div>
+				<span style="font-size: 16px; color: #b388ff; font-weight: bold;">@PlayerProgress.Data.SoulEssence</span>
 			</div>
 		</div>
 
 		<!-- Title logo -->
 		<div style="position: absolute; top: 2%; left: 0; width: 100%; display: flex; justify-content: center; align-items: center;">
-			<img src="ui/logo.png" style="width: 640px; max-width: 90%; height: auto;" />
+			<img src="ui/logo.png" style="width: 440px; max-width: 70%; height: auto;" />
 		</div>
 
 		<!-- Main menu buttons -->
-		<div class="btn-wrap" style="top: 44%;" onclick=@(() => { PlayClickSound(); _view = MenuView.CharacterSelect; })>
-			<div class="menu-main-btn"><span class="menu-main-btn-text">PLAY</span></div>
+		<div class="btn-wrap" style="top: 40%;">
+			<div class="menu-main-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.CharacterSelect; })><span class="menu-main-btn-text">PLAY</span></div>
 		</div>
-		<div class="btn-wrap" style="top: 56%;" onclick=@(() => { PlayClickSound(); _view = MenuView.Unlocks; })>
-			<div class="menu-main-btn"><span class="menu-main-btn-text">UNLOCKS</span></div>
+		<div class="btn-wrap" style="top: 51%;">
+			<div class="menu-main-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.Unlocks; })><span class="menu-main-btn-text">UNLOCKS</span></div>
 		</div>
-		<div class="btn-wrap" style="top: 68%;" onclick=@(() => { PlayClickSound(); _view = MenuView.Quests; })>
-			<div class="menu-main-btn"><span class="menu-main-btn-text">QUESTS</span></div>
+		<div class="btn-wrap" style="top: 62%;">
+			<div class="menu-main-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.Quests; })><span class="menu-main-btn-text">QUESTS</span></div>
+		</div>
+		<div class="btn-wrap" style="top: 73%;">
+			<div class="menu-main-btn skill-tree-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.SkillTree; })><span class="menu-main-btn-text" style="color: #b388ff;">SKILLS</span></div>
 		</div>
 
 		<!-- Version — bottom, full width -->
@@ -117,6 +124,94 @@
 			}
 		</div>
 
+		@* ═══ DAILY LOGIN BONUS PANEL (fullscreen overlay) ═══ *@
+		@if ( _showDailyLogin )
+		{
+			int dlStreak = DailyRewardSystem.GetNextStreak();
+			int dlCurrentDay = ((dlStreak - 1) % 7) + 1;
+			bool dlCanClaim = DailyRewardSystem.CanClaim();
+
+			<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 100;">
+				<div class="daily-login-panel">
+					<!-- Header -->
+					<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+						<div style="font-size: 22px; font-weight: bold; color: #b388ff; letter-spacing: 3px; text-shadow: 2px 2px 0 #000;">DAILY LOGIN BONUS</div>
+						<div style="font-size: 13px; color: #8a6ab0;">Streak: @dlStreak day@(dlStreak != 1 ? "s" : "")</div>
+					</div>
+
+					<!-- 7-day calendar grid -->
+					<div style="display: flex; gap: 8px; margin-bottom: 20px;">
+						@for ( int d = 1; d <= 7; d++ )
+						{
+							var dayReward = DailyRewardSystem.GetDayReward( d );
+							bool isToday = d == dlCurrentDay && dlCanClaim;
+							bool isPast = d < dlCurrentDay;
+							bool isFuture = !isToday && !isPast;
+							string cardBg = isToday ? "#2a1040" : isPast ? "#1e1408" : "#120c04";
+							string cardBorder = isToday ? "#b388ff" : isPast ? "#5a3080" : "#3a2510";
+							string dayLabelColor = isToday ? "#b388ff" : isPast ? "#8a6ab0" : "#555";
+
+							<div class="daily-day-card @(isToday ? "daily-day-today" : "") @(isFuture ? "daily-day-future" : "")" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; background-color: @cardBg; border: 2px solid @cardBorder; border-radius: 8px;">
+								<div style="font-size: 11px; font-weight: bold; letter-spacing: 1px; color: @dayLabelColor;">DAY @d</div>
+								<div style="width: 48px; height: 58px; position: relative; display: flex; align-items: center; justify-content: center;">
+									<div style="width: 48px; height: 58px; background-image: url(ui/pickups/essence.png); background-size: contain; background-repeat: no-repeat; background-position: center; image-rendering: pixelated; @(isPast ? "opacity: 0.5;" : "")"></div>
+									@if ( isPast )
+									{
+										<span style="position: absolute; font-size: 18px; color: #fff; text-shadow: 1px 1px 2px #000;">✓</span>
+									}
+								</div>
+								<div style="font-size: 12px; color: #b388ff; font-weight: bold;">+@dayReward.Essence</div>
+								@if ( dayReward.Coins > 0 )
+								{
+									<div style="display: flex; align-items: center; gap: 3px;">
+										<img src="ui/coin.png" style="width: 14px; height: 14px;" />
+										<span style="font-size: 11px; color: #f5c518;">+@dayReward.Coins</span>
+									</div>
+								}
+								@if ( isToday )
+								{
+									<div style="font-size: 9px; color: #b388ff; letter-spacing: 1px; font-weight: bold;">TODAY</div>
+								}
+							</div>
+						}
+					</div>
+
+					<!-- Today's reward summary + claim -->
+					@if ( dlCanClaim )
+					{
+						var peek = DailyRewardSystem.PeekReward();
+						<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background-color: #2a1040; border: 2px solid #8a40c8; border-radius: 8px;">
+							<div style="display: flex; align-items: center; gap: 16px;">
+								<span style="font-size: 14px; color: #ccc;">Today's Reward:</span>
+								<div style="display: flex; align-items: center; gap: 5px;">
+									<div style="width: 24px; height: 30px; background-image: url(ui/pickups/essence.png); background-size: contain; background-repeat: no-repeat; background-position: center; image-rendering: pixelated;"></div>
+									<span style="font-size: 16px; color: #b388ff; font-weight: bold;">+@peek.Essence</span>
+								</div>
+								@if ( peek.Coins > 0 )
+								{
+									<div style="display: flex; align-items: center; gap: 5px;">
+										<img src="ui/coin.png" style="width: 20px; height: 20px;" />
+										<span style="font-size: 16px; color: #f5c518; font-weight: bold;">+@peek.Coins</span>
+									</div>
+								}
+							</div>
+							<div class="confirm-btn" style="background-color: #8a40c8; border-color: #b388ff; color: #fff; width: auto; padding: 12px 28px; font-size: 16px;"
+							     onclick=@OnClaimDailyReward>CLAIM</div>
+						</div>
+					}
+					else
+					{
+						<div style="text-align: center; padding: 14px; font-size: 14px; color: #666; letter-spacing: 1px;">CLAIMED TODAY</div>
+					}
+
+					<!-- Close button -->
+					<div style="display: flex; justify-content: center; margin-top: 14px;">
+						<div class="back-btn" onclick=@(() => { PlayClickSound(); _showDailyLogin = false; })>CLOSE</div>
+					</div>
+				</div>
+			</div>
+		}
+
 		<!-- Chat — left of main buttons -->
 		<div class="widget-panel" style="position: absolute; top: 42%; left: 5%; width: 420px; pointer-events: all; cursor: @(_chatOpen ? "default" : "pointer");"
 			onclick=@OnChatPanelClick>
@@ -159,120 +254,71 @@
 			}
 		</div>
 
-		<!-- Leaderboard — three-column, centered right -->
-		<div class="widget-panel" style="position: absolute; top: 50%; transform: translateY(-50%); right: 2%; width: 560px;">
+		<!-- Leaderboard — reworked three-column board -->
+		<div class="widget-panel" style="position: absolute; top: 42%; right: 16px; width: 630px; max-width: 38%;">
 			<div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0;">
-				<div class="widget-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">🏆 LEADERBOARD</div>
+				<div class="widget-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0; font-size: 16px;">🏆 LEADERBOARD</div>
 				@{
 					var canRefresh = !_lbLoading && _lbRefreshCooldown <= 0f;
 					var refreshLabel = _lbLoading ? "..." : _lbRefreshCooldown > 0f ? $"({(int)System.Math.Ceiling(_lbRefreshCooldown)}s)" : "↻";
 				}
 				<div onclick="@(() => { if ( canRefresh ) { PlayClickSound(); _lbRefreshCooldown = 5f; _lbRefreshTimer = 60f; _ = RefreshLeaderboardAsync(); } })"
-				     style="font-size: 16px; font-family: Minecraft; color: @(canRefresh ? "#f5c518" : "#555"); cursor: @(canRefresh ? "pointer" : "default"); padding: 2px 8px; border: 1px solid @(canRefresh ? "#6a4a1a" : "#2a1a08"); border-radius: 4px; font-weight: bold;">@refreshLabel</div>
+				     style="font-size: 17px; font-family: Minecraft; color: @(canRefresh ? "#f5c518" : "#555"); cursor: @(canRefresh ? "pointer" : "default"); padding: 3px 9px; border: 1px solid @(canRefresh ? "#6a4a1a" : "#2a1a08"); border-radius: 4px; font-weight: bold;">@refreshLabel</div>
 			</div>
-			<div style="height: 2px; background-color: #6a4a1a; margin-bottom: 10px;"></div>
-			<div style="display: flex; flex-direction: row; gap: 0;">
+			<div style="height: 2px; background-color: #6a4a1a; margin-bottom: 9px;"></div>
+			<div style="font-size: 10px; color: @(_lbError ? "#c86a6a" : "#8a6a40"); text-align: center; margin-bottom: 9px; letter-spacing: 1px;">
+				@(_lbError ? "Unable to fetch leaderboard right now" : _lbLoading ? "Refreshing leaderboard..." : "Top players")
+			</div>
 
-				<!-- Kills column -->
-				<div style="flex: 1; display: flex; flex-direction: column; padding: 0 8px;">
-					<div style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 1px solid #6a4a1a; margin-bottom: 4px; white-space: nowrap;">⚔ KILLS</div>
-					@if ( _lbLoading )
+			<div style="display: flex; flex-direction: row; gap: 9px;">
+				<div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+					<div style="font-size: 12px; color: #a08050; font-family: Minecraft; font-weight: bold; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 1px solid #6a4a1a;">⚔ KILLS</div>
+					@for ( int i = 0; i < LbRowsToShow; i++ )
 					{
-						<div style="font-size: 11px; color: #555; font-family: Minecraft; padding: 8px 0; text-align: center; font-style: italic;">Loading...</div>
-					}
-					else if ( _lbError )
-					{
-						<div style="font-size: 11px; color: #a55; font-family: Minecraft; padding: 8px 0; text-align: center;">Error</div>
-					}
-					@foreach ( var entry in _lbKills )
-					{
-						var isLocal   = Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
-						var rankColor = entry.Rank == 1 ? "#f5c518" : entry.Rank == 2 ? "#c0c0c0" : entry.Rank == 3 ? "#cd7f32" : "#aaa";
-						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #2a1a08; gap: 4px; flex-shrink: 0;">
-							<span style="font-size: 11px; font-weight: bold; color: @rankColor; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@entry.Rank</span>
-							<img src="avatar:@entry.SteamId" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
-							<span style="font-size: 11px; color: @(isLocal ? "#f5e060" : "#ddd"); font-family: Minecraft; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@entry.DisplayName</span>
-							<span style="font-size: 11px; color: #f5c518; font-family: Minecraft; font-weight: bold; flex-shrink: 0;">@LbFormatKills( entry.Value )</span>
-						</div>
-					}
-					@for ( int i = _lbKills.Count; i < 10; i++ )
-					{
-						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #1a1008; gap: 4px; opacity: 0.2; flex-shrink: 0;">
-							<span style="font-size: 11px; font-weight: bold; color: #666; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@(i+1)</span>
-							<div style="width: 20px; height: 20px; border-radius: 3px; background-color: #1a1008; flex-shrink: 0;"></div>
-							<span style="font-size: 11px; color: #444; font-family: Minecraft; flex: 1;">---</span>
+						var entry = LbEntryAt( _lbKills, i );
+						var isLocal = entry != null && Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
+						<div style="display: flex; flex-direction: row; align-items: center; gap: 5px; padding: 4px 5px; border-bottom: 1px solid #2a1a08; opacity: @(entry != null ? "1" : "0.72");">
+							<span style="font-size: 12px; width: 19px; flex-shrink: 0; font-weight: bold; color: @LbRankColor(entry?.Rank ?? (i + 1));">#@(entry?.Rank ?? (i + 1))</span>
+							<img src="avatar:@((entry?.SteamId ?? 0).ToString())" style="width: 19px; height: 19px; border-radius: 3px; border: 1px solid @(isLocal ? "#f5c518" : "#5a3a10"); background-color: #1a1008; flex-shrink: 0;" />
+							<span style="font-size: 12px; color: @(isLocal ? "#f5e060" : "#ccc"); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@(entry?.DisplayName ?? "---")</span>
+							<span style="font-size: 12px; color: #f5c518; font-weight: bold; flex-shrink: 0;">@(entry != null ? LbFormatKills( entry.Value ) : "---")</span>
 						</div>
 					}
 				</div>
 
 				<div style="width: 1px; background-color: #3a2510; flex-shrink: 0;"></div>
 
-				<!-- Survival column -->
-				<div style="flex: 1; display: flex; flex-direction: column; padding: 0 8px;">
-					<div style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 1px solid #6a4a1a; margin-bottom: 4px; white-space: nowrap;">⏱ SURVIVAL</div>
-					@if ( _lbLoading )
+				<div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+					<div style="font-size: 12px; color: #a08050; font-family: Minecraft; font-weight: bold; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 1px solid #6a4a1a;">⏱ SURVIVAL</div>
+					@for ( int i = 0; i < LbRowsToShow; i++ )
 					{
-						<div style="font-size: 11px; color: #555; font-family: Minecraft; padding: 8px 0; text-align: center; font-style: italic;">Loading...</div>
-					}
-					else if ( _lbError )
-					{
-						<div style="font-size: 11px; color: #a55; font-family: Minecraft; padding: 8px 0; text-align: center;">Error</div>
-					}
-					@foreach ( var entry in _lbSurvival )
-					{
-						var isLocal   = Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
-						var rankColor = entry.Rank == 1 ? "#f5c518" : entry.Rank == 2 ? "#c0c0c0" : entry.Rank == 3 ? "#cd7f32" : "#aaa";
-						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #2a1a08; gap: 4px; flex-shrink: 0;">
-							<span style="font-size: 11px; font-weight: bold; color: @rankColor; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@entry.Rank</span>
-							<img src="avatar:@entry.SteamId" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
-							<span style="font-size: 11px; color: @(isLocal ? "#f5e060" : "#ddd"); font-family: Minecraft; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@entry.DisplayName</span>
-							<span style="font-size: 11px; color: #f5c518; font-family: Minecraft; font-weight: bold; flex-shrink: 0;">@entry.Value m</span>
-						</div>
-					}
-					@for ( int i = _lbSurvival.Count; i < 10; i++ )
-					{
-						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #1a1008; gap: 4px; opacity: 0.2; flex-shrink: 0;">
-							<span style="font-size: 11px; font-weight: bold; color: #666; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@(i+1)</span>
-							<div style="width: 20px; height: 20px; border-radius: 3px; background-color: #1a1008; flex-shrink: 0;"></div>
-							<span style="font-size: 11px; color: #444; font-family: Minecraft; flex: 1;">---</span>
+						var entry = LbEntryAt( _lbSurvival, i );
+						var isLocal = entry != null && Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
+						<div style="display: flex; flex-direction: row; align-items: center; gap: 5px; padding: 4px 5px; border-bottom: 1px solid #2a1a08; opacity: @(entry != null ? "1" : "0.72");">
+							<span style="font-size: 12px; width: 19px; flex-shrink: 0; font-weight: bold; color: @LbRankColor(entry?.Rank ?? (i + 1));">#@(entry?.Rank ?? (i + 1))</span>
+							<img src="avatar:@((entry?.SteamId ?? 0).ToString())" style="width: 19px; height: 19px; border-radius: 3px; border: 1px solid @(isLocal ? "#f5c518" : "#5a3a10"); background-color: #1a1008; flex-shrink: 0;" />
+							<span style="font-size: 12px; color: @(isLocal ? "#f5e060" : "#ccc"); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@(entry?.DisplayName ?? "---")</span>
+							<span style="font-size: 12px; color: #f5c518; font-weight: bold; flex-shrink: 0;">@(entry != null ? $"{entry.Value} m" : "---")</span>
 						</div>
 					}
 				</div>
 
 				<div style="width: 1px; background-color: #3a2510; flex-shrink: 0;"></div>
 
-				<!-- Runs column -->
-				<div style="flex: 1; display: flex; flex-direction: column; padding: 0 8px;">
-					<div style="font-size: 11px; color: #a08050; font-family: Minecraft; font-weight: bold; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 1px solid #6a4a1a; margin-bottom: 4px; white-space: nowrap;">🔄 RUNS</div>
-					@if ( _lbLoading )
+				<div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+					<div style="font-size: 12px; color: #a08050; font-family: Minecraft; font-weight: bold; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 1px solid #6a4a1a;">🔄 RUNS</div>
+					@for ( int i = 0; i < LbRowsToShow; i++ )
 					{
-						<div style="font-size: 11px; color: #555; font-family: Minecraft; padding: 8px 0; text-align: center; font-style: italic;">Loading...</div>
-					}
-					else if ( _lbError )
-					{
-						<div style="font-size: 11px; color: #a55; font-family: Minecraft; padding: 8px 0; text-align: center;">Error</div>
-					}
-					@foreach ( var entry in _lbRuns )
-					{
-						var isLocal   = Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
-						var rankColor = entry.Rank == 1 ? "#f5c518" : entry.Rank == 2 ? "#c0c0c0" : entry.Rank == 3 ? "#cd7f32" : "#aaa";
-						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #2a1a08; gap: 4px; flex-shrink: 0;">
-							<span style="font-size: 11px; font-weight: bold; color: @rankColor; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@entry.Rank</span>
-							<img src="avatar:@entry.SteamId" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid @(isLocal ? "#f5c518" : "#5a3a10"); flex-shrink: 0;" />
-							<span style="font-size: 11px; color: @(isLocal ? "#f5e060" : "#ddd"); font-family: Minecraft; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@entry.DisplayName</span>
-							<span style="font-size: 11px; color: #f5c518; font-family: Minecraft; font-weight: bold; flex-shrink: 0;">@entry.Value</span>
-						</div>
-					}
-					@for ( int i = _lbRuns.Count; i < 10; i++ )
-					{
-						<div style="display: flex; flex-direction: row; align-items: center; padding: 5px 2px; border-bottom: 1px solid #1a1008; gap: 4px; opacity: 0.2; flex-shrink: 0;">
-							<span style="font-size: 11px; font-weight: bold; color: #666; font-family: Minecraft; width: 18px; flex-shrink: 0;">#@(i+1)</span>
-							<div style="width: 20px; height: 20px; border-radius: 3px; background-color: #1a1008; flex-shrink: 0;"></div>
-							<span style="font-size: 11px; color: #444; font-family: Minecraft; flex: 1;">---</span>
+						var entry = LbEntryAt( _lbRuns, i );
+						var isLocal = entry != null && Connection.Local != null && entry.SteamId == Connection.Local.SteamId;
+						<div style="display: flex; flex-direction: row; align-items: center; gap: 5px; padding: 4px 5px; border-bottom: 1px solid #2a1a08; opacity: @(entry != null ? "1" : "0.72");">
+							<span style="font-size: 12px; width: 19px; flex-shrink: 0; font-weight: bold; color: @LbRankColor(entry?.Rank ?? (i + 1));">#@(entry?.Rank ?? (i + 1))</span>
+							<img src="avatar:@((entry?.SteamId ?? 0).ToString())" style="width: 19px; height: 19px; border-radius: 3px; border: 1px solid @(isLocal ? "#f5c518" : "#5a3a10"); background-color: #1a1008; flex-shrink: 0;" />
+							<span style="font-size: 12px; color: @(isLocal ? "#f5e060" : "#ccc"); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@(entry?.DisplayName ?? "---")</span>
+							<span style="font-size: 12px; color: #f5c518; font-weight: bold; flex-shrink: 0;">@(entry?.Value.ToString() ?? "---")</span>
 						</div>
 					}
 				</div>
-
 			</div>
 		</div>
 	}
@@ -955,6 +1001,148 @@
 			</div>
 		</div>
 	}
+
+	@* ══════════════════════════════════════════════════
+	    SKILL TREE VIEW
+	   ══════════════════════════════════════════════════ *@
+	@if ( _view == MenuView.SkillTree )
+	{
+		int totalInvested = SkillTreeSystem.GetTotalSkillPointsSpent();
+		int prestigeLevel = PrestigeSystem.GetLevel();
+		float prestigeBonus = (PrestigeSystem.GetBonusMultiplier() - 1f) * 100f;
+		string prestigeTitle = PrestigeSystem.GetTitle();
+
+		<div class="list-panel skill-tree-panel">
+			<!-- Header -->
+			<div class="list-panel-header">
+				<div class="list-panel-header-inner" style="justify-content: space-between;">
+					<div style="display: flex; align-items: center; gap: 12px;">
+						<span style="font-size: 18px; font-weight: bold; color: #b388ff; letter-spacing: 2px;">SKILL TREE</span>
+						@if ( prestigeLevel > 0 )
+						{
+							<span style="font-size: 12px; color: #8a40c8; letter-spacing: 1px;">@prestigeTitle (P@prestigeLevel +@((int)prestigeBonus)%)</span>
+						}
+					</div>
+					<div style="display: flex; align-items: center; gap: 8px;">
+						<div style="width: 26px; height: 32px; background-image: url(ui/pickups/essence.png); background-size: contain; background-repeat: no-repeat; background-position: center; image-rendering: pixelated;"></div>
+						<span style="font-size: 16px; color: #b388ff; font-weight: bold;">@PlayerProgress.Data.SoulEssence</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Category tabs -->
+			<div class="list-panel-tabs">
+				<div class="list-panel-tabs-inner">
+					@foreach ( var cat in new[] { SkillCategory.Offense, SkillCategory.Defense, SkillCategory.Utility, SkillCategory.Economy } )
+					{
+						int catInv = CategoryInvested( cat );
+						int catTot = CategoryTotal( cat );
+						<div class="tab skill-tab @(_skillTab == cat ? "skill-tab-active" : "")"
+						     onclick=@(() => { PlayClickSound(); _skillTab = cat; })>
+							@SkillCategoryLabel( cat ) <span style="font-size: 10px; color: #666; margin-left: 4px;">@catInv/@catTot</span>
+						</div>
+					}
+				</div>
+			</div>
+
+			<!-- Skill list (stacked cards like Unlocks) -->
+			<div class="list-panel-scroll list-panel-scroll-inner" onmousedown=@StopPropagation>
+				@foreach ( var sk in SkillNodeDefinition.ForCategory( _skillTab ) )
+				{
+					int lvl = SkillTreeSystem.GetLevel( sk.Id );
+					bool isMax = lvl >= sk.MaxLevel;
+					bool canBuy = SkillTreeSystem.CanUpgrade( sk.Id );
+					int cost = sk.GetCost( lvl );
+					float curVal = sk.GetTotalValue( lvl ) * PrestigeSystem.GetBonusMultiplier();
+					float nxtVal = sk.GetTotalValue( lvl + 1 ) * PrestigeSystem.GetBonusMultiplier();
+					bool preqMet = sk.Prerequisites.All( pid => SkillTreeSystem.GetLevel( pid ) >= 1 );
+					string cls = isMax ? "skill-owned" : canBuy ? "skill-affordable" : !preqMet ? "skill-locked" : "";
+
+					<div class="skill-card @cls">
+						<div class="skill-card-top">
+							<div class="skill-node-icon">
+								<span style="font-size: 18px;">@SkillIcon( sk.StatType )</span>
+							</div>
+							<div class="skill-card-content">
+								<div class="skill-card-name">@sk.Name</div>
+								<div class="skill-card-desc">@sk.Description</div>
+								<div class="skill-card-level" style="color: @(isMax ? "#8a40c8" : "#888");">Lv @lvl / @sk.MaxLevel</div>
+								<div class="skill-node-pips">@for ( int p = 0; p < sk.MaxLevel; p++ ) {<div class="@(p < lvl ? "skill-pip-on" : "skill-pip-off")"></div>}</div>
+								<div class="skill-card-stat">
+									@if ( lvl > 0 && !isMax && preqMet ) {<span style="color:#8a40c8;">+@FormatSkillValue(curVal,sk)@sk.StatSuffix</span><span style="color:#555;"> → </span><span style="color:#b388ff;">+@FormatSkillValue(nxtVal,sk)@sk.StatSuffix</span>}
+									else if ( lvl > 0 && isMax ) {<span style="color:#8a40c8;">+@FormatSkillValue(curVal,sk)@sk.StatSuffix</span>}
+									else if ( !isMax && preqMet ) {<span style="color:#b388ff;">+@FormatSkillValue(nxtVal,sk)@sk.StatSuffix</span>}
+									else if ( sk.Prerequisites.Length > 0 && !preqMet ) {<span style="color:#c44;">Requires: @string.Join( ", ", sk.Prerequisites.Select( pid => SkillNodeDefinition.GetById( pid )?.Name ?? pid ) )</span>}
+								</div>
+							</div>
+						</div>
+						<div class="skill-card-action">
+							@if ( isMax )
+							{
+								<div style="display: flex; align-items: center; gap: 6px;">
+									<div style="font-size: 18px; color: #b388ff;">✓</div>
+									<span class="skill-card-max-label">MAX</span>
+								</div>
+							}
+							else if ( !preqMet )
+							{
+								<img src="ui/locked.png" style="width: 28px; height: 28px; image-rendering: pixelated; opacity: 0.7;" />
+							}
+							else
+							{
+								<div class="buy-btn @(canBuy ? "buy-btn-ok" : "buy-btn-no") skill-buy-btn" onclick=@(() => { PlayClickSound(); SkillTreeSystem.TryUpgrade( sk.Id ); })>
+									<div class="essence-icon-sm"></div>
+									<span class="buy-btn-cost" style="font-size: 14px; font-weight: bold; color: @(canBuy ? "#b388ff" : "#555");">@cost</span>
+								</div>
+							}
+						</div>
+					</div>
+				}
+			</div>
+
+			<!-- Footer with prestige + back -->
+			<div class="list-panel-footer">
+				<div class="list-panel-footer-inner" style="display: flex; justify-content: space-between; align-items: center;">
+					<div class="back-btn" onclick=@(() => { PlayClickSound(); _view = MenuView.Main; })>← BACK</div>
+					<div style="display: flex; align-items: center; gap: 16px;">
+						<span style="font-size: 12px; color: #666;">Invested: @totalInvested essence</span>
+						@if ( PrestigeSystem.CanPrestige() )
+						{
+							<div class="claim-btn" style="background-color: #8a40c8; border-color: #b388ff; color: #fff;"
+							     onclick=@(() => { PlayClickSound(); _showPrestigeConfirm = true; })>PRESTIGE</div>
+						}
+						else if ( prestigeLevel < PrestigeSystem.MaxPrestigeLevel )
+						{
+							<span style="font-size: 11px; color: #555;">Prestige: @totalInvested / @PrestigeSystem.MinEssenceSpentToPrestige spent</span>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		@* ═══ PRESTIGE CONFIRMATION MODAL ═══ *@
+		@if ( _showPrestigeConfirm )
+		{
+			string nextTitle = PrestigeSystem.GetTitle( prestigeLevel + 1 );
+			float nextBonus = (prestigeLevel + 1) * 5f;
+
+			<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 100;">
+				<div style="background-color: #1a1008; border: 3px solid #8a40c8; border-radius: 12px; padding: 28px 36px; max-width: 480px; width: 90%; display: flex; flex-direction: column; gap: 14px;">
+					<div style="font-size: 20px; font-weight: bold; color: #b388ff; letter-spacing: 3px; text-align: center;">PRESTIGE UP</div>
+					<div style="font-size: 14px; color: #ccc; text-align: center; line-height: 1.6;">
+						Reset all skill levels and become <span style="color: #b388ff; font-weight: bold;">@nextTitle</span>.<br/>
+						All skill bonuses gain a permanent <span style="color: #b388ff; font-weight: bold;">+@((int)nextBonus)%</span> multiplier.<br/>
+						Your unspent essence and all unlocks are kept.
+					</div>
+					<div style="display: flex; gap: 12px; justify-content: center; padding-top: 8px;">
+						<div class="back-btn" onclick=@(() => { PlayClickSound(); _showPrestigeConfirm = false; })>CANCEL</div>
+						<div class="confirm-btn" style="background-color: #8a40c8; border-color: #b388ff; color: #fff; width: auto; padding: 14px 32px; font-size: 16px;"
+						     onclick=@OnPrestige>PRESTIGE</div>
+					</div>
+				</div>
+			</div>
+		}
+	}
 	}
 
 </root>
@@ -970,8 +1158,12 @@
 		try { Sound.Play( UiClick ); } catch { }
 	}
 
-	enum MenuView { Main, CharacterSelect, MapSelect, Unlocks, Quests }
+	enum MenuView { Main, CharacterSelect, MapSelect, Unlocks, Quests, SkillTree }
 	MenuView _view = MenuView.Main;
+
+	// ── Daily Login / Skill Tree / Prestige state ───────────────────────
+	bool _showDailyLogin = false;
+	bool _showPrestigeConfirm = false;
 
 	string _selectedMapId = "dark_forest";
 	int    _selectedTier  = 1;
@@ -1005,6 +1197,7 @@
 	float _lbRefreshTimer   = 0f;
 	float _lbRefreshCooldown = 0f;
 	int   _lbRefreshGen     = 0;
+	const int LbRowsToShow = 10;
 	const float LbRefreshInterval = 60f;
 
 	async Task RefreshLeaderboardAsync()
@@ -1015,14 +1208,22 @@
 		try
 		{
 			var bKills    = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "total_kills" );
+			bKills.MaxEntries = 100;
+			await bKills.Refresh();
+			if ( gen != _lbRefreshGen ) return;
+			_lbKills = ProcessBoard( bKills );
+
 			var bSurvival = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "best_survival" );
-			var bRuns     = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "runs_played" );
-			bKills.MaxEntries = bSurvival.MaxEntries = bRuns.MaxEntries = 20;
-			await Task.WhenAll( bKills.Refresh(), bSurvival.Refresh(), bRuns.Refresh() );
-			if ( gen != _lbRefreshGen ) return; // a newer refresh started; discard these results
-			_lbKills    = ProcessBoard( bKills );
+			bSurvival.MaxEntries = 100;
+			await bSurvival.Refresh();
+			if ( gen != _lbRefreshGen ) return;
 			_lbSurvival = ProcessBoard( bSurvival );
-			_lbRuns     = ProcessBoard( bRuns );
+
+			var bRuns = Sandbox.Services.Leaderboards.GetFromStat( "roguegames.ultimatesurvivors", "runs_played" );
+			bRuns.MaxEntries = 100;
+			await bRuns.Refresh();
+			if ( gen != _lbRefreshGen ) return;
+			_lbRuns = ProcessBoard( bRuns );
 		}
 		catch
 		{
@@ -1033,17 +1234,21 @@
 
 	List<LbEntry> ProcessBoard( Sandbox.Services.Leaderboards.Board2 board )
 	{
-		var all = board.Entries
+		return board.Entries
 			.Select( e => new LbEntry { Rank = (int)e.Rank, DisplayName = e.DisplayName ?? "???", Value = (long)e.Value, SteamId = (ulong)e.SteamId } )
-			.ToList();
-		Log.Info( $"[LB] raw entries: {all.Count} | MaxEntries was set to 20" );
-		foreach ( var e in all ) Log.Info( $"  #{e.Rank} {e.DisplayName} (SteamId={e.SteamId})" );
-		return all
 			.Where( e => e.SteamId != DevAccountSteamId )
-			.Take( 10 )
+			.Take( LbRowsToShow )
 			.Select( ( e, i ) => new LbEntry { Rank = i + 1, DisplayName = e.DisplayName, Value = e.Value, SteamId = e.SteamId } )
 			.ToList();
 	}
+
+	LbEntry LbEntryAt( List<LbEntry> board, int index ) => index >= 0 && index < board.Count ? board[index] : null;
+
+	string LbRankColor( int rank ) =>
+		rank == 1 ? "#f5c518" :
+		rank == 2 ? "#c0c0c0" :
+		rank == 3 ? "#cd7f32" :
+		"#aaa";
 
 	string LbFormatKills( long value ) => value >= 1000 ? $"{value / 1000.0:F1}K" : value.ToString();
 
@@ -1163,6 +1368,9 @@
 		_onlineRefreshTimer = 0f;
 		_ = RefreshLeaderboardAsync();
 		RefreshMenuChatFromHistory();
+
+		_showPrestigeConfirm = false;
+		_showDailyLogin = DailyRewardSystem.CanClaim();
 	}
 
 	protected override void OnDestroy()
@@ -1427,4 +1635,91 @@
 		QuestGoalType.ChestsPurchased  => "ui/quests/chest.png",
 		_                              => null
 	};
+
+	// ── Skill Tree helpers ────────────────────────────────────────────────
+	SkillCategory _skillTab = SkillCategory.Offense;
+
+	int CategoryInvested( SkillCategory cat )
+	{
+		int total = 0;
+		foreach ( var sk in SkillNodeDefinition.ForCategory( cat ) )
+		{
+			int lvl = SkillTreeSystem.GetLevel( sk.Id );
+			for ( int i = 0; i < lvl; i++ )
+				total += sk.GetCost( i );
+		}
+		return total;
+	}
+
+	int CategoryTotal( SkillCategory cat )
+	{
+		int total = 0;
+		foreach ( var sk in SkillNodeDefinition.ForCategory( cat ) )
+			for ( int i = 0; i < sk.MaxLevel; i++ )
+				total += sk.GetCost( i );
+		return total;
+	}
+
+	static string SkillCategoryLabel( SkillCategory cat ) => cat switch
+	{
+		SkillCategory.Offense => "OFFENSE",
+		SkillCategory.Defense => "DEFENSE",
+		SkillCategory.Utility => "UTILITY",
+		SkillCategory.Economy => "ECONOMY",
+		_ => "?"
+	};
+
+	static string SkillIcon( UpgradeDefinition.UpgradeType type ) => type switch
+	{
+		UpgradeDefinition.UpgradeType.DamageUp             => "⚔",
+		UpgradeDefinition.UpgradeType.CritChanceUp         => "🎯",
+		UpgradeDefinition.UpgradeType.CritDamageUp         => "💥",
+		UpgradeDefinition.UpgradeType.CooldownDown         => "⏱",
+		UpgradeDefinition.UpgradeType.ProjectileSpeedUp    => "➤",
+		UpgradeDefinition.UpgradeType.AreaUp               => "◎",
+		UpgradeDefinition.UpgradeType.KnockbackUp          => "↗",
+		UpgradeDefinition.UpgradeType.MaxHPUp              => "♥",
+		UpgradeDefinition.UpgradeType.ArmorUp              => "🛡",
+		UpgradeDefinition.UpgradeType.ShieldUp             => "🔷",
+		UpgradeDefinition.UpgradeType.RegenUp              => "✚",
+		UpgradeDefinition.UpgradeType.EvasionUp            => "💨",
+		UpgradeDefinition.UpgradeType.LifestealUp          => "🩸",
+		UpgradeDefinition.UpgradeType.SpeedUp              => "👟",
+		UpgradeDefinition.UpgradeType.MagnetUp             => "🧲",
+		UpgradeDefinition.UpgradeType.LuckUp               => "🍀",
+		UpgradeDefinition.UpgradeType.DashCooldownUp       => "⚡",
+		UpgradeDefinition.UpgradeType.DurationMultiplierUp => "⏳",
+		UpgradeDefinition.UpgradeType.GoldMultiplierUp     => "💰",
+		UpgradeDefinition.UpgradeType.XPMultiplierUp       => "📚",
+		_ => "★"
+	};
+
+	static string FormatSkillValue( float value, SkillNodeDefinition skill )
+	{
+		// Percentage stats: multiply by 100 for display
+		if ( skill.StatSuffix == "%" )
+			return $"{value * 100f:F1}";
+		// Flat stats
+		return $"{value:F1}";
+	}
+
+	void OnClaimDailyReward()
+	{
+		PlayClickSound();
+		if ( DailyRewardSystem.TryClaim( out var reward ) )
+		{
+			_showDailyLogin = false;
+			GameNotification.Show( $"Daily reward: +{reward.Essence} essence{(reward.Coins > 0 ? $", +{reward.Coins} coins" : "")}", new Color( 0.7f, 0.5f, 1f ), 3f );
+		}
+	}
+
+	void OnPrestige()
+	{
+		PlayClickSound();
+		if ( PrestigeSystem.TryPrestige() )
+		{
+			_showPrestigeConfirm = false;
+			GameNotification.Show( $"Prestige {PrestigeSystem.GetLevel()}! You are now: {PrestigeSystem.GetTitle()}", new Color( 0.7f, 0.5f, 1f ), 4f );
+		}
+	}
 }

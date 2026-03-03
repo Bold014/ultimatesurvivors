@@ -94,6 +94,10 @@ public static class PathFinder
 					continue;
 
 				float ng = cg + (diag ? DiagCost : 1f);
+				// Penalise tiles adjacent to trees so A* prefers routes with more open space
+				if ( TreeManager.IsTreeAtTile( nx + 1, ny ) || TreeManager.IsTreeAtTile( nx - 1, ny ) ||
+				     TreeManager.IsTreeAtTile( nx, ny + 1 ) || TreeManager.IsTreeAtTile( nx, ny - 1 ) )
+					ng += 0.4f;
 				if ( !gScore.TryGetValue( next, out float old ) || ng < old )
 				{
 					gScore[next] = ng;

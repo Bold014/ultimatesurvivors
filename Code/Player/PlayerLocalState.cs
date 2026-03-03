@@ -54,6 +54,8 @@ public sealed class PlayerLocalState : Component
 	public float DashCooldownMultiplier { get; set; } = 1f;
 	/// <summary>Multiplier on silver/premium currency (for future use).</summary>
 	public float SilverMultiplier { get; set; } = 1f;
+	/// <summary>Item IDs acquired from chests during this run (for inventory display).</summary>
+	public List<string> AcquiredItemIds { get; private set; } = new();
 
 	private bool _revivalUsed = false;
 
@@ -129,6 +131,7 @@ public sealed class PlayerLocalState : Component
 		DashCooldownMultiplier = 1f;
 		SilverMultiplier = 1f;
 		_shieldRegenTimer = 0f;
+		AcquiredItemIds.Clear();
 	}
 
 	protected override void OnUpdate()
@@ -231,6 +234,7 @@ public sealed class PlayerLocalState : Component
 	/// </summary>
 	public void ApplyItemById( string id )
 	{
+		AcquiredItemIds.Add( id );
 		switch ( id )
 		{
 			case "item_pendant":

@@ -20,6 +20,15 @@ public sealed class PlayerTomes : Component
 	public void LevelUp( string tomeName )
 		=> _levels[tomeName] = GetLevel( tomeName ) + 1;
 
+	/// <summary>Returns the sum of all tome levels this run.</summary>
+	public int GetTotalTomeLevels()
+	{
+		int total = 0;
+		foreach ( var kvp in _levels )
+			total += kvp.Value;
+		return total;
+	}
+
 	/// <summary>Returns a snapshot of all tome levels this run (for RunResult reporting).</summary>
 	public IReadOnlyDictionary<string, int> GetAllLevels() => _levels;
 

@@ -10,6 +10,7 @@ public sealed class WorldObjectSpawner : Component
 	private Random       _rand;
 	private int          _chestsSpawned  = 2;   // 2 spawned in OnStart
 	private int          _beaconsSpawned = 1;   // 1 spawned in OnStart
+	private int          _cratesSpawned  = 4;   // 4 spawned in OnStart
 
 	private const float SpawnMinDist = 200f;
 	private const float SpawnMaxDist = 400f;
@@ -24,20 +25,25 @@ public sealed class WorldObjectSpawner : Component
 			chest.GameObject.Destroy();
 		foreach ( var beacon in Scene.GetAllComponents<LevelUpBeacon>().ToList() )
 			beacon.GameObject.Destroy();
+		foreach ( var crate in Scene.GetAllComponents<Crate>().ToList() )
+			crate.GameObject.Destroy();
 
 		for ( int i = 0; i < 2; i++ )
 			SpawnChest();
 		for ( int i = 0; i < 1; i++ )
 			SpawnBeacon();
+		for ( int i = 0; i < 4; i++ )
+			SpawnCrate();
 	}
 
 	protected override void OnUpdate()
 	{
 		if ( _spawner == null ) return;
 
-		float runMinutes = _spawner.RunTime / 60f;
+		float runMinutes  = _spawner.RunTime / 60f;
 		int targetChests  = 2 + (int)(runMinutes / 1.5f);    // 2 initial + 1 per 1.5 min
 		int targetBeacons = 1 + (int)(runMinutes / 2.25f);   // 1 initial + 1 per 2.25 min
+		int targetCrates  = Math.Min( 12, 4 + (int)(runMinutes / 1.5f) );  // 4 initial + 1 per 1.5 min, capped at 12
 
 		while ( _chestsSpawned < targetChests )
 		{
@@ -49,6 +55,12 @@ public sealed class WorldObjectSpawner : Component
 		{
 			SpawnBeacon();
 			_beaconsSpawned++;
+		}
+
+		while ( _cratesSpawned < targetCrates )
+		{
+			SpawnCrate();
+			_cratesSpawned++;
 		}
 	}
 
@@ -69,6 +81,15 @@ public sealed class WorldObjectSpawner : Component
 		go.WorldPosition = pos;
 		LocalGameRunner.ParentRuntimeObject( go );
 		go.Components.Create<LevelUpBeacon>();
+	}
+
+	private void SpawnCrate()
+	{
+		var pos = RandomSpawnPosition( 16f );
+		var go  = new GameObject( true, "Crate" );
+		go.WorldPosition = pos;
+		LocalGameRunner.ParentRuntimeObject( go );
+		go.Components.Create<Crate>();
 	}
 
 	private Vector3 PlayerPosition()

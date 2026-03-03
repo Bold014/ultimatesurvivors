@@ -22,7 +22,7 @@ public sealed class AuraWeapon : WeaponBase
 		if ( _state == null ) return;
 
 		float radius = GetEffectiveRadius();
-		float damage = _state.Damage * (0.4f + WeaponLevel * 0.25f);
+		float damage = _state.Damage * GetDamageMultiplier();
 
 		foreach ( var enemy in Scene.GetAllComponents<EnemyBase>() )
 		{
@@ -47,20 +47,32 @@ public sealed class AuraWeapon : WeaponBase
 			_ring.Radius = GetEffectiveRadius();
 	}
 
+	private float GetDamageMultiplier()
+	{
+		int clamped = Math.Min( WeaponLevel, 5 );
+		int extra = Math.Max( 0, WeaponLevel - 5 );
+		return 0.4f + clamped * 0.25f + extra * 0.06f;
+	}
+
 	private void UpdateCooldown()
 	{
 		BaseCooldown = WeaponLevel switch
 		{
-			>= 5 => 0.7f,
-			>= 4 => 0.8f,
-			>= 2 => 0.9f,
-			_    => 1.0f,
+			>= 30 => 0.5f,
+			>= 20 => 0.55f,
+			>= 10 => 0.6f,
+			>= 5  => 0.7f,
+			>= 4  => 0.8f,
+			>= 2  => 0.9f,
+			_     => 1.0f,
 		};
 	}
 
 	private float GetEffectiveRadius()
 	{
-		float baseRadius = 12f + WeaponLevel * 5f;
+		int clamped = Math.Min( WeaponLevel, 5 );
+		int extra = Math.Max( 0, WeaponLevel - 5 );
+		float baseRadius = 12f + clamped * 5f + extra * 1.5f;
 		return _state != null ? baseRadius * _state.Area : baseRadius;
 	}
 
@@ -70,6 +82,9 @@ public sealed class AuraWeapon : WeaponBase
 		3 => "Radius: +5, Damage: +25%",
 		4 => "Radius: +5, Damage: +25%, Pulse rate: +11%",
 		5 => "Radius: +5, Damage: +25%, Fastest pulse rate",
-		_ => $"Level {nextLevel}: improved stats",
+		10 => "Pulse rate: 0.6s",
+		20 => "Pulse rate: 0.55s",
+		30 => "Pulse rate: 0.5s (max)",
+		_ => $"Level {nextLevel}: +6% damage, +1.5 radius",
 	};
 }

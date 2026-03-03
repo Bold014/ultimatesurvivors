@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:docs.facepunch.com)",
+      "Bash(xargs grep:*)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "Bash(grep:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(xxd:*)",
+      "Bash(xargs ls:*)",
+      "Bash(ls -la *.png)",
+      "Bash(sort -k2)",
+      "Bash(do echo:*)",
+      "Bash(ls:*)",
+      "Bash(identify:*)",
+      "Bash(magick identify:*)"
+    ]
+  }
+}

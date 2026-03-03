@@ -157,14 +157,14 @@
             "__guid": "60c96754-1332-4368-bbab-50e87edc919a",
             "__enabled": true,
             "Flags": 0,
+            "DetailsTilesetPath": "scenes/details.tileset",
             "GroundTilesetPath": "scenes/forestlevelone.tileset",
             "OnComponentDestroy": null,
             "OnComponentDisabled": null,
             "OnComponentEnabled": null,
             "OnComponentFixedUpdate": null,
             "OnComponentStart": null,
-            "OnComponentUpdate": null,
-            "TreeTilesetPath": "scenes/trees.tileset"
+            "OnComponentUpdate": null
           }
         ],
         "Children": []
@@ -226,6 +226,18 @@
             "OnComponentFixedUpdate": null,
             "OnComponentStart": null,
             "OnComponentUpdate": null
+          },
+          {
+            "__type": "Sandbox.UI.MinimapPanel",
+            "__guid": "26fb960d-a3a7-443c-b7d1-d7b9a248e7da",
+            "__enabled": true,
+            "Flags": 0,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null
           }
         ],
         "Children": []
@@ -262,7 +274,29 @@
         ],
         "Children": []
       }
-    ]
+    ],
+    "__properties": {
+      "NetworkInterpolation": true,
+      "TimeScale": 1,
+      "WantsSystemScene": true,
+      "Metadata": {
+        "Title": "game",
+        "Description": "Ultimate Survivors - Game"
+      },
+      "NavMesh": {
+        "Enabled": false,
+        "IncludeStaticBodies": true,
+        "IncludeKeyframedBodies": true,
+        "EditorAutoUpdate": false,
+        "AgentHeight": 64,
+        "AgentRadius": 16,
+        "AgentStepSize": 18,
+        "AgentMaxSlope": 40,
+        "ExcludedBodies": "",
+        "IncludedBodies": ""
+      }
+    },
+    "__variables": []
   },
   "ResourceVersion": 2,
   "ShowInMenu": false,

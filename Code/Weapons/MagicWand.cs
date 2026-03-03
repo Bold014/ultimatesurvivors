@@ -18,7 +18,7 @@ public sealed class MagicWand : WeaponBase
 		if ( target == null ) return;
 
 		var baseDir = (target.WorldPosition - WorldPosition).WithZ( 0f ).Normal;
-		int count = (WeaponLevel >= 5 ? 3 : WeaponLevel >= 3 ? 2 : 1) + _state.ProjectileCount;
+		int count = GetProjectileCount() + _state.ProjectileCount;
 		float spread = GetSpreadAngle();
 
 		for ( int i = 0; i < count; i++ )
@@ -56,13 +56,24 @@ public sealed class MagicWand : WeaponBase
 		proj.SourceWeaponId = WeaponId;
 	}
 
-	private float GetDamageMultiplier() => WeaponLevel switch
+	private int GetProjectileCount() => WeaponLevel switch
 	{
-		>= 5 => 1.6f,
-		>= 4 => 1.45f,
-		>= 2 => 1.2f,
-		_    => 1.0f,
+		>= 30 => 6,
+		>= 20 => 5,
+		>= 10 => 4,
+		>= 5  => 3,
+		>= 3  => 2,
+		_     => 1,
 	};
+
+	private float GetDamageMultiplier()
+	{
+		if ( WeaponLevel <= 1 ) return 1.0f;
+		if ( WeaponLevel <= 3 ) return 1.2f;
+		if ( WeaponLevel <= 4 ) return 1.45f;
+		if ( WeaponLevel <= 5 ) return 1.6f;
+		return 1.6f + (WeaponLevel - 5) * 0.04f;
+	}
 
 	private float GetImpactBurnDamageMultiplier() => WeaponLevel switch
 	{
@@ -102,6 +113,9 @@ public sealed class MagicWand : WeaponBase
 		3 => "Fires 2 fireballs, wider spread, impact burst size +15%",
 		4 => "Projectile speed +20%, Damage: +45%, impact burn damage +2%",
 		5 => "Fires 3 fireballs, widest spread, piercing and stronger impact burst",
-		_ => $"Level {nextLevel}: improved stats",
+		10 => "Fires 4 fireballs",
+		20 => "Fires 5 fireballs",
+		30 => "Fires 6 fireballs",
+		_ => $"Level {nextLevel}: +4% damage",
 	};
 }

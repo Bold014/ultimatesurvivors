@@ -65,17 +65,21 @@ public sealed class StormRodWeapon : WeaponBase
 
 	private int GetMaxTargets() => WeaponLevel switch
 	{
-		>= 5 => 3,
-		>= 3 => 2,
-		_    => 1,
+		>= 30 => 6,
+		>= 20 => 5,
+		>= 10 => 4,
+		>= 5  => 3,
+		>= 3  => 2,
+		_     => 1,
 	};
 
-	private float GetDamageMultiplier() => WeaponLevel switch
+	private float GetDamageMultiplier()
 	{
-		>= 4 => 1.25f,
-		>= 2 => 1.1f,
-		_    => 0.9f,
-	};
+		if ( WeaponLevel <= 1 ) return 0.9f;
+		if ( WeaponLevel <= 3 ) return 1.1f;
+		if ( WeaponLevel <= 5 ) return 1.25f;
+		return 1.25f + (WeaponLevel - 5) * 0.04f;
+	}
 
 	public override string GetUpgradeDescription( int nextLevel ) => nextLevel switch
 	{
@@ -83,6 +87,9 @@ public sealed class StormRodWeapon : WeaponBase
 		3 => "Targets 1 additional enemy",
 		4 => "Damage: +14%",
 		5 => "Targets 1 more enemy, strike radius +20%",
-		_ => $"Level {nextLevel}: improved stats",
+		10 => "Targets 1 more enemy (4 total)",
+		20 => "Targets 1 more enemy (5 total)",
+		30 => "Targets 1 more enemy (6 total)",
+		_ => $"Level {nextLevel}: +4% damage",
 	};
 }

@@ -13,7 +13,7 @@ public class UpgradeDefinition
 	private const float MaxSilverMultiplier = 2.5f;
 	private const float MaxLuck = 15f;
 	private const float MaxArmor = 40f;
-	private const int MaxProjectileCount = 4;
+	private const int MaxProjectileCount = 10;
 
 	public string Name        { get; init; }
 	public string Description { get; init; }
@@ -74,7 +74,7 @@ public class UpgradeDefinition
 		DashCooldownUp,
 	}
 
-	public enum UpgradeRarity { Common, Uncommon, Rare }
+	public enum UpgradeRarity { Common, Uncommon, Rare, Legendary }
 
 	/// <summary>Applies this upgrade to the player. Weapons need the optional parameter.</summary>
 	public void Apply( PlayerLocalState state, PlayerWeapons weapons = null )
@@ -86,6 +86,8 @@ public class UpgradeDefinition
 				break;
 			case UpgradeType.WeaponLevelUp:
 				weapons?.LevelUpWeapon( WeaponName );
+				if ( Value > 0f && state != null )
+					state.Damage *= 1f + Value;
 				break;
 			case UpgradeType.SpeedUp:
 				state.Speed *= 1f + Value;
@@ -199,23 +201,23 @@ public class UpgradeDefinition
 	public static IReadOnlyList<UpgradeDefinition> TomePool { get; } = new UpgradeDefinition[]
 	{
 		// ── Auto-unlocked tomes (always in the pool) ─────────────────────────
-		new() { Name = "Agility Tome",          Description = "+8% movement speed",               Type = UpgradeType.SpeedUp,           Value = 0.08f, MaxLevel = 10 },
-		new() { Name = "Size Tome",             Description = "+6% attack size",                 Type = UpgradeType.AreaUp,            Value = 0.06f, MaxLevel = 10 },
-		new() { Name = "Shield Tome",           Description = "+8 shield capacity",               Type = UpgradeType.ShieldUp,          Value = 8f,    MaxLevel = 10 },
-		new() { Name = "Regen Tome",            Description = "+2 HP regen per minute",           Type = UpgradeType.RegenUp,           Value = 2f,    MaxLevel = 10 },
-		new() { Name = "Lifesteal Tome",       Description = "+2% lifesteal (heal % of damage dealt)", Type = UpgradeType.LifestealUp, Value = 0.02f, MaxLevel = 10 },
-		new() { Name = "Projectile Speed Tome", Description = "+8% projectile speed",             Type = UpgradeType.ProjectileSpeedUp, Value = 0.08f, MaxLevel = 10 },
-		new() { Name = "HP Tome",               Description = "+8% max HP",                        Type = UpgradeType.MaxHPUp,           Value = 0.08f, MaxLevel = 10 },
-		new() { Name = "Golden Tome",           Description = "+8% gold from all sources",        Type = UpgradeType.GoldMultiplierUp,  Value = 0.08f, MaxLevel = 10 },
-		new() { Name = "Damage Tome",           Description = "+5% damage",                        Type = UpgradeType.DamageUp,          Value = 0.05f, MaxLevel = 10 },
-		new() { Name = "Cooldown Tome",         Description = "+2% attack speed",                  Type = UpgradeType.CooldownDown,      Value = 0.02f, MaxLevel = 10 },
+		new() { Name = "Agility Tome",          Description = "+8% movement speed",               Type = UpgradeType.SpeedUp,           Value = 0.08f, MaxLevel = 99 },
+		new() { Name = "Size Tome",             Description = "+6% attack size",                 Type = UpgradeType.AreaUp,            Value = 0.06f, MaxLevel = 99 },
+		new() { Name = "Shield Tome",           Description = "+8 shield capacity",               Type = UpgradeType.ShieldUp,          Value = 8f,    MaxLevel = 99 },
+		new() { Name = "Regen Tome",            Description = "+2 HP regen per minute",           Type = UpgradeType.RegenUp,           Value = 2f,    MaxLevel = 99 },
+		new() { Name = "Lifesteal Tome",       Description = "+2% lifesteal (heal % of damage dealt)", Type = UpgradeType.LifestealUp, Value = 0.02f, MaxLevel = 99 },
+		new() { Name = "Projectile Speed Tome", Description = "+8% projectile speed",             Type = UpgradeType.ProjectileSpeedUp, Value = 0.08f, MaxLevel = 99 },
+		new() { Name = "HP Tome",               Description = "+8% max HP",                        Type = UpgradeType.MaxHPUp,           Value = 0.08f, MaxLevel = 99 },
+		new() { Name = "Golden Tome",           Description = "+8% gold from all sources",        Type = UpgradeType.GoldMultiplierUp,  Value = 0.08f, MaxLevel = 99 },
+		new() { Name = "Damage Tome",           Description = "+5% damage",                        Type = UpgradeType.DamageUp,          Value = 0.05f, MaxLevel = 99 },
+		new() { Name = "Cooldown Tome",         Description = "+2% attack speed",                  Type = UpgradeType.CooldownDown,      Value = 0.02f, MaxLevel = 99 },
 
 		// ── Locked tomes (require meta-shop unlock) ──────────────────────────
-		new() { Name = "Precision Tome",        Description = "+4% critical hit chance",          Type = UpgradeType.CritChanceUp,      Value = 0.04f, MaxLevel = 10, UnlockId = "tome_precision" },
-		new() { Name = "Knockback Tome",        Description = "+6% enemy knockback distance",   Type = UpgradeType.KnockbackUp,       Value = 0.06f, MaxLevel = 10, UnlockId = "tome_knockback" },
-		new() { Name = "Quantity Tome",         Description = "+1 projectile to all attacks",     Type = UpgradeType.ProjectileCountUp, Value = 1f,    MaxLevel = 4, UnlockId = "tome_quantity"  },
-		new() { Name = "XP Tome",               Description = "+6% XP from all sources",           Type = UpgradeType.XPMultiplierUp,    Value = 0.06f, MaxLevel = 10, UnlockId = "tome_xp"        },
-		new() { Name = "Duration Tome",         Description = "+8% attack and projectile duration", Type = UpgradeType.DurationMultiplierUp, Value = 0.08f, MaxLevel = 10, UnlockId = "tome_duration" },
+		new() { Name = "Precision Tome",        Description = "+4% critical hit chance",          Type = UpgradeType.CritChanceUp,      Value = 0.04f, MaxLevel = 99, UnlockId = "tome_precision" },
+		new() { Name = "Knockback Tome",        Description = "+6% enemy knockback distance",   Type = UpgradeType.KnockbackUp,       Value = 0.06f, MaxLevel = 99, UnlockId = "tome_knockback" },
+		new() { Name = "Quantity Tome",         Description = "+1 projectile to all attacks",     Type = UpgradeType.ProjectileCountUp, Value = 1f,    MaxLevel = 10, UnlockId = "tome_quantity"  },
+		new() { Name = "XP Tome",               Description = "+6% XP from all sources",           Type = UpgradeType.XPMultiplierUp,    Value = 0.06f, MaxLevel = 99, UnlockId = "tome_xp"        },
+		new() { Name = "Duration Tome",         Description = "+8% attack and projectile duration", Type = UpgradeType.DurationMultiplierUp, Value = 0.08f, MaxLevel = 99, UnlockId = "tome_duration" },
 	};
 
 	// ── Shrine: stat boost pool (Megabonk-style, Luck scales rarity) ────────────

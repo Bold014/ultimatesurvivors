@@ -50,19 +50,22 @@ public sealed class AxeWeapon : WeaponBase
 
 	private int GetAxeCount() => WeaponLevel switch
 	{
-		>= 5 => 3,
-		>= 3 => 2,
-		_    => 1,
+		>= 30 => 6,
+		>= 20 => 5,
+		>= 10 => 4,
+		>= 5  => 3,
+		>= 3  => 2,
+		_     => 1,
 	};
 
-	private float GetDamageMultiplier() => WeaponLevel switch
+	private float GetDamageMultiplier()
 	{
-		>= 5 => 2.8f,
-		>= 4 => 2.4f,
-		>= 3 => 2.0f,
-		>= 2 => 2.0f,
-		_    => 1.6f,
-	};
+		if ( WeaponLevel <= 1 ) return 1.6f;
+		if ( WeaponLevel <= 3 ) return 2.0f;
+		if ( WeaponLevel <= 4 ) return 2.4f;
+		if ( WeaponLevel <= 5 ) return 2.8f;
+		return 2.8f + (WeaponLevel - 5) * 0.06f;
+	}
 
 	public override string GetUpgradeDescription( int nextLevel ) => nextLevel switch
 	{
@@ -70,6 +73,9 @@ public sealed class AxeWeapon : WeaponBase
 		3 => "Throws 2 axes in a radial spread",
 		4 => "Damage: +20%",
 		5 => "Throws 3 axes, Damage: +17%",
-		_ => $"Level {nextLevel}: improved stats",
+		10 => "Throws 4 axes",
+		20 => "Throws 5 axes",
+		30 => "Throws 6 axes",
+		_ => $"Level {nextLevel}: +6% damage",
 	};
 }

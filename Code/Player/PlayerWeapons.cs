@@ -82,6 +82,23 @@ public sealed class PlayerWeapons : Component
 		_weapons.Add( weapon );
 	}
 
+	/// <summary>Returns the average WeaponLevel across all owned weapons (min 1.0).</summary>
+	public float GetAverageWeaponLevel()
+	{
+		if ( _weapons.Count == 0 ) return 1f;
+		float sum = 0f;
+		int count = 0;
+		foreach ( var w in _weapons )
+		{
+			if ( w != null && w.IsValid )
+			{
+				sum += w.WeaponLevel;
+				count++;
+			}
+		}
+		return count > 0 ? MathF.Max( 1f, sum / count ) : 1f;
+	}
+
 	public void SetPaused( bool paused )
 	{
 		IsPaused = paused;

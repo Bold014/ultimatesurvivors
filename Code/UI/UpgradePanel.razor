@@ -7,136 +7,333 @@
 	{
 		var sys    = UpgSys;
 		var source = sys?.CurrentSource ?? UpgradeSystem.RewardSource.LevelUp;
+		var state  = PlayerLocalState.LocalInstance;
+		var weapons = PlayerWeapons.LocalInstance;
+		var passives = PlayerPassives.LocalInstance;
+		var tomes = PlayerTomes.LocalInstance;
 
-		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0d0905ee; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; pointer-events: all; z-index: 1000;">
+		<!-- Full-screen overlay -->
+		<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0d0905ee; display: flex; align-items: center; justify-content: center; pointer-events: all; z-index: 1000; overflow: hidden;">
 
-			<!-- ── Title block ────────────────────────────────────────────── -->
-			<div style="background: @TitleBg(source); border: 2px solid @TitleBorder(source); border-radius: 4px; padding: 12px 48px; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 0 0 1px rgba(0,0,0,0.3);">
-				<div style="font-size: 36px; font-weight: bold; color: @TitleColor(source); font-family: Minecraft; letter-spacing: 5px; text-shadow: 2px 2px 0 #000;">@TitleText(source)</div>
-				<div style="font-size: 12px; color: #a08050; font-family: Minecraft; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">@SubtitleText(source)</div>
-			</div>
+			<!-- ── Starburst rays ────────────────────────────────────────────── -->
+			<div class="upgrade-rays"></div>
 
-			<!-- ── Cards row ──────────────────────────────────────────────── -->
-			<div style="display: flex; gap: 16px; justify-content: center;">
-				@for ( int i = 0; i < (sys?.CurrentChoices?.Count ?? 0); i++ )
+			<!-- ── Gem particles ─────────────────────────────────────────────── -->
+			@if ( source == UpgradeSystem.RewardSource.LevelUp )
+			{
+				@foreach ( var p in Particles )
 				{
-					var upgrade = sys.CurrentChoices[i];
-					var idx     = i;
-					var isWeapon  = upgrade.Type == UpgradeDefinition.UpgradeType.WeaponUnlock
-					             || upgrade.Type == UpgradeDefinition.UpgradeType.WeaponLevelUp;
-					var cardBorder = source == UpgradeSystem.RewardSource.Shrine
-					               ? RarityBorderColor( upgrade.Rarity )
-					               : (isWeapon ? "#c8a800" : "#6a4a1a");
-					var cardBg = source == UpgradeSystem.RewardSource.Shrine
-					           ? RarityBg( upgrade.Rarity )
-					           : (isWeapon ? "#1a1400" : "#1a1008");
-
-				<div style="width: 200px; background: @cardBg; border: 2px solid @cardBorder; border-radius: 4px; padding: 16px 14px 20px 14px; display: flex; flex-direction: column; gap: 10px; pointer-events: all; cursor: pointer; box-shadow: 0 0 0 1px rgba(0,0,0,0.2);"
-					 onclick=@(() => SelectUpgrade( idx ))>
-
-				@* ── Thumbnail (weapons, tomes & items) ── *@
-				@{
-					var (iconPath, iconIsDirect) = GetIconInfo( upgrade, isWeapon );
+					<img src="ui/weapons/xp.png" style="@GemStyle(p)" />
 				}
-				@if ( iconPath != null )
-				{
-					<div style="width: 96px; height: 96px; align-self: center; background: #0d0805; border: 1px solid @cardBorder; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-						@if ( iconIsDirect )
+			}
+
+			<!-- ── Outer row: left | center | right ──────────────────────────── -->
+			<div style="display: flex; flex-direction: row; align-items: flex-start; justify-content: center; gap: 20px; width: 100%; padding: 0 24px; position: relative; z-index: 1;">
+
+				<!-- ══ LEFT PANEL: Inventory ══════════════════════════════════ -->
+				<div class="upgrade-side-panel">
+					<div class="upgrade-panel-header">INVENTORY</div>
+
+					<!-- Weapons -->
+					<div class="upgrade-section-label">WEAPONS</div>
+					<div class="upgrade-icon-grid">
+						@foreach ( var w in weapons?.Weapons ?? Array.Empty<WeaponBase>() )
 						{
-							<img src="@iconPath" style="width: 80px; height: 80px; object-fit: contain; object-position: center; image-rendering: pixelated;" />
+							var wIcon = WeaponIconPath( w.WeaponDisplayName );
+							<div class="upgrade-icon-slot" style="border-color: #c8a800;">
+								@if ( wIcon != null )
+								{
+									<div style="width: 40px; height: 40px; background-image: url('@wIcon'); background-size: contain; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+								}
+								<div class="upgrade-icon-level">@w.WeaponLevel</div>
+							</div>
+						}
+						@if ( !(weapons?.Weapons?.Any() ?? false) )
+						{
+							<div style="font-size: 10px; color: #5a3a10; font-family: Minecraft; text-shadow: 1px 1px 0 #000;">None</div>
+						}
+					</div>
+
+					<!-- Tomes -->
+					<div class="upgrade-section-label">TOMES</div>
+					<div class="upgrade-icon-grid">
+						@foreach ( var tomeName in passives?.Passives ?? Array.Empty<string>() )
+						{
+							var tIcon = TomeIconPath( tomeName );
+							var tLvl = tomes?.GetLevel( tomeName ) ?? 1;
+							<div class="upgrade-icon-slot" style="border-color: #8855cc;">
+								@if ( tIcon != null )
+								{
+									<div style="width: 40px; height: 40px; background-image: url('@tIcon'); background-size: contain; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+								}
+								<div class="upgrade-icon-level">@tLvl</div>
+							</div>
+						}
+						@if ( !(passives?.Passives?.Any() ?? false) )
+						{
+							<div style="font-size: 10px; color: #5a3a10; font-family: Minecraft; text-shadow: 1px 1px 0 #000;">None</div>
+						}
+					</div>
+
+					<!-- Items -->
+					<div class="upgrade-section-label">ITEMS</div>
+					<div class="upgrade-icon-grid">
+						@{ var acquiredItems = state?.AcquiredItemIds ?? new List<string>(); }
+						@foreach ( var itemId in acquiredItems )
+						{
+							var iIcon = ItemIconPath( itemId );
+							<div class="upgrade-icon-slot" style="border-color: #7755cc;">
+								@if ( iIcon != null )
+								{
+									<img src="@iIcon" style="width: 40px; height: 40px; object-fit: contain; image-rendering: pixelated;" />
+								}
+							</div>
+						}
+						@if ( !acquiredItems.Any() )
+						{
+							<div style="font-size: 10px; color: #5a3a10; font-family: Minecraft; text-shadow: 1px 1px 0 #000;">None</div>
+						}
+					</div>
+				</div>
+
+				<!-- ══ CENTER COLUMN: Title + Cards + Button ══════════════════ -->
+				<div style="display: flex; flex-direction: column; align-items: center; gap: 24px; flex: 1; max-width: 700px;">
+
+					<!-- ── Title block ──────────────────────────────────────── -->
+					<div style="background: @TitleBg(source); border: 2px solid @TitleBorder(source); border-radius: 4px; padding: 12px 48px; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 0 0 1px rgba(0,0,0,0.3);">
+						<div style="font-size: 36px; font-weight: bold; color: @TitleColor(source); font-family: Minecraft; letter-spacing: 5px; text-shadow: 2px 2px 0 #000;">@TitleText(source)</div>
+						<div style="font-size: 12px; color: #a08050; font-family: Minecraft; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">@SubtitleText(source)</div>
+					</div>
+
+					<!-- ── Cards row ────────────────────────────────────────── -->
+					<div style="display: flex; gap: 16px; justify-content: center;">
+						@for ( int i = 0; i < (sys?.CurrentChoices?.Count ?? 0); i++ )
+						{
+							var upgrade = sys.CurrentChoices[i];
+							var idx     = i;
+							var isWeapon  = upgrade.Type == UpgradeDefinition.UpgradeType.WeaponUnlock
+							             || upgrade.Type == UpgradeDefinition.UpgradeType.WeaponLevelUp;
+							bool usesRarity = source == UpgradeSystem.RewardSource.Shrine
+							               || ( source == UpgradeSystem.RewardSource.LevelUp
+							                    && ( upgrade.MaxLevel > 0
+							                      || upgrade.Type == UpgradeDefinition.UpgradeType.WeaponLevelUp ) );
+
+							var inBanishMode = sys?.IsBanishMode ?? false;
+							var cardBorder = inBanishMode ? "#ff4444"
+							               : usesRarity ? RarityBorderColor( upgrade.Rarity )
+							               : ( isWeapon ? "#c8a800" : "#6a4a1a" );
+							var cardBg = usesRarity ? RarityBg( upgrade.Rarity )
+							           : ( isWeapon ? "#1a1400" : "#1a1008" );
+
+						<div style="width: 200px; background: @cardBg; border: 2px solid @cardBorder; border-radius: 4px; padding: 16px 14px 20px 14px; display: flex; flex-direction: column; gap: 10px; pointer-events: all; cursor: pointer; box-shadow: 0 0 0 1px rgba(0,0,0,0.2);"
+							 onclick=@(() => SelectUpgrade( idx ))>
+
+						@* ── Thumbnail (weapons, tomes & items) ── *@
+						@{
+							var (iconPath, iconIsDirect) = GetIconInfo( upgrade, isWeapon );
+						}
+						@if ( iconPath != null )
+						{
+							<div style="width: 96px; height: 96px; align-self: center; background: #0d0805; border: 1px solid @cardBorder; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+								@if ( iconIsDirect )
+								{
+									<img src="@iconPath" style="width: 80px; height: 80px; object-fit: contain; image-rendering: pixelated;" />
+								}
+								else
+								{
+									<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: contain; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
+								}
+							</div>
+						}
+
+							@* ── Rarity / type badge ── *@
+							@if ( source == UpgradeSystem.RewardSource.Shrine )
+							{
+								<div style="background: @RarityBadgeBg(upgrade.Rarity); border: 1px solid @RarityBorderColor(upgrade.Rarity); border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: @RarityTextColor(upgrade.Rarity); font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+									@upgrade.Rarity.ToString().ToUpper()
+								</div>
+							}
+							else if ( isWeapon && upgrade.IsNewWeapon )
+							{
+								<div style="background: #1a2008; border: 1px solid #5a8a2a; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #88ee88; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+									NEW WEAPON
+								</div>
+							}
+						else if ( isWeapon && !upgrade.IsNewWeapon )
+						{
+							@{
+								var wpnRarityLabel = upgrade.Rarity.ToString().ToUpper();
+								var wpnLevelLabel  = $"WPN {upgrade.NextLevel - 1} > {upgrade.NextLevel} / {WeaponBase.MaxWeaponLevel}";
+							}
+							<div style="background: @RarityBadgeBg(upgrade.Rarity); border: 1px solid @RarityBorderColor(upgrade.Rarity); border-radius: 2px; padding: 3px 8px; align-self: flex-start; display: flex; flex-direction: column; gap: 1px;">
+								<span style="font-size: 11px; font-family: Minecraft; color: @RarityTextColor(upgrade.Rarity); font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">@wpnRarityLabel</span>
+								<span style="font-size: 10px; font-family: Minecraft; color: @RarityTextColor(upgrade.Rarity); letter-spacing: 0px; text-shadow: 1px 1px 0 #000; opacity: 0.8;">@wpnLevelLabel</span>
+							</div>
+						}
+							else if ( source == UpgradeSystem.RewardSource.Chest )
+							{
+								<div style="background: #0d0d20; border: 1px solid #7755cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #aa88ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+									ITEM
+								</div>
+							}
+							else if ( upgrade.MaxLevel > 0 )
+							{
+								var prevLevel = upgrade.NextLevel - 1;
+								@{
+									var tomeRarityLabel = upgrade.Rarity.ToString().ToUpper();
+									var tomeLevelLabel  = $"TOME {prevLevel} > {upgrade.NextLevel} / {upgrade.MaxLevel}";
+								}
+								<div style="background: @RarityBadgeBg(upgrade.Rarity); border: 1px solid @RarityBorderColor(upgrade.Rarity); border-radius: 2px; padding: 3px 8px; align-self: flex-start; display: flex; flex-direction: column; gap: 1px;">
+									<span style="font-size: 11px; font-family: Minecraft; color: @RarityTextColor(upgrade.Rarity); font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">@tomeRarityLabel</span>
+									<span style="font-size: 10px; font-family: Minecraft; color: @RarityTextColor(upgrade.Rarity); letter-spacing: 0px; text-shadow: 1px 1px 0 #000; opacity: 0.8;">@tomeLevelLabel</span>
+								</div>
+							}
+							else
+							{
+								<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
+									TOME
+								</div>
+							}
+
+							@* ── Upgrade name ── *@
+							<div style="font-size: 17px; color: #f0e0b0; font-family: Minecraft; font-weight: bold; padding-bottom: 2px; text-shadow: 1px 1px 0 #000;">
+								@upgrade.Name
+							</div>
+
+							@* ── Divider ── *@
+							<div style="height: 1px; background: #3a2510;"></div>
+
+							@* ── Description ── *@
+							<div style="font-size: 12px; color: #c8b090; font-family: Minecraft; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
+								@upgrade.Description
+							</div>
+
+							@* ── Cumulative stat preview (tomes only) ── *@
+							@if ( upgrade.StatPreview != null )
+							{
+								var parts = upgrade.StatPreview.Split( '→' );
+								@if ( parts.Length == 2 )
+								{
+									<div style="font-size: 13px; font-family: Minecraft; display: flex; align-items: center; gap: 4px; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
+										<span style="color: #888870;">@parts[0].Trim()</span>
+										<span style="color: #e8c060;">→</span>
+										<span style="color: #88ee88; font-weight: bold;">@parts[1].Trim()</span>
+									</div>
+								}
+							}
+
+						</div>
+						}
+					</div>
+
+					<!-- ── Action buttons ────────────────────────────────────── -->
+					@if ( sys?.CanIgnore == true )
+					{
+						<div style="background: #1a1008; border: 2px solid #6a4a1a; border-radius: 4px; padding: 10px 32px; pointer-events: all; cursor: pointer; font-size: 15px; font-family: Minecraft; color: #a08050; font-weight: bold; letter-spacing: 2px; text-shadow: 1px 1px 0 #000;"
+							 onclick=@(() => IgnoreOffers())>
+							IGNORE OFFERS
+						</div>
+					}
+					else if ( source == UpgradeSystem.RewardSource.LevelUp )
+					{
+						@if ( sys?.IsBanishMode == true )
+						{
+							<div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+								<div style="font-size: 13px; color: #ff4444; font-family: Minecraft; letter-spacing: 2px; text-shadow: 1px 1px 0 #000; font-weight: bold;">
+									CLICK A CARD TO BANISH IT
+								</div>
+								<div class="upgrade-action-btn" style="border-color: #aa3333; color: #ff6666;"
+									 onclick=@(() => CancelBanish())>
+									<div class="upgrade-action-label">CANCEL</div>
+								</div>
+							</div>
 						}
 						else
 						{
-							<div style="width: 80px; height: 80px; background-image: url('@iconPath'); background-size: contain; background-position: center; background-repeat: no-repeat; image-rendering: pixelated;"></div>
-						}
-					</div>
-				}
-
-					@* ── Rarity / type badge ── *@
-					@if ( source == UpgradeSystem.RewardSource.Shrine )
-					{
-						<div style="background: @RarityBadgeBg(upgrade.Rarity); border: 1px solid @RarityBorderColor(upgrade.Rarity); border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: @RarityTextColor(upgrade.Rarity); font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
-							@upgrade.Rarity.ToString().ToUpper()
-						</div>
-					}
-					else if ( isWeapon && upgrade.IsNewWeapon )
-					{
-						<div style="background: #1a2008; border: 1px solid #5a8a2a; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #88ee88; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
-							NEW WEAPON
-						</div>
-					}
-				else if ( isWeapon )
-				{
-					<div style="background: #1a1400; border: 1px solid #c8a800; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #f5c518; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
-						WEAPON LVL @(upgrade.NextLevel - 1) > @upgrade.NextLevel / @WeaponBase.MaxWeaponLevel
-					</div>
-				}
-					else if ( source == UpgradeSystem.RewardSource.Chest )
-					{
-						<div style="background: #0d0d20; border: 1px solid #7755cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #aa88ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
-							ITEM
-						</div>
-					}
-					else if ( upgrade.MaxLevel > 0 )
-					{
-						var prevLevel = upgrade.NextLevel - 1;
-						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
-							TOME LVL @prevLevel > @upgrade.NextLevel / @upgrade.MaxLevel
-						</div>
-					}
-					else
-					{
-						<div style="background: #100820; border: 1px solid #8855cc; border-radius: 2px; padding: 2px 8px; align-self: flex-start; font-size: 11px; font-family: Minecraft; color: #cc99ff; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 0 #000;">
-							TOME
-						</div>
-					}
-
-					@* ── Upgrade name ── *@
-					<div style="font-size: 17px; color: #f0e0b0; font-family: Minecraft; font-weight: bold; padding-bottom: 2px; text-shadow: 1px 1px 0 #000;">
-						@upgrade.Name
-					</div>
-
-					@* ── Divider ── *@
-					<div style="height: 1px; background: #3a2510;"></div>
-
-					@* ── Description ── *@
-					<div style="font-size: 12px; color: #c8b090; font-family: Minecraft; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
-						@upgrade.Description
-					</div>
-
-					@* ── Cumulative stat preview (tomes only) ── *@
-					@if ( upgrade.StatPreview != null )
-					{
-						var parts = upgrade.StatPreview.Split( '→' );
-						@if ( parts.Length == 2 )
-						{
-							<div style="font-size: 13px; font-family: Minecraft; display: flex; align-items: center; gap: 4px; padding-top: 2px; text-shadow: 1px 1px 0 #000;">
-								<span style="color: #888870;">@parts[0].Trim()</span>
-								<span style="color: #e8c060;">→</span>
-								<span style="color: #88ee88; font-weight: bold;">@parts[1].Trim()</span>
+							@{
+								var banishCount = sys?.BanishesRemaining ?? 0;
+								var skipCount = sys?.SkipsRemaining ?? 0;
+								var refreshCount = sys?.RefreshesRemaining ?? 0;
+								var coins = PlayerCoins.LocalInstance;
+								var canAffordRefresh = coins != null && coins.CanAfford( UpgradeSystem.RefreshCost );
+								var banishDisabled = banishCount <= 0;
+								var skipDisabled = skipCount <= 0;
+								var refreshDisabled = refreshCount <= 0 || !canAffordRefresh;
+							}
+							<div style="display: flex; gap: 16px; justify-content: center; align-items: stretch;">
+								<div class="upgrade-action-btn @(banishDisabled ? "disabled" : "")" style="border-color: #aa3333; color: #ff6666;"
+									 onclick=@(() => ClickBanish())>
+									<span style="font-size: 22px; font-weight: bold;">@banishCount</span>
+									<span class="upgrade-action-label">BANISH</span>
+								</div>
+								<div class="upgrade-action-btn @(skipDisabled ? "disabled" : "")" style="border-color: #33aa33; color: #66ff66;"
+									 onclick=@(() => ClickSkip())>
+									<span style="font-size: 22px; font-weight: bold;">@skipCount</span>
+									<span class="upgrade-action-label">SKIP</span>
+								</div>
+								<div class="upgrade-action-btn @(refreshDisabled ? "disabled" : "")" style="border-color: #3366cc; color: #6699ff;"
+									 onclick=@(() => ClickRefresh())>
+									<span style="font-size: 22px; font-weight: bold;">@refreshCount</span>
+									<span class="upgrade-action-label">REFRESH</span>
+									<span style="display: flex; align-items: center; gap: 4px; font-size: 10px; font-family: Minecraft; opacity: 0.7;">
+										<img src="ui/coin.png" style="width: 14px; height: 14px; image-rendering: pixelated;" />
+										@UpgradeSystem.RefreshCost
+									</span>
+								</div>
 							</div>
 						}
 					}
+					else
+					{
+						<div style="font-size: 11px; color: #5a3a10; font-family: Minecraft; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">
+							CLICK A CARD TO SELECT
+						</div>
+					}
 
 				</div>
-				}
+
+				<!-- ══ RIGHT PANEL: Stats ═════════════════════════════════════ -->
+				<div class="upgrade-side-panel">
+					<div class="upgrade-panel-header">STATS</div>
+
+					@if ( state != null )
+					{
+						<!-- Survivability -->
+						<div class="upgrade-section-label">SURVIVABILITY</div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Max HP</span><span class="upgrade-stat-value">@((int)state.MaxHP)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">HP Regen</span><span class="upgrade-stat-value @(state.RegenPerMinute > 0 ? "highlight" : "")">@((int)state.RegenPerMinute)/min</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Shield</span><span class="upgrade-stat-value @(state.MaxShield > 0 ? "highlight" : "")">@((int)state.MaxShield)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Armor</span><span class="upgrade-stat-value @(state.Armor > 0 ? "highlight" : "")">@((int)state.Armor)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Evasion</span><span class="upgrade-stat-value @(state.Evasion > 0 ? "highlight" : "")">@Pct(state.Evasion)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Lifesteal</span><span class="upgrade-stat-value @(state.Lifesteal > 0 ? "highlight" : "")">@Pct(state.Lifesteal)</span></div>
+
+						<!-- Offense -->
+						<div class="upgrade-section-label">OFFENSE</div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Damage</span><span class="upgrade-stat-value">@(state.Damage.ToString("F1"))</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Crit Chance</span><span class="upgrade-stat-value">@Pct(state.CritChance)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Crit Dmg</span><span class="upgrade-stat-value">@Mult(state.CritMultiplier)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Attack Spd</span><span class="upgrade-stat-value @(state.CooldownMultiplier < 1f ? "highlight" : "")">@Pct(1f / state.CooldownMultiplier)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">+Proj</span><span class="upgrade-stat-value @(state.ProjectileCount > 0 ? "highlight" : "")">+@state.ProjectileCount</span></div>
+
+						<!-- Utility -->
+						<div class="upgrade-section-label">UTILITY</div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Area</span><span class="upgrade-stat-value">@Mult(state.Area)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Proj Speed</span><span class="upgrade-stat-value">@Mult(state.ProjectileSpeedMultiplier)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Duration</span><span class="upgrade-stat-value">@Mult(state.DurationMultiplier)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Knockback</span><span class="upgrade-stat-value">@Mult(state.Knockback)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Move Speed</span><span class="upgrade-stat-value">@((int)state.Speed)</span></div>
+
+						<!-- Other -->
+						<div class="upgrade-section-label">OTHER</div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Luck</span><span class="upgrade-stat-value @(state.Luck > 0 ? "highlight" : "")">@Pct(state.Luck)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Pickup Range</span><span class="upgrade-stat-value">@((int)state.MagnetRadius)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">XP Gain</span><span class="upgrade-stat-value @(state.XPMultiplier > 1f ? "highlight" : "")">@Mult(state.XPMultiplier)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Gold Gain</span><span class="upgrade-stat-value @(state.GoldMultiplier > 1f ? "highlight" : "")">@Mult(state.GoldMultiplier)</span></div>
+						<div class="upgrade-stat-row"><span class="upgrade-stat-name">Silver Gain</span><span class="upgrade-stat-value @(state.SilverMultiplier > 1f ? "highlight" : "")">@Mult(state.SilverMultiplier)</span></div>
+					}
+				</div>
+
 			</div>
-
-			<!-- ── Ignore Offers button (shrine only) ─────────────────────── -->
-			@if ( sys?.CanIgnore == true )
-			{
-				<div style="background: #1a1008; border: 2px solid #6a4a1a; border-radius: 4px; padding: 10px 32px; pointer-events: all; cursor: pointer; font-size: 15px; font-family: Minecraft; color: #a08050; font-weight: bold; letter-spacing: 2px; text-shadow: 1px 1px 0 #000;"
-					 onclick=@(() => IgnoreOffers())>
-					IGNORE OFFERS
-				</div>
-			}
-			else
-			{
-				<div style="font-size: 11px; color: #5a3a10; font-family: Minecraft; letter-spacing: 3px; text-shadow: 1px 1px 0 #000;">
-					CLICK A CARD TO SELECT
-				</div>
-			}
-
 		</div>
 	}
 </root>
@@ -164,6 +361,11 @@
 		PlayClickSound();
 		UpgSys?.SelectIgnore();
 	}
+
+	void ClickBanish()  { PlayClickSound(); UpgSys?.EnterBanishMode(); }
+	void CancelBanish() { PlayClickSound(); UpgSys?.CancelBanishMode(); }
+	void ClickSkip()    { PlayClickSound(); UpgSys?.SkipLevelUp(); }
+	void ClickRefresh() { PlayClickSound(); UpgSys?.RefreshChoices(); }
 
 	// ── Title helpers per source ──────────────────────────────────────────────
 
@@ -211,34 +413,38 @@
 
 	string RarityBorderColor( UpgradeDefinition.UpgradeRarity r ) => r switch
 	{
-		UpgradeDefinition.UpgradeRarity.Common   => "#5a8a2a",
-		UpgradeDefinition.UpgradeRarity.Uncommon => "#8a6a20",
-		UpgradeDefinition.UpgradeRarity.Rare     => "#8a4a8a",
-		_                                        => "#6a5a4a"
+		UpgradeDefinition.UpgradeRarity.Common    => "#5a8a2a",
+		UpgradeDefinition.UpgradeRarity.Uncommon  => "#8a6a20",
+		UpgradeDefinition.UpgradeRarity.Rare      => "#8a4a8a",
+		UpgradeDefinition.UpgradeRarity.Legendary => "#b87820",
+		_                                         => "#6a5a4a"
 	};
 
 	string RarityBg( UpgradeDefinition.UpgradeRarity r ) => r switch
 	{
-		UpgradeDefinition.UpgradeRarity.Common   => "#0d1408",
-		UpgradeDefinition.UpgradeRarity.Uncommon => "#1a1408",
-		UpgradeDefinition.UpgradeRarity.Rare     => "#1a0818",
-		_                                        => "#111108"
+		UpgradeDefinition.UpgradeRarity.Common    => "#0d1408",
+		UpgradeDefinition.UpgradeRarity.Uncommon  => "#1a1408",
+		UpgradeDefinition.UpgradeRarity.Rare      => "#1a0818",
+		UpgradeDefinition.UpgradeRarity.Legendary => "#1a1200",
+		_                                         => "#111108"
 	};
 
 	string RarityBadgeBg( UpgradeDefinition.UpgradeRarity r ) => r switch
 	{
-		UpgradeDefinition.UpgradeRarity.Common   => "#0d1a0a",
-		UpgradeDefinition.UpgradeRarity.Uncommon => "#1a1404",
-		UpgradeDefinition.UpgradeRarity.Rare     => "#1a0a18",
-		_                                        => "#111108"
+		UpgradeDefinition.UpgradeRarity.Common    => "#0d1a0a",
+		UpgradeDefinition.UpgradeRarity.Uncommon  => "#1a1404",
+		UpgradeDefinition.UpgradeRarity.Rare      => "#1a0a18",
+		UpgradeDefinition.UpgradeRarity.Legendary => "#1a1000",
+		_                                         => "#111108"
 	};
 
 	string RarityTextColor( UpgradeDefinition.UpgradeRarity r ) => r switch
 	{
-		UpgradeDefinition.UpgradeRarity.Common   => "#88cc66",
-		UpgradeDefinition.UpgradeRarity.Uncommon => "#e8c060",
-		UpgradeDefinition.UpgradeRarity.Rare     => "#dd88dd",
-		_                                        => "#aaaaaa"
+		UpgradeDefinition.UpgradeRarity.Common    => "#88cc66",
+		UpgradeDefinition.UpgradeRarity.Uncommon  => "#e8c060",
+		UpgradeDefinition.UpgradeRarity.Rare      => "#dd88dd",
+		UpgradeDefinition.UpgradeRarity.Legendary => "#f5a020",
+		_                                         => "#aaaaaa"
 	};
 
 	// ── Thumbnail icon paths (same as inventory/unlock page) ───────────────────
@@ -348,20 +554,285 @@
 		};
 	}
 
+	// ── Stat format helpers ────────────────────────────────────────────────────
+
+	static string Pct( float v ) => $"{(int)(v * 100)}%";
+	static string Mult( float v ) => $"{v:F1}x";
+
+	// ── Gem particles (C# time-driven, no CSS animation) ──────────────────────
+
+	// X0/Y0 = start % of screen; VX/VY = velocity %/sec; AngVel = deg/sec
+	record GemParticle( float X0, float Y0, float VX, float VY, float AngVel, int Size, float Dur, float Delay );
+
+	static readonly GemParticle[] Particles =
+	[
+		// ── Burst — Layer 1: large/close (size 32, speed 26, AngVel 120) ─────
+		// Set A: cardinal + diagonal
+		new( 50f, 50f,   0f, -26f, 120f, 32, 2.5f, 0.00f ),  // N
+		new( 50f, 50f,  18f, -18f, 120f, 32, 2.7f, 0.30f ),  // NE
+		new( 50f, 50f,  26f,   0f, 120f, 32, 2.4f, 0.60f ),  // E
+		new( 50f, 50f,  18f,  18f, 120f, 32, 2.8f, 0.90f ),  // SE
+		new( 50f, 50f,   0f,  26f, 120f, 32, 2.6f, 1.20f ),  // S
+		new( 50f, 50f, -18f,  18f, 120f, 32, 2.9f, 1.50f ),  // SW
+		new( 50f, 50f, -26f,   0f, 120f, 32, 2.5f, 1.80f ),  // W
+		new( 50f, 50f, -18f, -18f, 120f, 32, 2.7f, 2.10f ),  // NW
+		// Set B: intermediate angles (22.5° offset)
+		new( 50f, 50f,  10f, -24f, 120f, 30, 2.5f, 0.15f ),  // NNE
+		new( 50f, 50f,  24f, -10f, 120f, 30, 2.7f, 0.45f ),  // ENE
+		new( 50f, 50f,  24f,  10f, 120f, 30, 2.4f, 0.75f ),  // ESE
+		new( 50f, 50f,  10f,  24f, 120f, 30, 2.8f, 1.05f ),  // SSE
+		new( 50f, 50f, -10f,  24f, 120f, 30, 2.6f, 1.35f ),  // SSW
+		new( 50f, 50f, -24f,  10f, 120f, 30, 2.9f, 1.65f ),  // WSW
+		new( 50f, 50f, -24f, -10f, 120f, 30, 2.5f, 1.95f ),  // WNW
+		new( 50f, 50f, -10f, -24f, 120f, 30, 2.7f, 2.25f ),  // NNW
+		// Set C: cardinal + diagonal (staggered delay)
+		new( 50f, 50f,   0f, -26f, 120f, 28, 2.5f, 0.50f ),  // N
+		new( 50f, 50f,  18f, -18f, 120f, 28, 2.7f, 0.80f ),  // NE
+		new( 50f, 50f,  26f,   0f, 120f, 28, 2.4f, 1.10f ),  // E
+		new( 50f, 50f,  18f,  18f, 120f, 28, 2.8f, 1.40f ),  // SE
+		new( 50f, 50f,   0f,  26f, 120f, 28, 2.6f, 1.70f ),  // S
+		new( 50f, 50f, -18f,  18f, 120f, 28, 2.9f, 2.00f ),  // SW
+		new( 50f, 50f, -26f,   0f, 120f, 28, 2.5f, 2.30f ),  // W
+		new( 50f, 50f, -18f, -18f, 120f, 28, 2.7f, 2.60f ),  // NW
+
+		// ── Burst — Layer 2: medium (size 22, speed 20, AngVel 100) ──────────
+		// Set A
+		new( 50f, 50f,   0f, -20f, 100f, 22, 3.0f, 0.15f ),  // N
+		new( 50f, 50f,  14f, -14f, 100f, 22, 3.2f, 0.45f ),  // NE
+		new( 50f, 50f,  20f,   0f, 100f, 22, 2.9f, 0.75f ),  // E
+		new( 50f, 50f,  14f,  14f, 100f, 22, 3.4f, 1.05f ),  // SE
+		new( 50f, 50f,   0f,  20f, 100f, 22, 3.1f, 1.35f ),  // S
+		new( 50f, 50f, -14f,  14f, 100f, 22, 3.3f, 1.65f ),  // SW
+		new( 50f, 50f, -20f,   0f, 100f, 22, 3.0f, 1.95f ),  // W
+		new( 50f, 50f, -14f, -14f, 100f, 22, 3.2f, 2.25f ),  // NW
+		// Set B: intermediate angles
+		new( 50f, 50f,   8f, -18f, 100f, 20, 3.0f, 0.30f ),  // NNE
+		new( 50f, 50f,  18f,  -8f, 100f, 20, 3.2f, 0.60f ),  // ENE
+		new( 50f, 50f,  18f,   8f, 100f, 20, 2.9f, 0.90f ),  // ESE
+		new( 50f, 50f,   8f,  18f, 100f, 20, 3.4f, 1.20f ),  // SSE
+		new( 50f, 50f,  -8f,  18f, 100f, 20, 3.1f, 1.50f ),  // SSW
+		new( 50f, 50f, -18f,   8f, 100f, 20, 3.3f, 1.80f ),  // WSW
+		new( 50f, 50f, -18f,  -8f, 100f, 20, 3.0f, 2.10f ),  // WNW
+		new( 50f, 50f,  -8f, -18f, 100f, 20, 3.2f, 2.40f ),  // NNW
+		// Set C: staggered delay
+		new( 50f, 50f,   0f, -20f, 100f, 18, 3.0f, 0.55f ),
+		new( 50f, 50f,  14f, -14f, 100f, 18, 3.2f, 0.85f ),
+		new( 50f, 50f,  20f,   0f, 100f, 18, 2.9f, 1.15f ),
+		new( 50f, 50f,  14f,  14f, 100f, 18, 3.4f, 1.45f ),
+		new( 50f, 50f,   0f,  20f, 100f, 18, 3.1f, 1.75f ),
+		new( 50f, 50f, -14f,  14f, 100f, 18, 3.3f, 2.05f ),
+		new( 50f, 50f, -20f,   0f, 100f, 18, 3.0f, 2.35f ),
+		new( 50f, 50f, -14f, -14f, 100f, 18, 3.2f, 2.65f ),
+
+		// ── Burst — Layer 3: small/far (size 14, speed 15, AngVel 75) ────────
+		// Set A
+		new( 50f, 50f,   0f, -15f,  75f, 14, 3.8f, 0.40f ),  // N
+		new( 50f, 50f,  11f, -11f,  75f, 14, 4.0f, 0.70f ),  // NE
+		new( 50f, 50f,  15f,   0f,  75f, 14, 3.6f, 1.00f ),  // E
+		new( 50f, 50f,  11f,  11f,  75f, 14, 4.2f, 1.30f ),  // SE
+		new( 50f, 50f,   0f,  15f,  75f, 14, 3.9f, 1.60f ),  // S
+		new( 50f, 50f, -11f,  11f,  75f, 14, 4.1f, 1.90f ),  // SW
+		new( 50f, 50f, -15f,   0f,  75f, 14, 3.7f, 2.20f ),  // W
+		new( 50f, 50f, -11f, -11f,  75f, 14, 4.0f, 2.50f ),  // NW
+		// Set B: intermediate angles
+		new( 50f, 50f,   6f, -14f,  75f, 12, 3.8f, 0.55f ),  // NNE
+		new( 50f, 50f,  14f,  -6f,  75f, 12, 4.0f, 0.85f ),  // ENE
+		new( 50f, 50f,  14f,   6f,  75f, 12, 3.6f, 1.15f ),  // ESE
+		new( 50f, 50f,   6f,  14f,  75f, 12, 4.2f, 1.45f ),  // SSE
+		new( 50f, 50f,  -6f,  14f,  75f, 12, 3.9f, 1.75f ),  // SSW
+		new( 50f, 50f, -14f,   6f,  75f, 12, 4.1f, 2.05f ),  // WSW
+		new( 50f, 50f, -14f,  -6f,  75f, 12, 3.7f, 2.35f ),  // WNW
+		new( 50f, 50f,  -6f, -14f,  75f, 12, 4.0f, 2.65f ),  // NNW
+		// Set C: staggered delay
+		new( 50f, 50f,   0f, -15f,  75f, 10, 3.8f, 0.90f ),
+		new( 50f, 50f,  11f, -11f,  75f, 10, 4.0f, 1.20f ),
+		new( 50f, 50f,  15f,   0f,  75f, 10, 3.6f, 1.50f ),
+		new( 50f, 50f,  11f,  11f,  75f, 10, 4.2f, 1.80f ),
+		new( 50f, 50f,   0f,  15f,  75f, 10, 3.9f, 2.10f ),
+		new( 50f, 50f, -11f,  11f,  75f, 10, 4.1f, 2.40f ),
+		new( 50f, 50f, -15f,   0f,  75f, 10, 3.7f, 2.70f ),
+		new( 50f, 50f, -11f, -11f,  75f, 10, 4.0f, 3.00f ),
+
+		// ── Burst — Layer 4: tiny/very far (size 8, speed 10, AngVel 55) ─────
+		// Set A
+		new( 50f, 50f,   0f, -10f,  55f,  8, 5.0f, 0.60f ),  // N
+		new( 50f, 50f,   7f,  -7f,  55f,  8, 5.2f, 1.00f ),  // NE
+		new( 50f, 50f,  10f,   0f,  55f,  8, 4.8f, 1.40f ),  // E
+		new( 50f, 50f,   7f,   7f,  55f,  8, 5.5f, 1.80f ),  // SE
+		new( 50f, 50f,   0f,  10f,  55f,  8, 5.1f, 2.20f ),  // S
+		new( 50f, 50f,  -7f,   7f,  55f,  8, 5.3f, 2.60f ),  // SW
+		new( 50f, 50f, -10f,   0f,  55f,  8, 4.9f, 3.00f ),  // W
+		new( 50f, 50f,  -7f,  -7f,  55f,  8, 5.4f, 3.40f ),  // NW
+		// Set B: intermediate angles
+		new( 50f, 50f,   4f,  -9f,  55f,  7, 5.0f, 0.80f ),  // NNE
+		new( 50f, 50f,   9f,  -4f,  55f,  7, 5.2f, 1.20f ),  // ENE
+		new( 50f, 50f,   9f,   4f,  55f,  7, 4.8f, 1.60f ),  // ESE
+		new( 50f, 50f,   4f,   9f,  55f,  7, 5.5f, 2.00f ),  // SSE
+		new( 50f, 50f,  -4f,   9f,  55f,  7, 5.1f, 2.40f ),  // SSW
+		new( 50f, 50f,  -9f,   4f,  55f,  7, 5.3f, 2.80f ),  // WSW
+		new( 50f, 50f,  -9f,  -4f,  55f,  7, 4.9f, 3.20f ),  // WNW
+		new( 50f, 50f,  -4f,  -9f,  55f,  7, 5.4f, 3.60f ),  // NNW
+		// Set C: staggered delay
+		new( 50f, 50f,   0f, -10f,  55f,  6, 5.0f, 1.00f ),
+		new( 50f, 50f,   7f,  -7f,  55f,  6, 5.2f, 1.40f ),
+		new( 50f, 50f,  10f,   0f,  55f,  6, 4.8f, 1.80f ),
+		new( 50f, 50f,   7f,   7f,  55f,  6, 5.5f, 2.20f ),
+		new( 50f, 50f,   0f,  10f,  55f,  6, 5.1f, 2.60f ),
+		new( 50f, 50f,  -7f,   7f,  55f,  6, 5.3f, 3.00f ),
+		new( 50f, 50f, -10f,   0f,  55f,  6, 4.9f, 3.40f ),
+		new( 50f, 50f,  -7f,  -7f,  55f,  6, 5.4f, 3.80f ),
+
+		// ── Rain — large/close (size 28-32, VY 25, AngVel 80) ────────────────
+		// Set A
+		new(  3f, 0f,   0f, 25f, 80f, 32, 4.0f, 0.0f ),
+		new( 16f, 0f,   4f, 25f, 80f, 30, 4.2f, 0.5f ),
+		new( 29f, 0f,  -4f, 25f, 80f, 32, 3.9f, 1.1f ),
+		new( 42f, 0f,   0f, 25f, 80f, 30, 4.3f, 1.7f ),
+		new( 55f, 0f,   4f, 25f, 80f, 28, 4.1f, 0.3f ),
+		new( 68f, 0f,  -4f, 25f, 80f, 30, 4.4f, 0.9f ),
+		new( 81f, 0f,   0f, 25f, 80f, 32, 3.8f, 1.5f ),
+		new( 94f, 0f,  -4f, 25f, 80f, 28, 4.2f, 2.1f ),
+		// Set B
+		new( 10f, 0f,   4f, 25f, 80f, 30, 4.0f, 0.3f ),
+		new( 23f, 0f,  -4f, 25f, 80f, 28, 4.2f, 0.8f ),
+		new( 36f, 0f,   0f, 25f, 80f, 30, 3.9f, 1.4f ),
+		new( 49f, 0f,   4f, 25f, 80f, 32, 4.3f, 2.0f ),
+		new( 62f, 0f,  -4f, 25f, 80f, 28, 4.1f, 0.6f ),
+		new( 75f, 0f,   0f, 25f, 80f, 30, 4.4f, 1.2f ),
+		new( 88f, 0f,   4f, 25f, 80f, 32, 3.8f, 1.8f ),
+		new(  6f, 0f,  -4f, 25f, 80f, 28, 4.2f, 2.4f ),
+		// Set C
+		new( 19f, 0f,   0f, 25f, 80f, 28, 4.0f, 0.6f ),
+		new( 32f, 0f,   4f, 25f, 80f, 30, 4.2f, 1.1f ),
+		new( 45f, 0f,  -4f, 25f, 80f, 28, 3.9f, 1.7f ),
+		new( 58f, 0f,   0f, 25f, 80f, 30, 4.3f, 0.2f ),
+		new( 71f, 0f,   4f, 25f, 80f, 32, 4.1f, 0.9f ),
+		new( 84f, 0f,  -4f, 25f, 80f, 28, 4.4f, 1.5f ),
+		new( 97f, 0f,   0f, 25f, 80f, 30, 3.8f, 2.2f ),
+		new( 13f, 0f,   4f, 25f, 80f, 28, 4.2f, 2.8f ),
+
+		// ── Rain — medium (size 18-20, VY 20, AngVel 65) ─────────────────────
+		// Set A
+		new(  8f, 0f,   0f, 20f, 65f, 20, 5.0f, 0.2f ),
+		new( 20f, 0f,   3f, 20f, 65f, 18, 5.3f, 0.8f ),
+		new( 33f, 0f,  -3f, 20f, 65f, 20, 4.9f, 1.4f ),
+		new( 46f, 0f,   0f, 20f, 65f, 18, 5.5f, 2.0f ),
+		new( 59f, 0f,   3f, 20f, 65f, 20, 5.1f, 0.6f ),
+		new( 72f, 0f,  -3f, 20f, 65f, 18, 5.4f, 1.2f ),
+		new( 85f, 0f,   0f, 20f, 65f, 20, 4.8f, 1.8f ),
+		new( 11f, 0f,  -3f, 20f, 65f, 18, 5.2f, 2.5f ),
+		new( 49f, 0f,   0f, 20f, 65f, 20, 5.0f, 3.2f ),
+		new( 77f, 0f,   3f, 20f, 65f, 18, 5.6f, 2.8f ),
+		// Set B
+		new( 14f, 0f,   3f, 20f, 65f, 18, 5.0f, 0.4f ),
+		new( 27f, 0f,  -3f, 20f, 65f, 20, 5.3f, 1.0f ),
+		new( 40f, 0f,   0f, 20f, 65f, 18, 4.9f, 1.7f ),
+		new( 53f, 0f,   3f, 20f, 65f, 20, 5.5f, 0.3f ),
+		new( 66f, 0f,  -3f, 20f, 65f, 18, 5.1f, 0.9f ),
+		new( 79f, 0f,   0f, 20f, 65f, 20, 5.4f, 1.5f ),
+		new( 92f, 0f,   3f, 20f, 65f, 18, 4.8f, 2.2f ),
+		new(  4f, 0f,  -3f, 20f, 65f, 20, 5.2f, 2.9f ),
+		new( 35f, 0f,   0f, 20f, 65f, 18, 5.0f, 3.6f ),
+		new( 60f, 0f,   3f, 20f, 65f, 20, 5.6f, 0.7f ),
+		// Set C
+		new( 25f, 0f,   0f, 20f, 65f, 20, 5.0f, 0.5f ),
+		new( 38f, 0f,   3f, 20f, 65f, 18, 5.3f, 1.2f ),
+		new( 43f, 0f,  -3f, 20f, 65f, 20, 4.9f, 1.9f ),
+		new( 56f, 0f,   0f, 20f, 65f, 18, 5.5f, 2.6f ),
+		new( 67f, 0f,   3f, 20f, 65f, 20, 5.1f, 0.1f ),
+		new( 80f, 0f,  -3f, 20f, 65f, 18, 5.4f, 0.8f ),
+		new( 88f, 0f,   0f, 20f, 65f, 20, 4.8f, 1.6f ),
+		new( 18f, 0f,   3f, 20f, 65f, 18, 5.2f, 3.0f ),
+		new( 52f, 0f,  -3f, 20f, 65f, 20, 5.0f, 4.0f ),
+		new( 70f, 0f,   0f, 20f, 65f, 18, 5.6f, 2.3f ),
+
+		// ── Rain — small/far (size 10-14, VY 14, AngVel 50) ─────────────────
+		// Set A
+		new(  5f, 0f,   0f, 14f, 50f, 12, 7.0f, 0.4f ),
+		new( 14f, 0f,   2f, 14f, 50f, 10, 7.5f, 1.0f ),
+		new( 23f, 0f,  -2f, 14f, 50f, 12, 6.8f, 1.7f ),
+		new( 37f, 0f,   0f, 14f, 50f, 14, 7.2f, 0.1f ),
+		new( 51f, 0f,   2f, 14f, 50f, 10, 7.8f, 2.3f ),
+		new( 65f, 0f,  -2f, 14f, 50f, 12, 7.0f, 0.7f ),
+		new( 78f, 0f,   0f, 14f, 50f, 14, 6.9f, 3.0f ),
+		new( 90f, 0f,  -2f, 14f, 50f, 10, 7.4f, 1.5f ),
+		new( 40f, 0f,   0f, 14f, 50f, 12, 7.1f, 4.2f ),
+		new( 62f, 0f,   2f, 14f, 50f, 10, 7.6f, 3.8f ),
+		// Set B
+		new( 10f, 0f,   2f, 14f, 50f, 10, 7.0f, 0.6f ),
+		new( 19f, 0f,  -2f, 14f, 50f, 12, 7.5f, 1.3f ),
+		new( 30f, 0f,   0f, 14f, 50f, 10, 6.8f, 2.0f ),
+		new( 44f, 0f,   2f, 14f, 50f, 14, 7.2f, 0.4f ),
+		new( 57f, 0f,  -2f, 14f, 50f, 10, 7.8f, 2.6f ),
+		new( 70f, 0f,   0f, 14f, 50f, 12, 7.0f, 1.0f ),
+		new( 83f, 0f,   2f, 14f, 50f, 14, 6.9f, 3.4f ),
+		new( 96f, 0f,  -2f, 14f, 50f, 10, 7.4f, 1.8f ),
+		new( 47f, 0f,   0f, 14f, 50f, 12, 7.1f, 4.5f ),
+		new( 72f, 0f,   2f, 14f, 50f, 10, 7.6f, 4.1f ),
+		// Set C
+		new(  7f, 0f,  -2f, 14f, 50f, 12, 7.0f, 0.9f ),
+		new( 20f, 0f,   0f, 14f, 50f, 10, 7.5f, 1.6f ),
+		new( 28f, 0f,   2f, 14f, 50f, 12, 6.8f, 2.3f ),
+		new( 42f, 0f,  -2f, 14f, 50f, 14, 7.2f, 0.7f ),
+		new( 58f, 0f,   0f, 14f, 50f, 10, 7.8f, 2.9f ),
+		new( 73f, 0f,   2f, 14f, 50f, 12, 7.0f, 1.3f ),
+		new( 86f, 0f,  -2f, 14f, 50f, 14, 6.9f, 3.7f ),
+		new( 93f, 0f,   0f, 14f, 50f, 10, 7.4f, 2.1f ),
+		new( 55f, 0f,   2f, 14f, 50f, 12, 7.1f, 4.8f ),
+		new( 80f, 0f,  -2f, 14f, 50f, 10, 7.6f, 4.4f ),
+	];
+
 	private bool _lastVisible = false;
+	private float _showStartTime = -1f;
+
+	string GemStyle( GemParticle p )
+	{
+		float elapsed = Time.Now - _showStartTime;
+		float loopDur = p.Dur;
+		float t = ((elapsed - p.Delay) % loopDur + loopDur) % loopDur;
+
+		float x   = p.X0 + p.VX * t;
+		float y   = p.Y0 + p.VY * t;
+		float rot = (p.AngVel * t) % 360f;
+
+		float tNorm  = t / loopDur;
+		float opacity = tNorm < 0.15f ? tNorm / 0.15f
+		              : tNorm > 0.85f ? (1f - tNorm) / 0.15f
+		              : 1f;
+
+		return $"position:absolute; left:{x:F1}%; top:{y:F1}%; opacity:{opacity:F2}; transform:rotate({rot:F0}deg); width:{p.Size}px; height:{p.Size}px; pointer-events:none; image-rendering:pixelated;";
+	}
+
 	protected override int BuildHash()
 	{
 		var sys = UpgSys;
+		var s = PlayerLocalState.LocalInstance;
 		bool showing = sys?.IsShowingUpgrades ?? false;
+
+		if ( showing && !_lastVisible )
+			_showStartTime = Time.Now;
+
 		if ( showing != _lastVisible )
 		{
 			_lastVisible = showing;
 			Log.Info( $"[UpgradePanel] BuildHash — IsShowingUpgrades changed to {showing}. UpgSys={(sys != null ? "SET" : "NULL")}. Choices={sys?.CurrentChoices?.Count ?? -1}" );
 		}
+
+		var coins = PlayerCoins.LocalInstance;
 		return System.HashCode.Combine(
 			showing,
 			sys?.CurrentChoices?.Count ?? 0,
-			(int)(sys?.CurrentSource ?? 0)
+			(int)(sys?.CurrentSource ?? 0),
+			System.HashCode.Combine(
+				(int)(s?.MaxHP ?? 0),
+				(int)(s?.Damage * 10 ?? 0),
+				sys?.BanishesRemaining ?? 0,
+				sys?.SkipsRemaining ?? 0,
+				sys?.RefreshesRemaining ?? 0,
+				sys?.IsBanishMode ?? false,
+				coins?.Coins ?? 0
+			),
+			showing ? (int)((Time.Now - _showStartTime) * 30f) : 0
 		);
 	}
 }

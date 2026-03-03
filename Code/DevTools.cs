@@ -59,6 +59,16 @@ public static class DevTools
 		Log.Info( $"[DevTools] DetailsManager.InvertY = {mgr.InvertY} — trees regenerating." );
 	}
 
+	[ConCmd( "dev_resetdaily" )]
+	public static void ResetDailyReward()
+	{
+		if ( !IsDev() ) return;
+		PlayerProgress.Data.LastDailyClaimDate = null;
+		PlayerProgress.Data.DailyStreak = 0;
+		PlayerProgress.Save();
+		Log.Info( "[DevTools] Daily reward reset — panel will show on next menu open." );
+	}
+
 	[ConCmd( "dev_spawndragon" )]
 	public static void SpawnDragonBoss()
 	{

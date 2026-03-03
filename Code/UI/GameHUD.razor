@@ -14,62 +14,64 @@
 		var coins    = LocalCoins;
 		var nearChest   = NearbyChest;
 		var nearBeacon  = NearbyBeacon;
+		var nearCrate   = NearbyCrate;
 	}
 
 	@if ( player != null )
 	{
 		<!-- ── XP bar — very top, full width ────────────────────────────────── -->
-		<div style="position: absolute; top: 0; left: 0; right: 0; height: 10px; background: #0a0812; border-bottom: 1px solid #2a2040;">
+		<div style="position: absolute; top: 0; left: 0; right: 0; height: 18px; background: #0a0812; border-bottom: 1px solid #2a2040;">
 			<div style="background: linear-gradient(90deg, #3a6fff 0%, #6a9fff 100%); height: 100%; width: @((int)((xp?.XPPercent ?? 0f) * 100))%; transition: width 0.15s ease-out; box-shadow: 0 0 8px rgba(58,111,255,0.4);"></div>
 		</div>
 
 		<!-- ── Top stats bar ────────────────────────────────────────────────── -->
-		<div style="position: absolute; top: 10px; left: 0; right: 0; height: 48px; background: linear-gradient(180deg, #1a1410 0%, #0f0c08 100%); border-bottom: 2px solid #4a3520; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: flex; align-items: center; padding: 0 20px;">
+		<div style="position: absolute; top: 18px; left: 0; right: 0; height: 68px; display: flex; align-items: center; padding: 0 28px;">
 
 			<!-- LEFT cluster -->
 			<div style="flex: 1; display: flex; align-items: center; gap: 24px; justify-content: flex-start; min-width: 0;">
 
 				<div style="display: flex; align-items: center; gap: 8px;">
-					<div style="width: 24px; height: 24px; border: 2px solid #3a6fff; border-radius: 50%; background: #0a1030; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #88aaff; font-family: Minecraft; font-weight: bold; box-shadow: 0 0 6px rgba(58,111,255,0.2);">X</div>
-					<span style="font-size: 14px; color: #aaccff; font-family: Minecraft;">@(xp?.CurrentXP ?? 0) / @(xp?.XPToNextLevel ?? 100)</span>
+					<div style="width: 34px; height: 34px; border: 2px solid #8a2020; border-radius: 50%; background: #2a0808; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #ff6666; font-family: Minecraft; font-weight: bold;">K</div>
+					<span style="font-size: 20px; color: #e8aaaa; font-family: Minecraft;">@(stats?.Kills ?? 0)</span>
 				</div>
 
 				<div style="display: flex; align-items: center; gap: 8px;">
-					<div style="width: 24px; height: 24px; border: 2px solid #8a2020; border-radius: 50%; background: #2a0808; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #ff6666; font-family: Minecraft; font-weight: bold;">K</div>
-					<span style="font-size: 14px; color: #e8aaaa; font-family: Minecraft;">@(stats?.Kills ?? 0)</span>
-				</div>
-
-				<div style="display: flex; align-items: center; gap: 8px;">
-					<div style="width: 24px; height: 24px; border: 2px solid #c8a800; border-radius: 50%; background: #2a1f00; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #f5c518; font-family: Minecraft; font-weight: bold;">$</div>
-					<span style="font-size: 14px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@(coins?.Coins ?? 0)</span>
+					<div style="width: 34px; height: 34px; border: 2px solid #c8a800; border-radius: 50%; background: #2a1f00; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #f5c518; font-family: Minecraft; font-weight: bold;">$</div>
+					<span style="font-size: 20px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@(coins?.Coins ?? 0)</span>
 				</div>
 
 			</div>
 
-			<!-- CENTER countdown timer (10 min until final boss) -->
-			<div style="flex: 0 0 auto; font-size: 26px; font-family: Minecraft; color: #f5c518; font-weight: bold; letter-spacing: 6px; text-shadow: 0 0 12px rgba(245,197,24,0.15);">
-				@(spawner?.IsFinalBossPhase == true ? "FINAL BOSS!" : FormatTime( spawner?.TimeRemaining ?? 600f ))
+			<!-- CENTER countdown timer / endless indicator -->
+			<div style="flex: 0 0 auto; font-size: 34px; font-family: Minecraft; font-weight: bold; letter-spacing: 8px; text-shadow: 0 0 12px rgba(245,197,24,0.15);">
+				@if ( spawner?.IsFinalBossPhase == true )
+				{
+					<span style="color: #ff4444;">FINAL BOSS!</span>
+				}
+				else if ( GameManager.Instance?.IsEndlessModeActive == true )
+				{
+					<span style="color: #ff9900; font-size: 26px; letter-spacing: 3px;">SURVIVE!</span>
+				}
+				else
+				{
+					<span style="color: #f5c518;">@FormatTime( spawner?.TimeRemaining ?? 600f )</span>
+				}
 			</div>
 
 			<!-- RIGHT cluster -->
 			<div style="flex: 1; display: flex; align-items: center; gap: 24px; justify-content: flex-end; min-width: 0;">
 
-				<div style="display: flex; align-items: center; gap: 8px;">
-					<div style="width: 24px; height: 24px; border: 2px solid #6a4a1a; border-radius: 4px; background: #120c04; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #f5c518; font-family: Minecraft; font-weight: bold;">S</div>
-					<span style="font-size: 14px; color: #f5c518; font-family: Minecraft;">@((int)(stats?.Score ?? 0))</span>
+				<div style="display: flex; align-items: center; gap: 8px; background: #120c04; border: 1px solid #4a3520; padding: 6px 16px; border-radius: 6px;">
+					<span style="font-size: 13px; color: #a08050; font-family: Minecraft; letter-spacing: 2px;">WAVE</span>
+					<span style="font-size: 22px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@(spawner?.IsFinalBossPhase == true ? "BOSS!" : (spawner?.WaveNumber ?? 0).ToString())</span>
+				</div>
+				<div style="display: flex; align-items: center; gap: 8px; background: #120c04; border: 1px solid #4a3520; padding: 6px 16px; border-radius: 6px;">
+					<span style="font-size: 13px; color: #a08050; font-family: Minecraft; letter-spacing: 2px;">PHASE</span>
+					<span style="font-size: 22px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@(spawner?.IntensityPhase ?? 0)</span>
 				</div>
 
-				<div style="display: flex; align-items: center; gap: 8px; background: #120c04; border: 1px solid #4a3520; padding: 4px 12px; border-radius: 6px;">
-					<span style="font-size: 11px; color: #a08050; font-family: Minecraft; letter-spacing: 2px;">WAVE</span>
-					<span style="font-size: 16px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@(spawner?.IsFinalBossPhase == true ? "BOSS!" : (spawner?.WaveNumber ?? 0).ToString())</span>
-				</div>
-				<div style="display: flex; align-items: center; gap: 8px; background: #120c04; border: 1px solid #4a3520; padding: 4px 12px; border-radius: 6px;">
-					<span style="font-size: 11px; color: #a08050; font-family: Minecraft; letter-spacing: 2px;">PHASE</span>
-					<span style="font-size: 16px; color: #f5c518; font-family: Minecraft; font-weight: bold;">@(spawner?.IntensityPhase ?? 0)</span>
-				</div>
-
-				<div style="background: linear-gradient(180deg, #2a2008 0%, #1a1404 100%); border: 2px solid #c8a800; padding: 4px 14px; border-radius: 8px; box-shadow: 0 0 10px rgba(200,168,0,0.2);">
-					<span style="font-size: 16px; font-family: Minecraft; color: #f5c518; font-weight: bold; letter-spacing: 2px;">LVL @(xp?.Level ?? 1)</span>
+				<div style="background: linear-gradient(180deg, #2a2008 0%, #1a1404 100%); border: 2px solid #c8a800; padding: 6px 18px; border-radius: 8px; box-shadow: 0 0 10px rgba(200,168,0,0.2);">
+					<span style="font-size: 22px; font-family: Minecraft; color: #f5c518; font-weight: bold; letter-spacing: 2px;">LVL @(xp?.Level ?? 1)</span>
 				</div>
 
 			</div>
@@ -83,7 +85,7 @@
 	{
 		var notifHex = ColorToHex( GameNotification.CurrentColor );
 		var notifHexAlpha = notifHex + "88";
-		<div style="position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: #0f0c08ee; border: 2px solid @notifHex; border-radius: 8px; padding: 8px 28px; pointer-events: none;">
+		<div style="position: absolute; top: 96px; left: 50%; transform: translateX(-50%); background: #0f0c08ee; border: 2px solid @notifHex; border-radius: 8px; padding: 8px 28px; pointer-events: none;">
 			<span style="font-size: 18px; font-family: Minecraft; font-weight: bold; color: @notifHex; letter-spacing: 3px; white-space: nowrap; text-shadow: 0 0 10px @notifHexAlpha;">@notif</span>
 		</div>
 	}
@@ -93,7 +95,7 @@
 		var active = ChallengeRuntime.ActiveChallenge;
 		var goalDone = IsChallengeGoalCurrentlyMet( active, spawner );
 		var goalText = active.Goal == ChallengeGoalType.KillAllBosses ? "Defeat final boss" : "Reach final boss phase";
-		<div style="position: absolute; top: 112px; left: 50%; transform: translateX(-50%); background: #120c04ee; border: 2px solid @(goalDone ? "#5ae88a" : "#c8a800"); border-radius: 10px; padding: 8px 16px; min-width: 360px; text-align: center;">
+		<div style="position: absolute; top: 150px; left: 50%; transform: translateX(-50%); background: #120c04ee; border: 2px solid @(goalDone ? "#5ae88a" : "#c8a800"); border-radius: 10px; padding: 8px 16px; min-width: 360px; text-align: center;">
 			<div style="font-size: 13px; color: #f5c518; font-family: Minecraft; letter-spacing: 2px;">CHALLENGE • @active.Name.ToUpper()</div>
 			<div style="font-size: 11px; color: #a08050; margin-top: 2px;">@($"{goalText} • {active.RunCoinMultiplier:F2}x run coins")</div>
 			<div style="font-size: 11px; color: @(goalDone ? "#7ee27e" : "#d0b080"); margin-top: 3px;">@(goalDone ? "Objective reached" : "Objective in progress")</div>
@@ -101,7 +103,7 @@
 	}
 
 	<!-- ── Left panel ───────────────────────────────────────────────────── -->
-		<div style="position: absolute; top: 68px; left: 14px; width: 288px; background: linear-gradient(180deg, #1a1410 0%, #0f0c08 100%); border: 2px solid #4a3520; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
+		<div style="position: absolute; top: 96px; left: 14px; width: 288px; background: linear-gradient(180deg, #1a1410 0%, #0f0c08 100%); border: 2px solid #4a3520; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
 
 		<!-- HP bar -->
 		<div style="display: flex; flex-direction: column; gap: 6px;">
@@ -145,7 +147,7 @@
 								var wIcon = WeaponIconPath( w.WeaponDisplayName );
 								@if ( wIcon != null )
 								{
-									<img src="@wIcon" style="width: 48px; height: 48px; object-fit: contain; object-position: center; image-rendering: pixelated; flex-shrink: 0;" />
+									<img src="@wIcon" style="width: 48px; height: 48px; object-fit: contain; image-rendering: pixelated; flex-shrink: 0;" />
 								}
 								else
 								{
@@ -195,12 +197,16 @@
 		</div>
 
 		@{
-			var bothNearby = nearChest != null && nearChest.IsPlayerNearby && nearBeacon != null && nearBeacon.IsPlayerNearby;
-			var chestBottom = bothNearby ? 130 : 80;
-			var beaconBottom = bothNearby ? 80 : 80;
+			bool chestVisible  = nearChest  != null && nearChest.IsPlayerNearby;
+			bool crateVisible  = nearCrate  != null && nearCrate.IsPlayerNearby;
+			bool beaconVisible = nearBeacon != null && nearBeacon.IsPlayerNearby;
+			// Stack prompts from bottom: beacon=80, crate above beacon, chest above crate
+			var beaconBottom = 80;
+			var crateBottom  = beaconVisible ? 130 : 80;
+			var chestBottom  = (beaconVisible && crateVisible) ? 180 : (beaconVisible || crateVisible) ? 130 : 80;
 		}
 		<!-- ── Chest interaction prompt ─────────────────────────────────────── -->
-		@if ( nearChest != null && nearChest.IsPlayerNearby )
+		@if ( chestVisible )
 		{
 			var canAfford = (coins?.Coins ?? 0) >= nearChest.Cost;
 			var isFree = player?.IsNextChestFree ?? false;
@@ -216,8 +222,16 @@
 		</div>
 		}
 
+		<!-- ── Crate interaction prompt ──────────────────────────────────────── -->
+		@if ( crateVisible )
+		{
+			<div style="position: absolute; bottom: @(crateBottom)px; left: 50%; transform: translateX(-50%); background: #081a10ee; border: 2px solid #20c878; border-radius: 10px; padding: 10px 24px; display: flex; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
+				<div style="font-size: 16px; font-family: Minecraft; color: #20c878; font-weight: bold; white-space: nowrap;">[E] Open Crate</div>
+			</div>
+		}
+
 		<!-- ── Beacon charging prompt ─────────────────────────────────────────── -->
-		@if ( nearBeacon != null && nearBeacon.IsPlayerNearby )
+		@if ( beaconVisible )
 		{
 			int pct = (int)(nearBeacon.ChargePercent * 100f);
 			<div style="position: absolute; bottom: @(beaconBottom)px; left: 50%; transform: translateX(-50%); background: #080f1aee; border: 2px solid #3a6fff; border-radius: 8px; padding: 8px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
@@ -402,6 +416,7 @@
 	PlayerCoins      LocalCoins    => PlayerCoins.LocalInstance;
 	Chest            NearbyChest   => Scene?.GetAllComponents<Chest>().FirstOrDefault( c => c.IsPlayerNearby );
 	LevelUpBeacon    NearbyBeacon  => Scene?.GetAllComponents<LevelUpBeacon>().FirstOrDefault( b => b.IsPlayerNearby );
+	Crate            NearbyCrate   => Scene?.GetAllComponents<Crate>().FirstOrDefault( c => c.IsPlayerNearby );
 
 	static string ColorToHex( Color c )
 	{
@@ -458,6 +473,7 @@
 		ApplyPauseState();
 		GameManager.Instance?.RecordAbandonResult();
 		LocalGameRunner.Instance?.EndLocalGame();
+		MenuManager.ReturnToHomepage();
 	}
 
 	void ApplyPauseState()
@@ -496,6 +512,10 @@
 			(int)GameManager.ReturnToMenuCountdown,
 			GameManager.EscapeMenuOpen ? 1 : 0
 		);
+		int h6 = System.HashCode.Combine(
+			GameManager.Instance?.IsEndlessModeActive == true ? 1 : 0,
+			sp?.EndlessWavesCompleted ?? 0
+		);
 		var tl = LocalTomes;
 		int tomeLevelSum = tl != null ? tl.GetAllLevels().Values.Sum() : 0;
 		int h3 = System.HashCode.Combine(
@@ -503,14 +523,15 @@
 			NearbyChest       != null ? 1 : 0,
 			bc                != null ? 1 : 0,
 			(int)((bc?.ChargePercent ?? 0f) * 100),
-			tomeLevelSum
+			tomeLevelSum,
+			NearbyCrate       != null ? 1 : 0
 		);
 		int h4 = (GameNotification.CurrentText ?? "").GetHashCode();
 		int h5 = System.HashCode.Combine(
 			ChallengeRuntime.IsChallengeRun ? 1 : 0,
 			ChallengeRuntime.ActiveChallenge?.Id?.GetHashCode() ?? 0
 		);
-		return System.HashCode.Combine( h1, h2, h3, h4, h5 );
+		return System.HashCode.Combine( h1, h2, h3, h4, h5, h6 );
 	}
 
 	static bool IsChallengeGoalCurrentlyMet( ChallengeDefinition active, EnemySpawner spawner )

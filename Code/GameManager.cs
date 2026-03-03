@@ -15,6 +15,9 @@ public sealed class GameManager : Component
 	/// <summary>True while the in-game escape/pause menu is open.</summary>
 	public static bool EscapeMenuOpen { get; set; } = false;
 
+	/// <summary>True after the final boss is defeated. Waves continue forever; run ends only on player death.</summary>
+	public bool IsEndlessModeActive { get; private set; } = false;
+
 	private bool _welcomeSent           = false;
 	private float _welcomeDelay         = 1.5f;
 	private bool _runEnded              = false;
@@ -22,11 +25,26 @@ public sealed class GameManager : Component
 	private bool _tierCompleteGoldAwarded = false;
 	private bool _challengeReachedFinalSwarm = false;
 	private bool _challengeResolved = false;
+	/// <summary>Set true after RecordWinResult fires so CheckRunEnd skips double-recording in endless mode.</summary>
+	private bool _runResultRecorded = false;
 
 	protected override void OnStart()
 	{
 		Instance = this;
+		EscapeMenuOpen = false;
 		Log.Info( $"[GameManager] OnStart. Scene={Scene?.Name}, IsInLocalGame={LocalGameRunner.IsInLocalGame}" );
+
+		// If running outside of LocalGameRunner (e.g. game.scene loaded directly via lobby rejoin),
+		// redirect to the menu scene so the player goes through proper character/map selection.
+		if ( !Scene.IsEditor && LocalGameRunner.Instance == null )
+		{
+			Log.Info( "[GameManager] No LocalGameRunner found — redirecting to menu.scene." );
+			var opts = new SceneLoadOptions();
+			opts.SetScene( ResourceLibrary.Get<SceneFile>( "scenes/menu.scene" ) );
+			Game.ChangeScene( opts );
+			return;
+		}
+
 		PlayerProgress.Load();
 		var selectedChallengeId = MenuManager.SelectedChallengeId;
 		if ( !PlayerProgress.CanUseChallengesFor( MenuManager.SelectedMap ?? "dark_forest", MenuManager.SelectedTier ) )
@@ -41,12 +59,15 @@ public sealed class GameManager : Component
 		SpawnPlayer();
 	}
 
-	/// <summary>Ensures the procedural map exists (spawns at runtime if missing).</summary>
+	/// <summary>Ensures a MapSpawner exists so the procedural map will be created.</summary>
+	/// <remarks>
+	/// Always creates the MapSpawner unconditionally — do NOT check for existing TilesetComponents here.
+	/// During a second run, orphaned tilesets from the previous run may still exist due to deferred Destroy().
+	/// MapSpawner's own 1-frame delay lets those deferred destroys complete before it checks.
+	/// </remarks>
 	private void EnsureMapExists()
 	{
-		if ( Scene.GetAllComponents<TilesetComponent>().Any() ) return;
-		var spawner = GameObject.Components.GetOrCreate<MapSpawner>();
-		// MapSpawner.OnStart will run next frame; it spawns the map. No need to call it manually.
+		GameObject.Components.GetOrCreate<MapSpawner>();
 	}
 
 	protected override void OnUpdate()
@@ -121,10 +142,15 @@ public sealed class GameManager : Component
 			PlayerProgress.Data.HighestTierCompletedByMap[map] = tier;
 		PlayerProgress.Save();
 
+		// Soul Essence reward for tier completion (victory)
+		int essenceWin = 5 + (tier * 3) + (stats.Kills / 50);
+		PlayerProgress.Data.SoulEssence += essenceWin;
+		PlayerProgress.Save();
+
 		_tierCompleteGoldAwarded = true;
 		spawner.ClearTierJustCompleted();
 
-		GameNotification.Show( $"+{gold} gold for defeating the final boss!", new Color( 1f, 0.85f, 0.2f ), 4f );
+		GameNotification.Show( $"+{gold} gold, +{essenceWin} essence for defeating the final boss!", new Color( 1f, 0.85f, 0.2f ), 4f );
 
 		// Broadcast victory to lobby chat so all players see it
 		var victoryName  = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "A player";
@@ -136,10 +162,10 @@ public sealed class GameManager : Component
 		RecordWinResult( stats, tier, map );
 		ResolveChallengeOutcome( completedTier: true, died: false, stats );
 
-		// Victory — return to menu
-		EscapeMenuOpen     = false;
-		_runEnded          = true;
-		_returnToMenuDelay = 8f;
+		// Boss defeated — activate endless mode instead of returning to menu
+		EscapeMenuOpen      = false;
+		IsEndlessModeActive = true;
+		GameNotification.Show( "ENDLESS MODE! Survive as long as you can!", new Color( 1f, 0.6f, 0f ), 5f );
 	}
 
 	// ── Abandon recording (escape menu quit/restart) ───────────────────────────
@@ -148,6 +174,12 @@ public sealed class GameManager : Component
 		if ( _runEnded ) return; // already recorded (win or death path fired first)
 		var stats = Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
 		if ( stats == null ) return;
+
+		// Only count runs where the player had meaningful activity.
+		bool hasActivity = stats.TimeAlive >= 60f || stats.Kills >= 1;
+		if ( !hasActivity ) return;
+
+		_runEnded = true; // prevent any second call from double-recording
 		ResolveChallengeOutcome( completedTier: false, died: false, stats );
 
 		var result = new RunResult
@@ -203,6 +235,7 @@ public sealed class GameManager : Component
 			GoldEarned              = 0,
 		};
 		PlayerProgress.RecordRunResult( result );
+		_runResultRecorded = true;
 	}
 
 	// ── End-of-run check ──────────────────────────────────────────────────────
@@ -222,6 +255,18 @@ public sealed class GameManager : Component
 			if ( !allStats.Any() ) return;
 			if ( !allStats.All( s => !s.IsAlive ) ) return;
 			statsToRecord = allStats;
+		}
+
+		// Save best endless wave on any death during endless mode
+		if ( IsEndlessModeActive )
+		{
+			var endlessSpawner = Scene.GetAllComponents<EnemySpawner>().FirstOrDefault();
+			int endlessWaves   = endlessSpawner?.EndlessWavesCompleted ?? 0;
+			if ( endlessWaves > PlayerProgress.Data.BestEndlessWave )
+			{
+				PlayerProgress.Data.BestEndlessWave = endlessWaves;
+				PlayerProgress.Save();
+			}
 		}
 
 		foreach ( var stats in statsToRecord )
@@ -251,6 +296,9 @@ public sealed class GameManager : Component
 				// We could add a small consolation, but plan says "gold for completing level" — so 0
 			}
 
+			// Soul Essence: consolation reward on death (smaller than victory)
+			int essenceDeath = completed ? 0 : 3 + (stats.Kills / 100);
+
 			var result = new RunResult
 			{
 				Kills               = stats.Kills,
@@ -268,10 +316,21 @@ public sealed class GameManager : Component
 				MapId               = MenuManager.SelectedMap ?? "dark_forest",
 				TierCompleted       = MenuManager.SelectedTier,
 				GoldEarned          = goldEarned,
+				SoulEssenceEarned   = essenceDeath,
 			};
-			PlayerProgress.RecordRunResult( result );
-			ResolveChallengeOutcome( completedTier: completed, died: !completed, stats );
+			// Skip re-recording if we already recorded a win at tier complete (endless mode death)
+			if ( !_runResultRecorded )
+			{
+				PlayerProgress.RecordRunResult( result );
+				ResolveChallengeOutcome( completedTier: completed, died: !completed, stats );
+			}
 		}
+
+		// Show essence earned notification
+		var firstStats = statsToRecord.FirstOrDefault();
+		int essenceEarned = _tierCompleteGoldAwarded ? 0 : 3 + ((firstStats?.Kills ?? 0) / 100);
+		if ( essenceEarned > 0 )
+			GameNotification.Show( $"+{essenceEarned} soul essence", new Color( 0.7f, 0.5f, 1f ), 3f );
 
 		// Broadcast death stats to lobby chat so all players see it
 		var deathName  = Connection.Local?.DisplayName ?? Connection.Local?.Name ?? "A player";
@@ -374,6 +433,8 @@ public sealed class GameManager : Component
 	protected override void OnDestroy()
 	{
 		ChallengeRuntime.Clear();
+		EscapeMenuOpen = false;
+		ReturnToMenuCountdown = 0f;
 		if ( Instance == this )
 			Instance = null;
 	}

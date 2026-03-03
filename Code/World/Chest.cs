@@ -66,7 +66,7 @@ public sealed class Chest : Component
 
 		if ( IsOpened ) return;
 
-		var player = Scene.GetAllComponents<PlayerLocalState>().FirstOrDefault();
+		var player = PlayerLocalState.LocalInstance;
 		if ( player == null ) return;
 
 		var playerGo = player.GameObject;

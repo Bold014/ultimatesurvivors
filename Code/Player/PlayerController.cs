@@ -22,6 +22,11 @@ public sealed class PlayerController : Component
 	private Vector3 _dashDir = Vector3.Forward;
 	private float _dashTime = 0f;
 
+	// Camera shake state
+	private GameObject _cameraGo;
+	private float _shakeTimer = 0f;
+	private bool _prevHitFlash = false;
+
 	// Knockback state — applied when an enemy deals contact damage
 	private Vector3 _knockbackVelocity = Vector3.Zero;
 
@@ -74,6 +79,7 @@ public sealed class PlayerController : Component
 
 		var charDef = CharacterDefinition.GetByName( MenuManager.SelectedCharacter );
 		_state.Initialize( charDef );
+		SkillTreeSystem.ApplySkillBonuses( _state );
 		ApplyChallengePlayerModifiers();
 
 		if ( _stats != null )
@@ -119,21 +125,43 @@ public sealed class PlayerController : Component
 
 		if ( _isDead ) return;
 
-		// If the local game is being torn down, stop interfering with cursor/input
-		if ( !LocalGameRunner.IsInLocalGame ) return;
+		// If LocalGameRunner is present but the run has ended (being torn down), stop processing input.
+		// When there is no LocalGameRunner at all (e.g. game.scene in editor), allow movement normally.
+		if ( LocalGameRunner.Instance != null && !LocalGameRunner.IsInLocalGame ) return;
 
 		// Show cursor when any UI panel is open, hide it during normal play
 		bool uiOpen = UpgradeSystem.LocalInstance?.IsShowingUpgrades == true
 			|| GameManager.EscapeMenuOpen;
 		Mouse.Visibility = uiOpen ? MouseVisibility.Visible : MouseVisibility.Hidden;
 
-		// Red sprite tint while hit flash is active
+		// Red sprite tint while hit flash is active; trigger camera shake on new hit
+		bool hitNow = _state?.HitFlashTimer > 0f;
+		if ( hitNow && !_prevHitFlash )
+			_shakeTimer = 0.25f;
+		_prevHitFlash = hitNow;
+
 		if ( _spriteRenderer != null )
 		{
-			if ( _state?.HitFlashTimer > 0f )
+			if ( hitNow )
 				_spriteRenderer.OverlayColor = new Color( 1f, 0.1f, 0.1f, 0.7f );
 			else
 				_spriteRenderer.OverlayColor = Color.White.WithAlpha( 0f );
+		}
+
+		// Apply sinusoidal camera shake that fades over 0.25s
+		if ( _cameraGo != null )
+		{
+			if ( _shakeTimer > 0f )
+			{
+				_shakeTimer -= Time.Delta;
+				float t = _shakeTimer / 0.25f;
+				float offset = MathF.Sin( Time.Now * 60f ) * 4f * t;
+				_cameraGo.LocalPosition = new Vector3( offset, 0f, 1000f );
+			}
+			else
+			{
+				_cameraGo.LocalPosition = new Vector3( 0f, 0f, 1000f );
+			}
 		}
 
 		if ( uiOpen )
@@ -262,6 +290,12 @@ public sealed class PlayerController : Component
 			pos = AabbPushOut( pos, chest.WorldPosition.WithZ( 0f ), PlayerHalfExtent, ChestCollisionHalfExtent );
 		}
 
+		foreach ( var crate in Scene.GetAllComponents<Crate>() )
+		{
+			if ( crate.IsOpened ) continue;
+			pos = AabbPushOut( pos, crate.WorldPosition.WithZ( 0f ), PlayerHalfExtent, ChestCollisionHalfExtent );
+		}
+
 		foreach ( var shrine in Scene.GetAllComponents<LevelUpBeacon>() )
 		{
 			if ( !shrine.IsActive ) continue;
@@ -353,6 +387,7 @@ public sealed class PlayerController : Component
 		_spriteRenderer.Sprite = sprite;
 		_spriteRenderer.PlaybackSpeed = 1f;
 		_spriteRenderer.TextureFilter = Sandbox.Rendering.FilterMode.Point;
+
 	}
 
 	private void UpdateTreeOcclusion()
@@ -455,6 +490,8 @@ public sealed class PlayerController : Component
 
 			_isDashing = true;
 			_dashTime = 0.15f;
+			if ( _spriteRenderer != null )
+				_spriteRenderer.Color = new Color( 0.55f, 0.9f, 1f, 1f );
 			float baseCooldown = _state?.DashCooldownBase ?? 1.5f;
 			float mult = _state?.DashCooldownMultiplier ?? 1f;
 			_dashCooldown = baseCooldown * mult;
@@ -467,7 +504,11 @@ public sealed class PlayerController : Component
 			WorldPosition = WorldPosition.WithZ( 0f );
 
 			if ( _dashTime <= 0f )
+			{
 				_isDashing = false;
+				if ( _spriteRenderer != null )
+					_spriteRenderer.Color = Color.White;
+			}
 		}
 	}
 
@@ -489,12 +530,12 @@ public sealed class PlayerController : Component
 
 	private void SetupCamera()
 	{
-		var camGo = new GameObject( true, "PlayerCamera" );
-		camGo.SetParent( GameObject );
-		camGo.LocalPosition = new Vector3( 0f, 0f, 1000f );
-		camGo.LocalRotation = Rotation.From( new Angles( 90f, CameraYaw, 0f ) );
+		_cameraGo = new GameObject( true, "PlayerCamera" );
+		_cameraGo.SetParent( GameObject );
+		_cameraGo.LocalPosition = new Vector3( 0f, 0f, 1000f );
+		_cameraGo.LocalRotation = Rotation.From( new Angles( 90f, CameraYaw, 0f ) );
 
-		var cam = camGo.Components.Create<CameraComponent>();
+		var cam = _cameraGo.Components.Create<CameraComponent>();
 		cam.Orthographic = true;
 		cam.OrthographicHeight = 200f;
 		cam.IsMainCamera = true;

@@ -1,28 +1,23 @@
 /// <summary>
-/// Local-only XP gem dropped by enemies.
-/// Floats in place until the player enters the magnet radius, then flies toward them.
-/// Collected on close contact, adding XP via PlayerXP.
+/// Ground pickup dropped by enemies. Flies to the player when attracted and instantly
+/// vacuums all XP gems on screen toward the player.
 /// </summary>
-public sealed class XPGem : Component
+public sealed class MagnetPickup : Component
 {
-	static SoundEvent XpPickupSound = new( "sounds/xp_pickup.mp3" );
-
-	[Property] public int XPValue { get; set; } = 5;
 	public GameObject PlayerObject { get; set; }
 
 	private float _lifetime = 25f;
 	private bool _attracted = false;
 	private const float MoveSpeed = 220f;
-	private const float GemSize = 6f;
+	private const float PickupSize = 6f;
 
 	protected override void OnStart()
 	{
-		// Place gem behind enemies (enemy sprites render at Z=2; higher Z = further back)
 		WorldPosition = WorldPosition.WithZ( 4f );
 
 		var renderer = Components.Create<SpriteRenderer>();
-		renderer.Sprite = ResourceLibrary.Get<Sprite>( "ui/weapons/xp.sprite" );
-		renderer.Size = new Vector2( GemSize, GemSize );
+		renderer.Sprite = ResourceLibrary.Get<Sprite>( "ui/pickups/magnet.sprite" );
+		renderer.Size = new Vector2( PickupSize, PickupSize );
 		renderer.TextureFilter = Sandbox.Rendering.FilterMode.Point;
 	}
 
@@ -43,11 +38,9 @@ public sealed class XPGem : Component
 		var toPlayer = (PlayerObject.WorldPosition - WorldPosition).WithZ( 0f );
 		float dist = toPlayer.Length;
 
-		// Enter attract mode when within magnet radius
 		if ( dist < playerState.MagnetRadius )
 			_attracted = true;
 
-		// Also attract if lifetime is nearly up
 		if ( _lifetime < 3f )
 			_attracted = true;
 
@@ -62,18 +55,16 @@ public sealed class XPGem : Component
 		}
 	}
 
-	public void ForceAttract() => _attracted = true;
-
 	private void Collect()
 	{
-		var xp = PlayerObject?.Components.Get<PlayerXP>();
+		foreach ( var gem in Scene.GetAllComponents<XPGem>() )
+			gem.ForceAttract();
+
 		try
 		{
-			var h = Sound.Play( XpPickupSound );
-			h.Position = WorldPosition;
+			Sound.Play( "sounds/xp_pickup.mp3" );
 		}
 		catch { }
-		xp?.AddXP( XPValue );
 		GameObject.Destroy();
 	}
 }

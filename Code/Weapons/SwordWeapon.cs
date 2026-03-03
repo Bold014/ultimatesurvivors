@@ -21,7 +21,7 @@ public sealed class SwordWeapon : WeaponBase
 	{
 		var dir = GetNearestEnemyDirection();
 
-		int baseCount = WeaponLevel >= 3 ? 2 : 1;
+		int baseCount = GetSlashCount();
 		int totalCount = baseCount + (_state?.ProjectileCount ?? 0);
 
 		PerformSlash( dir );
@@ -131,11 +131,20 @@ public sealed class SwordWeapon : WeaponBase
 		effect.Lifetime = lifetime;
 	}
 
+	private int GetSlashCount() => WeaponLevel switch
+	{
+		>= 30 => 4,
+		>= 10 => 3,
+		>= 3  => 2,
+		_     => 1,
+	};
+
 	private float GetArcDegrees() => WeaponLevel switch
 	{
-		>= 4 => 150f,
-		>= 3 => 130f,
-		_    => 120f,
+		>= 20 => 170f,
+		>= 4  => 150f,
+		>= 3  => 130f,
+		_     => 120f,
 	};
 
 	private float GetRange() => WeaponLevel switch
@@ -145,14 +154,15 @@ public sealed class SwordWeapon : WeaponBase
 		_    => 65f,
 	};
 
-	private float GetDamageMultiplier() => WeaponLevel switch
+	private float GetDamageMultiplier()
 	{
-		>= 5 => 2.2f,
-		>= 4 => 2.05f,
-		>= 3 => 1.9f,
-		>= 2 => 1.75f,
-		_    => 1.6f,
-	};
+		if ( WeaponLevel <= 1 ) return 1.6f;
+		if ( WeaponLevel <= 2 ) return 1.75f;
+		if ( WeaponLevel <= 3 ) return 1.9f;
+		if ( WeaponLevel <= 4 ) return 2.05f;
+		if ( WeaponLevel <= 5 ) return 2.2f;
+		return 2.2f + (WeaponLevel - 5) * 0.05f;
+	}
 
 	public override string GetUpgradeDescription( int nextLevel ) => nextLevel switch
 	{
@@ -160,7 +170,10 @@ public sealed class SwordWeapon : WeaponBase
 		3 => "Double slash — strikes twice per attack",
 		4 => "Wider arc (150°), longer range, Damage: +8%",
 		5 => "Knockback — enemies are pushed away on hit",
-		_ => $"Level {nextLevel}: improved stats",
+		10 => "Triple slash — strikes three times per attack",
+		20 => "Wider arc (170°)",
+		30 => "Quad slash — strikes four times per attack",
+		_ => $"Level {nextLevel}: +5% damage",
 	};
 }
 

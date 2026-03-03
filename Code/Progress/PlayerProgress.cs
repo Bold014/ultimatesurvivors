@@ -39,6 +39,7 @@ public static class PlayerProgress
 		// Ensure new fields exist (migration for old saves)
 		Data.HighestTierCompletedByMap ??= new Dictionary<string, int>();
 		Data.CompletedChallengeIds ??= new List<string>();
+		Data.SkillLevels ??= new Dictionary<string, int>();
 
 		// Archer and starter weapons are always unlocked
 		EnsureDefaultUnlocks();
@@ -182,6 +183,7 @@ public static class PlayerProgress
 	public static void RecordRunResult( RunResult result )
 	{
 		Data.Coins += result.GoldEarned;
+		Data.SoulEssence += result.SoulEssenceEarned;
 
 		Data.TotalKills += result.Kills;
 		Data.TotalRunsPlayed += 1;
@@ -357,6 +359,29 @@ public class SaveData
 	public float PermanentChallengeCoinBonusPercent { get; set; } = 0f;
 
 	public bool MusicMuted { get; set; } = false;
+
+	/// <summary>Highest number of endless boss cycles survived after defeating the final boss.</summary>
+	public int BestEndlessWave { get; set; } = 0;
+
+	// ── Daily Rewards ─────────────────────────────────────────────────────
+	/// <summary>ISO 8601 date string of the last daily reward claim (e.g. "2026-03-02").</summary>
+	public string LastDailyClaimDate { get; set; } = null;
+	/// <summary>Current daily streak (1-based, resets on missed day).</summary>
+	public int DailyStreak { get; set; } = 0;
+	/// <summary>Total number of daily rewards ever claimed.</summary>
+	public int TotalDailyClaims { get; set; } = 0;
+
+	// ── Skill Tree ────────────────────────────────────────────────────────
+	/// <summary>Skill node levels keyed by skill ID (e.g. "damage" = 5).</summary>
+	public Dictionary<string, int> SkillLevels { get; set; } = new();
+	/// <summary>Unspent Soul Essence currency for the skill tree.</summary>
+	public int SoulEssence { get; set; } = 0;
+
+	// ── Prestige ──────────────────────────────────────────────────────────
+	/// <summary>Current prestige level (0 = no prestige yet, max 10).</summary>
+	public int PrestigeLevel { get; set; } = 0;
+	/// <summary>Lifetime total Soul Essence spent on skill upgrades (persists through prestige).</summary>
+	public int TotalSoulEssenceSpent { get; set; } = 0;
 }
 
 public class RunResult
@@ -384,4 +409,6 @@ public class RunResult
 	public int TierCompleted { get; set; }
 	/// <summary>Gold awarded for completing the run (or partial progress on death).</summary>
 	public int GoldEarned { get; set; }
+	/// <summary>Soul Essence earned this run (for skill tree progression).</summary>
+	public int SoulEssenceEarned { get; set; }
 }

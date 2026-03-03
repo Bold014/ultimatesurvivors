@@ -37,7 +37,7 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 		// Sync damage, orbit radius, and sprite size to current player state
 		if ( _state != null )
 		{
-			float baseRadius = 35f + WeaponLevel * 5f;
+			float baseRadius = GetBaseOrbitRadius();
 			float effectiveRadius = baseRadius * _state.Area;
 			float effectiveSize = 10f * _state.Area;
 			foreach ( var shardGo in _shards )
@@ -45,8 +45,9 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 				var shard = shardGo.Components.Get<OrbitalShard>();
 				if ( shard != null )
 				{
-					shard.Damage = _state.Damage * (0.9f + WeaponLevel * 0.15f);
+					shard.Damage = _state.Damage * GetDamageMultiplier();
 					shard.OrbitRadius = effectiveRadius;
+					shard.OrbitSpeed = GetOrbitSpeed();
 					shard.ShardSize = effectiveSize;
 				}
 			}
@@ -68,10 +69,9 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 
 			var shard = go.Components.Create<OrbitalShard>();
 			shard.AngleOffset = i * angleStep;
-			float baseRadius = 35f + WeaponLevel * 5f;
-			shard.OrbitRadius = baseRadius * (_state?.Area ?? 1f);
-			shard.OrbitSpeed = 120f + WeaponLevel * 20f;
-			shard.Damage = _state != null ? _state.Damage * (0.9f + WeaponLevel * 0.15f) : 10f;
+			shard.OrbitRadius = GetBaseOrbitRadius() * (_state?.Area ?? 1f);
+			shard.OrbitSpeed = GetOrbitSpeed();
+			shard.Damage = _state != null ? _state.Damage * GetDamageMultiplier() : 10f;
 			shard.ShardSize = 10f * (_state?.Area ?? 1f);
 			shard.SourceWeaponId = WeaponId;
 
@@ -90,11 +90,35 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 	{
 		int baseCount = WeaponLevel switch
 		{
-			>= 5 => 4,
-			>= 3 => 3,
-			_    => 2
+			>= 30 => 7,
+			>= 20 => 6,
+			>= 10 => 5,
+			>= 5  => 4,
+			>= 3  => 3,
+			_     => 2
 		};
 		return baseCount + (_state != null ? _state.ProjectileCount : 0);
+	}
+
+	private float GetDamageMultiplier()
+	{
+		int clamped = Math.Min( WeaponLevel, 5 );
+		int extra = Math.Max( 0, WeaponLevel - 5 );
+		return 0.9f + clamped * 0.15f + extra * 0.04f;
+	}
+
+	private float GetBaseOrbitRadius()
+	{
+		int clamped = Math.Min( WeaponLevel, 5 );
+		int extra = Math.Max( 0, WeaponLevel - 5 );
+		return 35f + clamped * 5f + extra * 1.5f;
+	}
+
+	private float GetOrbitSpeed()
+	{
+		int clamped = Math.Min( WeaponLevel, 5 );
+		int extra = Math.Max( 0, WeaponLevel - 5 );
+		return 120f + clamped * 20f + extra * 6f;
 	}
 
 	protected override void OnDestroy()
@@ -108,6 +132,9 @@ public sealed class OrbitalShardsWeapon : WeaponBase
 		3 => "Spawns a 3rd orbital shard",
 		4 => "Damage: +11%, wider orbit radius",
 		5 => "Spawns a 4th orbital shard, Damage: +10%",
-		_ => $"Level {nextLevel}: improved stats",
+		10 => "Spawns a 5th orbital shard",
+		20 => "Spawns a 6th orbital shard",
+		30 => "Spawns a 7th orbital shard",
+		_ => $"Level {nextLevel}: +4% damage, faster orbit",
 	};
 }

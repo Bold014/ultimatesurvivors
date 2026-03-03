@@ -41,6 +41,7 @@ public class MapSpawner : Component
 		if ( existing != null )
 		{
 			Log.Info( "[MapSpawner] Map already present, skipping spawn." );
+			_spawned = true;
 			return;
 		}
 
@@ -76,7 +77,7 @@ public class MapSpawner : Component
 		var groundTileset = mapGo.Components.Create<TilesetComponent>();
 		groundTileset.Layers = new List<TilesetComponent.Layer>
 		{
-			new TilesetComponent.Layer( "Ground" ) { TilesetResource = groundRes }
+			new TilesetComponent.Layer( "Ground" ) { TilesetResource = groundRes, Height = 0f }
 		};
 		groundTileset.Layers[0].TilesetComponent = groundTileset;
 
@@ -96,12 +97,39 @@ public class MapSpawner : Component
 			"2,3", "2,2", "2,1", "2,0",
 			// Grass col 5 — user rows 1–4 → tileset rows 3–0
 			"5,3", "5,2", "5,1", "5,0",
+			// Dense grass/dots col 6 — rows 0–2 only
+			"6,2", "6,1", "6,0",
 		};
-		// Flower/grass variant patches — concentrated in noise-defined areas
+		// Flower/grass variant patches — slightly more frequent
 		mapGen.PatchNoiseScale = 8f;
-		mapGen.PatchThreshold = 0.58f;
-		mapGen.PatchVariantPercent = 35;
+		mapGen.PatchThreshold = 0.54f;
+		mapGen.PatchVariantPercent = 38;
 		mapGen.SparseVariantPercent = 2;
+
+		// Ground decor overlay — details tileset leaf/log/shrub tiles on the ground layer
+		groundTileset.Layers.Add(
+			new TilesetComponent.Layer( "GroundDecor" ) { TilesetResource = detailsRes, Height = 0.01f }
+		);
+		groundTileset.Layers[1].TilesetComponent = groundTileset;
+
+		var decor = mapGo.Components.Create<RandomTileVariants>();
+		decor.Tileset = groundTileset;
+		decor.LayerIndex = 1;
+		decor.OverlayMode = true;
+		// details.tileset decoration tiles:
+		//   (0,7)(1,7)(2,7)(3,7) = leaf cluster variations
+		//   (1,5)(2,5) = logs on ground
+		//   (6,5) = shrub
+		decor.VariantPositions = new List<string>
+		{
+			"0,7", "1,7", "2,7", "3,7",
+			"1,5", "2,5",
+			"6,5",
+		};
+		decor.PatchNoiseScale = 12f;
+		decor.PatchThreshold = 0.70f;
+		decor.PatchVariantPercent = 8;
+		decor.SparseVariantPercent = 1;
 
 		// Details (trees) — slight Z offset so trees render on top of ground
 		var detailsGo = new GameObject( true, "Details" );
@@ -111,8 +139,8 @@ public class MapSpawner : Component
 		var detailsTileset = detailsGo.Components.Create<TilesetComponent>();
 		detailsTileset.Layers = new List<TilesetComponent.Layer>
 		{
-			new TilesetComponent.Layer( "Details" ) { TilesetResource = detailsRes },
-			new TilesetComponent.Layer( "DetailsTop" ) { TilesetResource = detailsRes }
+			new TilesetComponent.Layer( "Details" ) { TilesetResource = detailsRes, Height = 0f },
+			new TilesetComponent.Layer( "DetailsTop" ) { TilesetResource = detailsRes, Height = 0.5f }
 		};
 		detailsTileset.Layers[0].TilesetComponent = detailsTileset;
 		detailsTileset.Layers[1].TilesetComponent = detailsTileset;

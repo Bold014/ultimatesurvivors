@@ -1,0 +1,166 @@
+@using Sandbox;
+@using System.Linq;
+@inherits PanelComponent;
+
+<root>
+@if ( ShouldShow )
+{
+    var playerPos = PlayerLocalState.LocalInstance?.WorldPosition ?? Vector3.Zero;
+
+    <div class="minimap-root">
+        <div class="minimap-frame">
+            <div class="minimap-bg">
+
+                <div class="minimap-cardinal minimap-cardinal--n">N</div>
+                <div class="minimap-cardinal minimap-cardinal--s">S</div>
+                <div class="minimap-cardinal minimap-cardinal--e">E</div>
+                <div class="minimap-cardinal minimap-cardinal--w">W</div>
+
+                @foreach ( var cell in GetTerrainCells( playerPos ) )
+                {
+                    <div class="minimap-terrain-tree" style="left: @(cell.px)px; top: @(cell.py)px;"></div>
+                }
+
+                @foreach ( var beacon in GetBeacons() )
+                {
+                    var (px, py) = WorldToMinimap( beacon.WorldPosition, playerPos );
+                    <div class="minimap-dot minimap-dot--beacon" style="left: @((int)px)px; top: @((int)py)px;"></div>
+                }
+
+                @foreach ( var chest in GetChests() )
+                {
+                    var (px, py) = WorldToMinimap( chest.WorldPosition, playerPos );
+                    <div class="minimap-dot minimap-dot--chest" style="left: @((int)px)px; top: @((int)py)px;"></div>
+                }
+
+                @foreach ( var enemy in GetEnemies() )
+                {
+                    var (px, py) = WorldToMinimap( enemy.WorldPosition, playerPos );
+                    <div class="minimap-dot minimap-dot--enemy" style="left: @((int)px)px; top: @((int)py)px;"></div>
+                }
+
+                <div class="minimap-dot minimap-dot--player"></div>
+
+            </div>
+        </div>
+        <div class="minimap-label">MAP</div>
+    </div>
+}
+</root>
+
+@code
+{
+    const float MinimapRange  = 1000f;
+    const float MinimapRadius = 128f;  // half of 256px display diameter
+
+    bool ShouldShow =>
+        PlayerLocalState.LocalInstance != null &&
+        (PlayerStats.LocalInstance?.IsAlive ?? true) &&
+        !GameManager.EscapeMenuOpen;
+
+    // World-aligned terrain grid. WorldStep = 3 tiles exactly (48 = 3 × TileWorldWidth=16),
+    // so each cell always covers the same 3×3 tile block regardless of player position.
+    // Cells are projected from world space → minimap pixels each rebuild, so they
+    // scroll naturally as the player moves instead of flickering at screen-grid boundaries.
+    const float WorldStep    = 48f;   // 3 tiles per cell
+    const int   TilesPerCell = 3;
+    const float CellPx       = 7f;   // 48 × (128/1000) = 6.14 → 7px to close seams
+    const float HalfCellPx   = CellPx * 0.5f;
+    const float TerrainScale = MinimapRadius / MinimapRange;
+
+    IEnumerable<(int px, int py)> GetTerrainCells( Vector3 playerPos )
+    {
+        int gxMin = (int)MathF.Floor( (playerPos.x - MinimapRange) / WorldStep );
+        int gxMax = (int)MathF.Ceiling( (playerPos.x + MinimapRange) / WorldStep );
+        int gyMin = (int)MathF.Floor( (playerPos.y - MinimapRange) / WorldStep );
+        int gyMax = (int)MathF.Ceiling( (playerPos.y + MinimapRange) / WorldStep );
+
+        for ( int gy = gyMin; gy <= gyMax; gy++ )
+        {
+            for ( int gx = gxMin; gx <= gxMax; gx++ )
+            {
+                // World centre of this cell
+                float wx = (gx + 0.5f) * WorldStep;
+                float wy = (gy + 0.5f) * WorldStep;
+
+                // Project to minimap (world Y up = CSS Y down)
+                float mx = (wx - playerPos.x) * TerrainScale;
+                float my = -(wy - playerPos.y) * TerrainScale;
+
+                if ( mx * mx + my * my > MinimapRadius * MinimapRadius ) continue;
+
+                // Sample every tile in the 3×3 block; show green if any is a tree.
+                // Because WorldStep == 3 × TileWorldWidth the tile indices are exact.
+                int txBase = gx * TilesPerCell;
+                int tyBase = gy * TilesPerCell;
+                bool isTree = false;
+                for ( int dy = 0; dy < TilesPerCell && !isTree; dy++ )
+                    for ( int dx = 0; dx < TilesPerCell && !isTree; dx++ )
+                        isTree = TreeManager.IsTreeAtTile( txBase + dx, tyBase + dy );
+
+                if ( !isTree ) continue;
+
+                int px = (int)(MinimapRadius + mx - HalfCellPx);
+                int py = (int)(MinimapRadius + my - HalfCellPx);
+                yield return (px, py);
+            }
+        }
+    }
+
+    IEnumerable<EnemyBase> GetEnemies() =>
+        Scene?.GetAllComponents<EnemyBase>().Where( e => e.IsValid() && e.HP > 0 )
+        ?? Enumerable.Empty<EnemyBase>();
+
+    IEnumerable<LevelUpBeacon> GetBeacons() =>
+        Scene?.GetAllComponents<LevelUpBeacon>().Where( b => b.IsValid() && b.IsActive )
+        ?? Enumerable.Empty<LevelUpBeacon>();
+
+    IEnumerable<Chest> GetChests() =>
+        Scene?.GetAllComponents<Chest>().Where( c => c.IsValid() && !c.IsOpened )
+        ?? Enumerable.Empty<Chest>();
+
+    (float left, float top) WorldToMinimap( Vector3 worldPos, Vector3 playerPos )
+    {
+        float dX = worldPos.x - playerPos.x;
+        float dY = worldPos.y - playerPos.y;
+
+        float mx = (dX / MinimapRange) * MinimapRadius;
+        float my = (-dY / MinimapRange) * MinimapRadius;
+
+        // Clamp to circle edge with 4px inset
+        float lenSq = mx * mx + my * my;
+        if ( lenSq > MinimapRadius * MinimapRadius )
+        {
+            float len = MathF.Sqrt( lenSq );
+            mx = mx / len * (MinimapRadius - 4f);
+            my = my / len * (MinimapRadius - 4f);
+        }
+
+        return (MinimapRadius + mx, MinimapRadius + my);
+    }
+
+    protected override int BuildHash()
+    {
+        var player = PlayerLocalState.LocalInstance;
+        if ( player == null ) return 0;
+
+        var pos = player.WorldPosition;
+        int px = (int)(pos.x / 8f);
+        int py = (int)(pos.y / 8f);
+
+        int enemyHash = Scene?.GetAllComponents<EnemyBase>()
+            .Where( e => e.IsValid() && e.HP > 0 )
+            .Aggregate( 0, ( h, e ) =>
+                System.HashCode.Combine( h, (int)(e.WorldPosition.x / 8f), (int)(e.WorldPosition.y / 8f) ) )
+            ?? 0;
+
+        int beaconCount = Scene?.GetAllComponents<LevelUpBeacon>()
+            .Count( b => b.IsValid() && b.IsActive ) ?? 0;
+
+        int chestCount = Scene?.GetAllComponents<Chest>()
+            .Count( c => c.IsValid() && !c.IsOpened ) ?? 0;
+
+        return System.HashCode.Combine( px, py, enemyHash, beaconCount, chestCount,
+            ShouldShow ? 1 : 0 );
+    }
+}

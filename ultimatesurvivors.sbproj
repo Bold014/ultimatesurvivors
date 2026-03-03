@@ -5,7 +5,7 @@
   "Ident": "ultimatesurvivors",
   "Schema": 1,
   "IncludeSourceFiles": true,
-  "Resources": "/sprites/*.png\n/sprites/bear/*.png\n/sprites/orc/*.png\n/sprites/wraith/*.png\n/sprites/dragon/*.png\n/ui/*.png\n/ui/weapons/*.png\n/ui/weapons/sword/*.png\n/ui/tomes/*.png\n/ui/quests/*.png\n/Textures/flame/*.png\n/fonts/*\n/sounds/*\n/Textures/*.png",
+  "Resources": "/sprites/*.png\n/sprites/bear/*.png\n/sprites/orc/*.png\n/sprites/wraith/*.png\n/sprites/dragon/*.png\n/ui/*.png\n/ui/weapons/*.png\n/ui/weapons/sword/*.png\n/ui/tomes/*.png\n/ui/quests/*.png\n/Textures/flame/*.png\n/fonts/*\n/sounds/*\n/Textures/*.png\n/scenes/*.png\n",
   "PackageReferences": [],
   "EditorReferences": null,
   "Mounts": null,
